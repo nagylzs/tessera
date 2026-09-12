@@ -13,7 +13,7 @@
 import 'dart:io';
 import 'dart:math';
 
-const rowCount = 1000;
+const rowCount_ = 1000;
 const seed = 42;
 
 // country -> region (null = country without a region)
@@ -84,10 +84,19 @@ const pNoUnitPrice = 0.04;
 const pNoDiscount = 0.15;
 const pNoSalesperson = 0.03;
 
-void main() {
+void main(List<String> args) {
+  // Optional: `--rows N --out path` for benchmarking with bigger files.
+  var rowCount = rowCount_;
+  var outPath = 'assets/sales.csv';
+  for (var i = 0; i + 1 < args.length; i += 2) {
+    if (args[i] == '--rows') rowCount = int.parse(args[i + 1]);
+    if (args[i] == '--out') outPath = args[i + 1];
+  }
   final rnd = Random(seed);
   final regions = countries.values.whereType<String>().toSet().toList()..sort();
-  final categories = products.values.map((p) => p.$1).whereType<String>().toSet().toList()..sort();
+  final categories =
+      products.values.map((p) => p.$1).whereType<String>().toSet().toList()
+        ..sort();
   final countryNames = countries.keys.toList();
   final productNames = products.keys.toList();
 
@@ -126,7 +135,9 @@ void main() {
     final date = start.add(Duration(days: rnd.nextInt(dayRange)));
     final salesperson = chance(pNoSalesperson) ? null : pick(salespeople);
     final quantity = chance(pNoQuantity) ? null : 1 + rnd.nextInt(20);
-    final unitPrice = chance(pNoUnitPrice) ? null : basePrice * (0.85 + rnd.nextDouble() * 0.3);
+    final unitPrice = chance(pNoUnitPrice)
+        ? null
+        : basePrice * (0.85 + rnd.nextDouble() * 0.3);
     final discount = chance(pNoDiscount) ? null : (rnd.nextInt(7) * 0.05);
     final total = (quantity == null || unitPrice == null)
         ? null
@@ -153,12 +164,14 @@ void main() {
   }
 
   final out = StringBuffer()
-    ..writeln('id,date,region,country,category,product,salesperson,quantity,unit_price,discount,total');
+    ..writeln(
+      'id,date,region,country,category,product,salesperson,quantity,unit_price,discount,total',
+    );
   for (final row in rows) {
     out.writeln(row.map(cell).join(','));
   }
 
-  final file = File('assets/sales.csv');
+  final file = File(outPath);
   file.writeAsStringSync(out.toString());
   stdout.writeln('Wrote ${rows.length} rows to ${file.path}');
 }
