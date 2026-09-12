@@ -1,5 +1,6 @@
 import '../facts/dimension.dart';
 import 'aggregate.dart';
+import 'dimension_path.dart';
 import 'filter.dart';
 
 enum SortBy {
@@ -23,11 +24,13 @@ enum SummaryPosition { start, end, hidden }
 ///
 /// With [SortBy.value] the empty group goes where [nulls] says. With
 /// [SortBy.aggregate] every group — the empty one included — is ordered by
-/// its summary value; groups whose aggregate is `null` sort as the smallest.
+/// the aggregate in its key cell; groups whose aggregate is `null` sort as
+/// the smallest.
 final class AxisSort {
   const AxisSort({
     this.by = SortBy.value,
     this.aggregate,
+    this.keyPath,
     this.direction = SortDirection.ascending,
     this.nulls = NullPosition.first,
   }) : assert(
@@ -40,6 +43,12 @@ final class AxisSort {
   /// Required when [by] is [SortBy.aggregate]; must be one of
   /// [CubeSpec.aggregates].
   final Aggregate? aggregate;
+
+  /// For [SortBy.aggregate]: the group on the *other* axis whose cell
+  /// supplies the sort key — e.g. sort rows by the value in the "May"
+  /// column. `null` means the summary (row total / column total). If the
+  /// path is not visible in the current layout the summary is used instead.
+  final DimensionPath? keyPath;
 
   final SortDirection direction;
   final NullPosition nulls;

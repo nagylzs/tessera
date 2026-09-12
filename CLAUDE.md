@@ -33,8 +33,33 @@ cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (
   only under expanded nodes), one pass over the facts into leaf cells, then
   row roll-up and column roll-up via `Accumulator.merge`, then ordering
   (`AxisSort`) and summary placement. All built-in accumulators done.
-- Still `UnimplementedError`: `CubeView.build`, ISO week in
-  `DatePartDimension`.
+- Widget-prep API (from the reference screenshots in the owner's pivot
+  app): `AxisSort.keyPath` (sort by the aggregate in a specific cross-axis
+  group; falls back to the summary when not visible), `HeaderEntry.childCount`
+  (size of an expansion, for "too many columns" confirmation),
+  `AxisLayout.descendantCount` (subtree size for header spans / merged
+  cells), `standardDimensions(facts)` (column + date-part dimensions for a
+  picker dialog), ISO week.
+- Still `UnimplementedError`: `CubeView.build`.
+
+## Widget plan (agreed)
+
+- Three widgets: `CubeView` (grid only), `AxisEditor` (chips per axis,
+  drag-and-drop within and between axes), `DimensionPickerDialog` fed by
+  `standardDimensions`. `CubeController` is the single mutable object.
+- `CubeView` is built on `TableView` from `two_dimensional_scrollables`
+  (lazy cells, pinned headers, merged cells for the L-shaped group
+  headers). Expanded parent = first entry of its span (its own subtotal),
+  children follow; header band = one row per column dimension + aggregate
+  label row; row header = one column per row dimension; top-left corner
+  shows column-dimension names.
+- Hooks: `CellFormatter`, cell `TextStyle` callback (zero/negative
+  colours), `CubeTheme.levelColor(depth, maxDepth)` with presets,
+  separate row/column summary labels, expansion confirmation callback with
+  a limit. Sort indicators on dimension titles (value sort) and under
+  column entries (aggregate sort at that `keyPath`).
+- The library must NOT depend on `intl`; the example app uses it for
+  locale formatting (`hu`: decimal comma).
 - `example/` is the untouched `flutter create` app plus `assets/sales.csv`.
 - README describes the target API. `pubspec.yaml` `description` is set;
   `CHANGELOG.md` is the template.

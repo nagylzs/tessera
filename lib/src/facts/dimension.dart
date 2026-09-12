@@ -9,6 +9,15 @@ int compareDimensionValues(Object? a, Object? b) {
   return a.toString().compareTo(b.toString());
 }
 
+/// ISO 8601 week number of [date] (1–53). The week belongs to the year of
+/// its Thursday, so 2024‑12‑30 is week 1 and 2021‑01‑03 is week 53.
+int isoWeek(DateTime date) {
+  final day = DateTime.utc(date.year, date.month, date.day);
+  final thursday = day.add(Duration(days: DateTime.thursday - day.weekday));
+  final jan1 = DateTime.utc(thursday.year, 1, 1);
+  return thursday.difference(jan1).inDays ~/ 7 + 1;
+}
+
 /// A groupable attribute of the facts.
 ///
 /// A dimension is *derived from* a column of the [FactTable]; it is not the
@@ -100,7 +109,7 @@ final class DatePartDimension extends Dimension {
       DatePart.year => columnValue.year,
       DatePart.quarter => (columnValue.month - 1) ~/ 3 + 1,
       DatePart.month => columnValue.month,
-      DatePart.week => throw UnimplementedError('ISO week'),
+      DatePart.week => isoWeek(columnValue),
       DatePart.day => columnValue.day,
       DatePart.weekday => columnValue.weekday,
       DatePart.hour => columnValue.hour,

@@ -28,6 +28,7 @@ export 'src/facts/dimension.dart';
 export 'src/facts/fact_table.dart';
 export 'src/facts/importer.dart';
 export 'src/facts/measure.dart';
+export 'src/facts/standard_dimensions.dart';
 export 'src/schema/column_spec.dart';
 export 'src/schema/column_type.dart';
 export 'src/schema/schema.dart';

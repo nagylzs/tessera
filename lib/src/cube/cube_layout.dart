@@ -31,6 +31,11 @@ abstract interface class HeaderEntry {
 
   /// Number of facts in the group (after the cube's filter).
   int get factCount;
+
+  /// Number of groups one level down — what expanding this entry would add
+  /// to the axis. `0` on the last level. Computed on demand for collapsed
+  /// entries, so a widget can ask before an expensive expansion.
+  int get childCount;
 }
 
 /// The materialised rows or columns of one axis: the groups actually visible
@@ -45,6 +50,11 @@ abstract interface class AxisLayout {
 
   /// Index of the entry with [path], or `-1`.
   int indexOf(DimensionPath path);
+
+  /// Number of entries after [index] that belong to its subtree — the
+  /// extra rows/columns its label spans. `0` for leaves and for a summary
+  /// placed at the end.
+  int descendantCount(int index);
 }
 
 /// The facts and aggregates at one row/column intersection.

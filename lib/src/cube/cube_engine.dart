@@ -229,11 +229,29 @@ final class AxisTree {
     return true;
   }
 
-  /// Orders the children of every non-leaf node. [summaryOf] returns the
-  /// node's summary cell for aggregate sorting.
+  /// The existing node at [path], or `null` if it is not part of the tree.
+  AxisNode? resolve(DimensionPath path) {
+    if (path.length > depth) return null;
+    var node = root;
+    for (var i = 0; i < path.length; i++) {
+      final entry = path.entries[i];
+      if (entry.dimension != dims[i].dimension) return null;
+      final code = dims[i].codeOf(entry.value);
+      if (code == null) return null;
+      final next = node.children?[code];
+      if (next == null) return null;
+      node = next;
+    }
+    return node;
+  }
+
+  /// Orders the children of every non-leaf node. For aggregate sorting,
+  /// [cellOf] returns the cell of a node of this tree against a node of the
+  /// [other] tree (the sort's key path, or that tree's root).
   void order(
     List<Aggregate> aggregates,
-    CellData? Function(AxisNode) summaryOf,
+    AxisTree other,
+    CellData? Function(AxisNode self, AxisNode key) cellOf,
   ) {
     for (final n in nodes) {
       final children = n.children;
@@ -272,7 +290,11 @@ final class AxisTree {
             'not among the cube\'s aggregates',
           );
         }
-        Object? keyOf(AxisNode c) => summaryOf(c)?.accumulators[index].result;
+        final keyPath = sort.keyPath;
+        final keyNode =
+            (keyPath == null ? null : other.resolve(keyPath)) ?? other.root;
+        Object? keyOf(AxisNode c) =>
+            cellOf(c, keyNode)?.accumulators[index].result;
         int compare(AxisNode a, AxisNode b) {
           final ka = keyOf(a), kb = keyOf(b);
           if (ka == null) return kb == null ? a.code - b.code : -1;
@@ -363,8 +385,8 @@ CubeLayoutImpl computeLayout({
     }
   }
 
-  rowTree.order(aggregates, (n) => n.cells?[colTree.root.id]);
-  colTree.order(aggregates, (n) => rowTree.root.cells?[n.id]);
+  rowTree.order(aggregates, colTree, (n, key) => n.cells?[key.id]);
+  colTree.order(aggregates, rowTree, (n, key) => key.cells?[n.id]);
 
   return CubeLayoutImpl(
     facts: facts,
@@ -400,10 +422,11 @@ ExpansionState expansionToDepth({
 }
 
 final class HeaderEntryImpl implements HeaderEntry {
-  HeaderEntryImpl(this.tree, this.node);
+  HeaderEntryImpl(this.tree, this.node, this._rows);
 
   final AxisTree tree;
   final AxisNode node;
+  final Int32List _rows;
 
   @override
   DimensionPath get path => tree.pathOf(node);
@@ -436,19 +459,54 @@ final class HeaderEntryImpl implements HeaderEntry {
   int get factCount => node.factCount;
 
   @override
+  late final int childCount = _countChildren();
+
+  int _countChildren() {
+    if (!isExpandable) return 0;
+    if (isExpanded) return node.ordered.length;
+    final codes = tree.dims[node.depth].codes;
+    final seen = <int>{};
+    for (final r in _rows) {
+      if (tree.contains(node, r)) seen.add(codes[r]);
+    }
+    return seen.length;
+  }
+
+  @override
   String toString() => 'HeaderEntry($path, $factCount facts)';
 }
 
 final class AxisLayoutImpl implements AxisLayout {
-  AxisLayoutImpl(this.tree)
+  AxisLayoutImpl(this.tree, Int32List rows)
     : entries = List.unmodifiable([
-        for (final n in tree.entries()) HeaderEntryImpl(tree, n),
+        for (final n in tree.entries()) HeaderEntryImpl(tree, n, rows),
       ]);
 
   final AxisTree tree;
 
   @override
   final List<HeaderEntryImpl> entries;
+
+  late final List<int> _descendants = _countDescendants();
+
+  List<int> _countDescendants() {
+    final counts = List<int>.filled(entries.length, 0);
+    final ancestors = <int>[]; // indices of open entries, shallow to deep
+    for (var i = 0; i < entries.length; i++) {
+      final depth = entries[i].depth;
+      while (ancestors.isNotEmpty && entries[ancestors.last].depth >= depth) {
+        ancestors.removeLast();
+      }
+      for (final a in ancestors) {
+        counts[a]++;
+      }
+      ancestors.add(i);
+    }
+    return counts;
+  }
+
+  @override
+  int descendantCount(int index) => _descendants[index];
 
   late final Map<DimensionPath, int> _index = {
     for (var i = 0; i < entries.length; i++) entries[i].path: i,
@@ -524,8 +582,8 @@ final class CubeLayoutImpl implements CubeLayout {
     required this.filteredRows,
     required this.rowTree,
     required this.colTree,
-  }) : rows = AxisLayoutImpl(rowTree),
-       columns = AxisLayoutImpl(colTree);
+  }) : rows = AxisLayoutImpl(rowTree, filteredRows),
+       columns = AxisLayoutImpl(colTree, filteredRows);
 
   final FactTable facts;
   final Int32List filteredRows;
