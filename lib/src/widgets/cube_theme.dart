@@ -22,7 +22,7 @@ final class CubeTheme {
     this.headerTextStyle,
     this.rowHeight = 28,
     this.headerRowHeight = 28,
-    this.columnWidth = 96,
+    this.columnWidth = 120,
     this.rowHeaderWidth = 160,
     this.cellPadding = const EdgeInsets.symmetric(horizontal: 6),
   });
@@ -106,7 +106,7 @@ final class CubeTheme {
           (depth, maxDepth) => Color.lerp(
             scheme.surface,
             scheme.primaryContainer,
-            maxDepth == 0 ? 0 : 0.6 * depth / maxDepth,
+            maxDepth == 0 ? 0 : 0.35 * depth / maxDepth,
           )!,
       headerColor: headerColor ?? scheme.surfaceContainer,
       summaryColor: summaryColor ?? scheme.surfaceContainerHighest,

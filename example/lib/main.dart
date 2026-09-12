@@ -1,122 +1,149 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:intl/intl.dart';
+import 'package:tessera/tessera.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() => runApp(const TesseraExampleApp());
+
+class TesseraExampleApp extends StatelessWidget {
+  const TesseraExampleApp({super.key});
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Tessera example',
+    theme: ThemeData(colorSchemeSeed: Colors.teal),
+    darkTheme: ThemeData(
+      colorSchemeSeed: Colors.teal,
+      brightness: Brightness.dark,
+    ),
+    home: const SalesPage(),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/// Loads `assets/sales.csv` and shows it as a pivot cube.
+class SalesPage extends StatefulWidget {
+  const SalesPage({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+  State<SalesPage> createState() => _SalesPageState();
+}
+
+class _SalesPageState extends State<SalesPage> {
+  static const region = ColumnDimension('region');
+  static const country = ColumnDimension('country');
+  static const year = DatePartDimension('date', DatePart.year);
+  static const quarter = DatePartDimension('date', DatePart.quarter);
+  static final sumTotal = Aggregate.sum(const Measure('total'));
+  static final avgPrice = Aggregate.average(const Measure('unit_price'));
+
+  final _numbers = NumberFormat.decimalPatternDigits(
+    locale: 'hu',
+    decimalDigits: 2,
+  );
+  late final Future<ImportResult> _import = _load();
+  CubeController? _controller;
+  Aggregate _shown = sumTotal;
+
+  Future<ImportResult> _load() async {
+    final data = await rootBundle.load('assets/sales.csv');
+    final bytes = data.buffer.asUint8List();
+    final source = CsvDataSource.fromBytes(
+      () => Stream.value(bytes),
+      name: 'sales.csv',
     );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    final result = await loadFacts(source);
+    _controller = CubeController(
+      Cube(
+        facts: result.facts,
+        spec: CubeSpec(
+          rows: CubeAxis.of([region, country]),
+          columns: CubeAxis.of([year, quarter]),
+          aggregates: [sumTotal, Aggregate.count, avgPrice],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
     );
+    return result;
   }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  String _format(CubeCell cell, Object? value) =>
+      value is num ? _numbers.format(value) : value?.toString() ?? '';
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: const Text('Tessera — sales.csv'),
+      actions: [
+        ListenableBuilder(
+          listenable: _controller ?? ValueNotifier(null),
+          builder: (context, _) {
+            final controller = _controller;
+            if (controller == null) return const SizedBox();
+            return DropdownButton<Aggregate>(
+              value: _shown,
+              underline: const SizedBox(),
+              items: [
+                for (final a in controller.cube.spec.aggregates)
+                  DropdownMenuItem(value: a, child: Text(a.label)),
+              ],
+              onChanged: (a) => setState(() => _shown = a!),
+            );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.unfold_more),
+          tooltip: 'Expand all rows',
+          onPressed: () =>
+              _controller?.cube = _controller!.cube.expandRowsToDepth(2),
+        ),
+        IconButton(
+          icon: const Icon(Icons.unfold_less),
+          tooltip: 'Collapse rows',
+          onPressed: () =>
+              _controller?.cube = _controller!.cube.expandRowsToDepth(1),
+        ),
+      ],
+    ),
+    body: FutureBuilder(
+      future: _import,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Import failed: ${snapshot.error}'));
+        }
+        final result = snapshot.data;
+        if (result == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final facts = result.facts;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                '${facts.rowCount} facts, ${facts.columns.length} columns'
+                '${result.report.hasIssues ? ', ${result.report.issues.length} issues' : ''}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            Expanded(
+              child: CubeView(
+                controller: _controller!,
+                aggregate: _shown,
+                formatCell: _format,
+                theme: const CubeTheme(columnWidth: 130, rowHeaderWidth: 170),
+                rowSummaryLabel: 'Total (all countries)',
+                columnSummaryLabel: 'Total (all dates)',
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
 }

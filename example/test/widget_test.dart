@@ -1,30 +1,21 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:tessera_example/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('loads sales.csv and shows the cube', (tester) async {
+    // Asset loading is real I/O, which needs runAsync under the test clock.
+    await tester.runAsync(() async {
+      await tester.pumpWidget(const TesseraExampleApp());
+      expect(find.text('Tessera — sales.csv'), findsOneWidget);
+      for (var i = 0; i < 50; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await tester.pump();
+        if (find.text('1000 facts, 11 columns').evaluate().isNotEmpty) break;
+      }
+    });
+    expect(find.text('1000 facts, 11 columns'), findsOneWidget);
+    expect(find.text('Europe'), findsOneWidget);
+    expect(find.text('Total (all countries)'), findsOneWidget);
+    expect(find.text('sum of total'), findsWidgets);
   });
 }

@@ -12,6 +12,7 @@ flutter test                         # unit tests in test/
 dart format lib test example/lib     # run before committing
 flutter pub publish --dry-run        # pub.dev validation; keep at 0 warnings
 cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (seeded)
+cd example && flutter run -d linux               # run the example (X11: xdotool + `import -window` for screenshots; i3 tiles it)
 ```
 
 ## Status
@@ -44,7 +45,12 @@ cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (
   `widgets/axis_geometry.dart` (pure Dart) resolves the merged header
   areas; `CubeTheme` / `ResolvedCubeTheme`. Dependency:
   `two_dimensional_scrollables`. Nothing throws `UnimplementedError` any
-  more. Not yet built: `AxisEditor`, `DimensionPickerDialog`, example app.
+  more. Not yet built: `AxisEditor`, `DimensionPickerDialog`.
+- Example app (`example/lib/main.dart`) loads `assets/sales.csv` via
+  `rootBundle`, shows rows `[region, country]` × columns `[date.year,
+  date.quarter]`, aggregate dropdown, expand/collapse buttons, `intl`
+  `hu` number formatting. Verified visually on Linux desktop (expand,
+  merged headers, aggregate sort).
 
 ## Widget plan (agreed)
 
