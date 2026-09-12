@@ -13,6 +13,8 @@ dart format lib test example/lib     # run before committing
 flutter pub publish --dry-run        # pub.dev validation; keep at 0 warnings
 cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (seeded)
 cd example && flutter run -d linux               # run the example (X11: xdotool + `import -window` for screenshots; i3 tiles it)
+# find the window with `xdotool search --class tessera_example`; stop with
+# pkill -f '[f]lutter run -d linux' (the bracket keeps pkill from killing the shell)
 ```
 
 ## Status
@@ -53,6 +55,13 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
   `showDimensionPicker` / `DimensionPickerDialog`
   (`widgets/dimension_picker.dart`; searchable, used dimensions disabled).
   Both verified on Linux desktop.
+- Implemented: `AggregateEditor` (`widgets/aggregate_editor.dart`; chips
+  with delete — never the last one; removing resets any `AxisSort` that
+  used it; `selected`/`onSelected` let the app choose what `CubeView`
+  shows) and `showAggregatePicker` / `AggregatePickerDialog` /
+  `AggregateKind` / `standardMeasures` (`widgets/aggregate_picker.dart`).
+  `CubeView` falls back to the spec's first aggregate when its `aggregate`
+  is not in the spec. Example uses the editor instead of a dropdown.
 - Example app (`example/lib/main.dart`) loads `assets/sales.csv` via
   `rootBundle`, shows rows `[region, country]` × columns `[date.year,
   date.quarter]`, aggregate dropdown, expand/collapse buttons, `intl`

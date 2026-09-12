@@ -13,7 +13,8 @@
 ///    an [ExpansionState] per axis define a [Cube], whose [CubeLayout]
 ///    exposes the visible header entries and a [CubeCell] per intersection.
 /// 4. **Widgets** — [CubeView] renders a cube driven by a [CubeController];
-///    [AxisEditor] and [showDimensionPicker] let the user configure the axes.
+///    [AxisEditor], [AggregateEditor] and the picker dialogs let the user
+///    configure the axes and aggregates.
 ///
 /// Layers 1–3 do not import Flutter.
 library;
@@ -38,6 +39,8 @@ export 'src/source/csv_data_source.dart';
 export 'src/source/data_source.dart';
 export 'src/source/list_data_source.dart';
 export 'src/source/schema_inference.dart';
+export 'src/widgets/aggregate_editor.dart';
+export 'src/widgets/aggregate_picker.dart';
 export 'src/widgets/axis_editor.dart';
 export 'src/widgets/cube_controller.dart';
 export 'src/widgets/cube_theme.dart';

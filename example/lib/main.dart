@@ -91,22 +91,6 @@ class _SalesPageState extends State<SalesPage> {
     appBar: AppBar(
       title: const Text('Tessera — sales.csv'),
       actions: [
-        ListenableBuilder(
-          listenable: _controller ?? ValueNotifier(null),
-          builder: (context, _) {
-            final controller = _controller;
-            if (controller == null) return const SizedBox();
-            return DropdownButton<Aggregate>(
-              value: _shown,
-              underline: const SizedBox(),
-              items: [
-                for (final a in controller.cube.spec.aggregates)
-                  DropdownMenuItem(value: a, child: Text(a.label)),
-              ],
-              onChanged: (a) => setState(() => _shown = a!),
-            );
-          },
-        ),
         IconButton(
           icon: const Icon(Icons.unfold_more),
           tooltip: 'Expand all rows',
@@ -164,6 +148,16 @@ class _SalesPageState extends State<SalesPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: AggregateEditor(
+                controller: _controller!,
+                selected: _shown,
+                onSelected: (a) => setState(() => _shown = a),
+                dimensions: _dimensions,
               ),
             ),
             const SizedBox(height: 8),

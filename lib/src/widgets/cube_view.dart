@@ -64,7 +64,9 @@ class CubeView extends StatelessWidget {
 
   final CubeController controller;
 
-  /// Which of the spec's aggregates to show in the cells.
+  /// Which of the spec's aggregates to show in the cells. If it is not
+  /// among them (e.g. it was just removed), the spec's first aggregate is
+  /// shown instead; with no aggregates at all, cells stay blank.
   final Aggregate aggregate;
 
   final CubeTheme theme;
@@ -117,6 +119,11 @@ class _CubeGrid extends StatelessWidget {
   final AxisGeometry columnGeometry;
 
   CubeSpec get spec => layout.spec;
+
+  /// The aggregate actually displayed (see [CubeView.aggregate]).
+  Aggregate? get shown => spec.aggregates.contains(view.aggregate)
+      ? view.aggregate
+      : spec.aggregates.firstOrNull;
   int get rowDepth => spec.rows.depth;
   int get columnDepth => spec.columns.depth;
 
@@ -243,7 +250,7 @@ class _CubeGrid extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  view.aggregate.label,
+                  shown?.label ?? '',
                   style: theme.headerTextStyle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -390,8 +397,9 @@ class _CubeGrid extends StatelessWidget {
       color = Color.alphaBlend(theme.sortKeyColor, color);
     }
     Widget child = const SizedBox();
-    if (!cell.isEmpty) {
-      final value = cell.aggregate<Object?>(view.aggregate);
+    final aggregate = shown;
+    if (!cell.isEmpty && aggregate != null) {
+      final value = cell.aggregate<Object?>(aggregate);
       final text = (view.formatCell ?? _defaultFormat)(cell, value);
       var style = theme.cellTextStyle;
       if (summary) style = style.copyWith(fontWeight: FontWeight.bold);
@@ -503,7 +511,7 @@ class _CubeGrid extends StatelessWidget {
 
   bool _isSortKeyColumn(HeaderEntry column) => spec.rows.dimensions.any((d) {
     final s = d.sort;
-    if (s.by != SortBy.aggregate || s.aggregate != view.aggregate) return false;
+    if (s.by != SortBy.aggregate || s.aggregate != shown) return false;
     final key = s.keyPath;
     return key == null ? column.isSummary : key == column.path;
   });
@@ -533,12 +541,14 @@ class _CubeGrid extends StatelessWidget {
   }
 
   void _sortRowsByColumn(HeaderEntry column) {
+    final aggregate = shown;
+    if (aggregate == null) return;
     final keyPath = column.isSummary ? null : column.path;
     final first = spec.rows.dimensions.firstOrNull?.sort;
     final same =
         first != null &&
         first.by == SortBy.aggregate &&
-        first.aggregate == view.aggregate &&
+        first.aggregate == aggregate &&
         first.keyPath == keyPath;
     final direction = same && first.direction == SortDirection.descending
         ? SortDirection.ascending
@@ -549,7 +559,7 @@ class _CubeGrid extends StatelessWidget {
           d.dimension,
           sort: AxisSort(
             by: SortBy.aggregate,
-            aggregate: view.aggregate,
+            aggregate: aggregate,
             keyPath: keyPath,
             direction: direction,
             nulls: d.sort.nulls,
