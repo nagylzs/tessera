@@ -1,21 +1,84 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tessera/tessera.dart';
 import 'package:tessera_example/main.dart';
+import 'package:tessera_example/schema_page.dart';
+
+/// Pumps until [finder] matches (asset loading is real I/O, so this runs
+/// under [WidgetTester.runAsync]).
+Future<void> waitFor(WidgetTester tester, Finder finder) async {
+  for (var i = 0; i < 50 && finder.evaluate().isEmpty; i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await tester.pump();
+  }
+  expect(finder, findsWidgets);
+}
 
 void main() {
   testWidgets('loads sales.csv and shows the cube', (tester) async {
-    // Asset loading is real I/O, which needs runAsync under the test clock.
     await tester.runAsync(() async {
       await tester.pumpWidget(const TesseraExampleApp());
       expect(find.text('Tessera — sales.csv'), findsOneWidget);
-      for (var i = 0; i < 50; i++) {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-        await tester.pump();
-        if (find.text('1000 facts, 11 columns').evaluate().isNotEmpty) break;
-      }
+      await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
     });
-    expect(find.text('1000 facts, 11 columns'), findsOneWidget);
     expect(find.text('Europe'), findsOneWidget);
     expect(find.text('Total (all countries)'), findsOneWidget);
-    expect(find.text('sum of total'), findsWidgets);
+    expect(find.widgetWithText(InputChip, 'sum of total'), findsOneWidget);
   });
+
+  testWidgets(
+    'schema page: exclude a column and change a type, then re-import',
+    (tester) async {
+      // The schema list is lazy; make the surface tall enough for all rows.
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.runAsync(() async {
+        await tester.pumpWidget(const TesseraExampleApp());
+        await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
+        await tester.tap(find.byTooltip('Schema…'));
+        await tester.pumpAndSettle();
+        expect(find.byType(SchemaPage), findsOneWidget);
+        expect(find.byType(Switch), findsNWidgets(11));
+        // samples from the first rows are shown
+        expect(find.textContaining('Europe'), findsWidgets);
+
+        // exclude "id"
+        await tester.tap(find.byType(Switch).first);
+        await tester.pumpAndSettle();
+        // make "quantity" text
+        await tester.tap(find.byKey(const ValueKey('type-quantity')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('text').last);
+        await tester.pumpAndSettle();
+        // give "total" a label
+        await tester.enterText(
+          find.byKey(const ValueKey('label-total')),
+          'Revenue',
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Import'));
+        await tester.pumpAndSettle();
+        await waitFor(tester, find.textContaining('1000 facts, 10 columns'));
+      });
+      final page = tester.state<State<SalesPage>>(find.byType(SalesPage));
+      expect(page, isNotNull);
+      // the cube survived the re-import with the same axes
+      expect(find.widgetWithText(InputChip, 'region'), findsOneWidget);
+      expect(find.widgetWithText(InputChip, 'date year'), findsOneWidget);
+      expect(find.widgetWithText(InputChip, 'sum of total'), findsOneWidget);
+      // quantity is text now, so it is offered as a plain dimension but not as a measure
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AggregateEditor),
+          matching: find.byIcon(Icons.add),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(ListTile, 'quantity'), findsNothing);
+      expect(find.widgetWithText(ListTile, 'id'), findsNothing);
+      expect(find.widgetWithText(ListTile, 'Revenue'), findsWidgets);
+    },
+  );
 }

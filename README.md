@@ -106,10 +106,16 @@ default to the ambient Material theme.
 
 ## Example app
 
-`example/` contains a Flutter app that will load `example/assets/sales.csv`
+`example/` contains a Flutter app that loads `example/assets/sales.csv`
 (1 000 generated sales rows with deliberately missing values, hierarchical
-dimensions and orphan values — see `example/tool/gen_sales_csv.dart`) and let
-you configure the schema and the cube interactively.
+dimensions and orphan values — see `example/tool/gen_sales_csv.dart`) and
+lets you configure everything interactively: the inferred schema (include,
+type, label, date format, number syntax per column — `lib/schema_page.dart`),
+the axes (drag-and-drop), the aggregates, and the cube itself.
+
+```bash
+cd example && flutter run
+```
 
 ## Contributing
 

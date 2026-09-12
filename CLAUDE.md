@@ -63,10 +63,15 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
   `CubeView` falls back to the spec's first aggregate when its `aggregate`
   is not in the spec. Example uses the editor instead of a dropdown.
 - Example app (`example/lib/main.dart`) loads `assets/sales.csv` via
-  `rootBundle`, shows rows `[region, country]` × columns `[date.year,
-  date.quarter]`, aggregate dropdown, expand/collapse buttons, `intl`
-  `hu` number formatting. Verified visually on Linux desktop (expand,
-  merged headers, aggregate sort).
+  `rootBundle`, infers the schema, imports, shows rows `[region, country]`
+  × columns `[date.year, date.quarter]`, axis + aggregate editors,
+  expand/collapse buttons, `intl` `hu` number formatting. AppBar "Schema…"
+  opens `example/lib/schema_page.dart` (include switch, type, label, date
+  format / number syntax per column, sample raw values, reset) and
+  re-imports on "Import"; `_prune` drops spec dimensions/aggregates whose
+  columns vanished or changed type, expansion state is carried over. The
+  info line summarises the `ImportReport` and opens it in a dialog.
+  Verified visually on Linux desktop.
 
 ## Widget plan (agreed)
 

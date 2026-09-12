@@ -3,6 +3,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:intl/intl.dart';
 import 'package:tessera/tessera.dart';
 
+import 'schema_page.dart';
+
 void main() => runApp(const TesseraExampleApp());
 
 class TesseraExampleApp extends StatelessWidget {
@@ -20,7 +22,8 @@ class TesseraExampleApp extends StatelessWidget {
   );
 }
 
-/// Loads `assets/sales.csv` and shows it as a pivot cube.
+/// Loads `assets/sales.csv`, lets the user adjust the inferred schema, and
+/// shows the imported facts as a pivot cube.
 class SalesPage extends StatefulWidget {
   const SalesPage({super.key});
 
@@ -40,22 +43,46 @@ class _SalesPageState extends State<SalesPage> {
     locale: 'hu',
     decimalDigits: 2,
   );
-  late final Future<ImportResult> _import = _load();
+
+  late final Future<void> _ready = _load();
+  late final CsvDataSource _source;
+  late final Schema _inferred;
+  late final List<String> _columnNames;
+  late final List<SourceRow> _sampleRows;
+  Schema? _schema;
+  ImportResult? _result;
   CubeController? _controller;
   List<Dimension> _dimensions = const [];
   Aggregate _shown = sumTotal;
+  Object? _error;
 
-  Future<ImportResult> _load() async {
+  Future<void> _load() async {
     final data = await rootBundle.load('assets/sales.csv');
     final bytes = data.buffer.asUint8List();
-    final source = CsvDataSource.fromBytes(
+    _source = CsvDataSource.fromBytes(
       () => Stream.value(bytes),
       name: 'sales.csv',
     );
-    final result = await loadFacts(source);
+    _columnNames = await _source.columnNames();
+    _sampleRows = await _source.rows().take(5).toList();
+    _inferred = await inferSchema(_source);
+    await _import(_inferred);
+  }
+
+  /// Imports with [schema] and rebuilds the cube, keeping as much of the
+  /// current spec and expansion as the new facts allow.
+  Future<void> _import(Schema schema) async {
+    final ImportResult result;
+    try {
+      result = await loadFacts(_source, schema: schema);
+    } catch (e) {
+      setState(() => _error = e);
+      return;
+    }
+    final facts = result.facts;
     // Everything except the id and the measures makes sense to group by.
-    _dimensions = [
-      for (final d in standardDimensions(result.facts))
+    final dimensions = [
+      for (final d in standardDimensions(facts))
         if (!const {
           'id',
           'unit_price',
@@ -64,17 +91,120 @@ class _SalesPageState extends State<SalesPage> {
         }.contains(d.sourceColumn))
           d,
     ];
-    _controller = CubeController(
-      Cube(
-        facts: result.facts,
-        spec: CubeSpec(
-          rows: CubeAxis.of([region, country]),
-          columns: CubeAxis.of([year, quarter]),
-          aggregates: [sumTotal, Aggregate.count, avgPrice],
+    final old = _controller?.cube;
+    final spec = old == null
+        ? CubeSpec(
+            rows: CubeAxis.of([region, country]),
+            columns: CubeAxis.of([year, quarter]),
+            aggregates: [sumTotal, Aggregate.count, avgPrice],
+          )
+        : _prune(old.spec, facts);
+    final shown = spec.aggregates.contains(_shown)
+        ? _shown
+        : spec.aggregates.first;
+    final cube = Cube(
+      facts: facts,
+      spec: spec,
+      rowExpansion: old?.rowExpansion,
+      columnExpansion: old?.columnExpansion,
+    );
+    setState(() {
+      _error = null;
+      _schema = schema;
+      _result = result;
+      _dimensions = dimensions;
+      _shown = shown;
+      _controller?.dispose();
+      _controller = CubeController(cube);
+    });
+  }
+
+  /// Drops dimensions and aggregates whose columns are gone or changed type.
+  static CubeSpec _prune(CubeSpec spec, FactTable facts) {
+    bool hasColumn(String name) => facts.columns.any((c) => c.name == name);
+    bool dimensionOk(Dimension d) {
+      if (!hasColumn(d.sourceColumn)) return false;
+      if (d is DatePartDimension) {
+        final t = facts.column(d.sourceColumn).type;
+        return t == ColumnType.date || t == ColumnType.dateTime;
+      }
+      return true;
+    }
+
+    bool aggregateOk(Aggregate a) => switch (a) {
+      MeasureAggregate(:final measure) =>
+        hasColumn(measure.column) &&
+            facts.column(measure.column).type.isNumeric,
+      DistinctCountAggregate(:final dimension) => dimensionOk(dimension),
+      _ => true,
+    };
+    CubeAxis prune(CubeAxis axis) => axis.copyWith(
+      dimensions: [
+        for (final d in axis.dimensions)
+          if (dimensionOk(d.dimension) &&
+              (d.sort.aggregate == null || aggregateOk(d.sort.aggregate!)))
+            d
+          else if (dimensionOk(d.dimension))
+            AxisDimension(d.dimension),
+      ],
+    );
+    final aggregates = [
+      for (final a in spec.aggregates)
+        if (aggregateOk(a)) a,
+    ];
+    return CubeSpec(
+      rows: prune(spec.rows),
+      columns: prune(spec.columns),
+      aggregates: aggregates.isEmpty ? const [Aggregate.count] : aggregates,
+      filter: spec.filter,
+    );
+  }
+
+  Future<void> _editSchema() async {
+    final edited = await Navigator.push<Schema>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SchemaPage(
+          schema: _schema ?? _inferred,
+          inferred: _inferred,
+          sampleRows: _sampleRows,
+          columnNames: _columnNames,
         ),
       ),
     );
-    return result;
+    if (edited != null) await _import(edited);
+  }
+
+  void _showReport() {
+    final report = _result!.report;
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Import report'),
+        content: SizedBox(
+          width: 480,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Text('${report.rowsImported} rows imported'),
+              for (final e in report.widenedColumns.entries)
+                Text('${e.key}: widened to ${e.value.name}'),
+              for (final e in report.nullifiedPerColumn.entries)
+                Text('${e.key}: ${e.value} values could not be parsed'),
+              if (report.issues.isNotEmpty) const Divider(),
+              for (final issue in report.issues) Text(issue.toString()),
+              if (report.issuesTruncated) const Text('…'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -92,6 +222,11 @@ class _SalesPageState extends State<SalesPage> {
       title: const Text('Tessera — sales.csv'),
       actions: [
         IconButton(
+          icon: const Icon(Icons.table_chart_outlined),
+          tooltip: 'Schema…',
+          onPressed: _schema == null ? null : _editSchema,
+        ),
+        IconButton(
           icon: const Icon(Icons.unfold_more),
           tooltip: 'Expand all rows',
           onPressed: () =>
@@ -106,25 +241,31 @@ class _SalesPageState extends State<SalesPage> {
       ],
     ),
     body: FutureBuilder(
-      future: _import,
+      future: _ready,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Import failed: ${snapshot.error}'));
-        }
-        final result = snapshot.data;
-        if (result == null) {
+        final error = _error ?? snapshot.error;
+        if (error != null) return Center(child: Text('Import failed: $error'));
+        final controller = _controller;
+        final result = _result;
+        if (controller == null || result == null) {
           return const Center(child: CircularProgressIndicator());
         }
         final facts = result.facts;
+        final report = result.report;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
               padding: const EdgeInsets.all(8),
-              child: Text(
-                '${facts.rowCount} facts, ${facts.columns.length} columns'
-                '${result.report.hasIssues ? ', ${result.report.issues.length} issues' : ''}',
-                style: Theme.of(context).textTheme.bodySmall,
+              child: InkWell(
+                onTap: _showReport,
+                child: Text(
+                  '${facts.rowCount} facts, ${facts.columns.length} columns'
+                  '${report.widenedColumns.isEmpty ? '' : ', ${report.widenedColumns.length} widened'}'
+                  '${report.nullifiedPerColumn.isEmpty ? '' : ', ${report.nullifiedPerColumn.values.fold(0, (a, b) => a + b)} values nullified'}'
+                  ' — tap for the import report',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             ),
             Padding(
@@ -134,7 +275,7 @@ class _SalesPageState extends State<SalesPage> {
                 children: [
                   Expanded(
                     child: AxisEditor(
-                      controller: _controller!,
+                      controller: controller,
                       side: AxisSide.rows,
                       available: _dimensions,
                     ),
@@ -142,7 +283,7 @@ class _SalesPageState extends State<SalesPage> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: AxisEditor(
-                      controller: _controller!,
+                      controller: controller,
                       side: AxisSide.columns,
                       available: _dimensions,
                     ),
@@ -154,7 +295,7 @@ class _SalesPageState extends State<SalesPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: AggregateEditor(
-                controller: _controller!,
+                controller: controller,
                 selected: _shown,
                 onSelected: (a) => setState(() => _shown = a),
                 dimensions: _dimensions,
@@ -163,7 +304,7 @@ class _SalesPageState extends State<SalesPage> {
             const SizedBox(height: 8),
             Expanded(
               child: CubeView(
-                controller: _controller!,
+                controller: controller,
                 aggregate: _shown,
                 formatCell: _format,
                 theme: const CubeTheme(columnWidth: 130, rowHeaderWidth: 170),
