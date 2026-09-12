@@ -11,10 +11,13 @@ import 'csv_data_source.dart';
 ///
 /// Blank records (a single empty unquoted field) are skipped, as are the
 /// first [CsvOptions.skipLeadingLines] lines.
+///
+/// If [stats] is given it is updated as records are yielded.
 Stream<List<String>> parseCsv(
   Stream<String> chunks,
-  CsvOptions options,
-) async* {
+  CsvOptions options, {
+  CsvParseStats? stats,
+}) async* {
   final delimiter = options.delimiter.codeUnitAt(0);
   final quote = options.quote.codeUnitAt(0);
   const cr = 0x0D, lf = 0x0A, bom = 0xFEFF;
@@ -29,6 +32,7 @@ Stream<List<String>> parseCsv(
   var recordQuoted = false; // any field of the record was quoted
   final field = StringBuffer();
   var record = <String>[];
+  var consumed = 0; // characters in the chunks fully processed so far
 
   void endField() {
     var value = field.toString();
@@ -120,7 +124,10 @@ Stream<List<String>> parseCsv(
         } else if (c == cr || c == lf) {
           pendingCr = c == cr;
           final done = endRecord();
-          if (done != null) yield done;
+          if (done != null) {
+            stats?.record(consumed + i + 1);
+            yield done;
+          }
         } else if (field.isEmpty && !fieldQuoted) {
           inQuotes = true;
           fieldQuoted = true;
@@ -132,10 +139,28 @@ Stream<List<String>> parseCsv(
       i++;
     }
     if (i > runStart) field.write(chunk.substring(runStart, i));
+    consumed += n;
   }
 
   if (field.isNotEmpty || record.isNotEmpty || fieldQuoted) {
     final done = endRecord();
-    if (done != null) yield done;
+    if (done != null) {
+      stats?.record(consumed);
+      yield done;
+    }
+  }
+}
+
+/// Running counters of a [parseCsv] run.
+final class CsvParseStats {
+  /// Records yielded so far.
+  int records = 0;
+
+  /// Characters of input consumed through the end of the last record.
+  int characters = 0;
+
+  void record(int charactersConsumed) {
+    records++;
+    characters = charactersConsumed;
   }
 }

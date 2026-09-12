@@ -154,6 +154,15 @@ void main() {
       }
     });
 
+    test('fromData reads in-memory bytes and knows its length', () async {
+      final s = CsvDataSource.fromData(utf8.encode('a,b\nx,y\n'));
+      expect(await s.columnNames(), ['a', 'b']);
+      expect(await rowsOf(s), [
+        ['x', 'y'],
+      ]);
+      expect(await s.estimatedRowCount(), 1);
+    });
+
     test('latin-1 encoding', () async {
       final bytes = latin1.encode('a\nKovács\n');
       final s = CsvDataSource.fromBytes(

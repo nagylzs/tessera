@@ -27,4 +27,8 @@ final class ListDataSource implements DataSource {
 
   @override
   Stream<SourceRow> rows() => Stream.fromIterable(_rows);
+
+  /// Exact.
+  @override
+  Future<int?> estimatedRowCount() async => _rows.length;
 }

@@ -30,4 +30,10 @@ abstract interface class DataSource {
 
   /// Opens a fresh iteration over all rows.
   Stream<SourceRow> rows();
+
+  /// Roughly how many rows [rows] will yield, or `null` if there is no
+  /// cheap way to know. Used for import progress only, so an estimate
+  /// (a file's size divided by the average row length, say) is fine; it
+  /// must never require reading the whole source.
+  Future<int?> estimatedRowCount();
 }

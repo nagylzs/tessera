@@ -159,7 +159,26 @@ Layers 1–3 must not import Flutter.
   `Cell` — use `CubeAxis`, `HeaderEntry`, `CubeCell`, etc.
 - Web support matters: no `dart:io` in the library; sources are byte/stream
   based.
-- Import and aggregation are expected to run in an isolate for large data.
+- **Large data.** Measured (2 M rows / 172 MB, desktop): parse 3.3 s,
+  import 10–11 s (~5 µs/row), first cube 1.2–1.7 s, toggle 0.3–0.4 s,
+  ~225 MB RSS. `example/tool/bench.dart` reproduces it. Hence:
+  `DataSource.estimatedRowCount()` (exact for lists; CSV = length /
+  average of the first 200 records, needs `length:` for `fromBytes`),
+  `FactTableImporter.import(onProgress:)` with `ImportProgress`
+  (`rowsRead`, `estimatedTotal`, `fraction` capped at 0.99 until `done`),
+  return `false` to cancel → `ImportCancelled`; the importer yields to the
+  event loop at every report (`progressEvery`, default 10 000).
+  `loadFactsInIsolate` runs infer + import via `Isolate.run`, forwards
+  progress and cancellation over ports, falls back to `loadFacts` on the
+  web. Sources must be sendable (plain data or a `File`; not live
+  streams). Gotcha: Dart closures capture their whole scope, so a
+  `fromBytes(() => ...)` callback written in a `State` method (captures
+  `this`) or the worker closure sharing scope with the caller's ports is
+  unsendable ("object is unsendable - _Future") — hence
+  `CsvDataSource.fromData(bytes)` and the separate `_runWorker` function.
+  Isolate import of 2 M rows: 9.9 s, i.e. no measurable overhead; the CSV
+  row estimate was 5 % high (fraction is capped at 0.99 anyway). Import conversion has headroom (regex per numeric cell) — a
+  tryParse fast path is a known TODO. Cube layout still runs on the caller.
 
 ## Test data
 

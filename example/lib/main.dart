@@ -55,14 +55,14 @@ class _SalesPageState extends State<SalesPage> {
   List<Dimension> _dimensions = const [];
   Aggregate _shown = sumTotal;
   Object? _error;
+  ImportProgress? _progress;
 
   Future<void> _load() async {
     final data = await rootBundle.load('assets/sales.csv');
     final bytes = data.buffer.asUint8List();
-    _source = CsvDataSource.fromBytes(
-      () => Stream.value(bytes),
-      name: 'sales.csv',
-    );
+    // fromData (not fromBytes with a closure): closures created in a State
+    // method capture `this`, which cannot be sent to the import isolate.
+    _source = CsvDataSource.fromData(bytes, name: 'sales.csv');
     _columnNames = await _source.columnNames();
     _sampleRows = await _source.rows().take(5).toList();
     _inferred = await inferSchema(_source);
@@ -74,7 +74,17 @@ class _SalesPageState extends State<SalesPage> {
   Future<void> _import(Schema schema) async {
     final ImportResult result;
     try {
-      result = await loadFacts(_source, schema: schema);
+      // Off the UI isolate, with progress; the source only captures bytes,
+      // so it can be sent over.
+      result = await loadFactsInIsolate(
+        _source,
+        schema: schema,
+        importer: const FactTableImporter(progressEvery: 250),
+        onProgress: (p) {
+          if (mounted) setState(() => _progress = p);
+          return true;
+        },
+      );
     } catch (e) {
       setState(() => _error = e);
       return;
@@ -110,6 +120,7 @@ class _SalesPageState extends State<SalesPage> {
     );
     setState(() {
       _error = null;
+      _progress = null;
       _schema = schema;
       _result = result;
       _dimensions = dimensions;
@@ -247,6 +258,25 @@ class _SalesPageState extends State<SalesPage> {
         if (error != null) return Center(child: Text('Import failed: $error'));
         final controller = _controller;
         final result = _result;
+        final progress = _progress;
+        if (progress != null && !progress.done) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 240,
+                  child: LinearProgressIndicator(value: progress.fraction),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${progress.rowsRead} rows'
+                  '${progress.fraction == null ? '' : ' (${(progress.fraction! * 100).round()}%)'}',
+                ),
+              ],
+            ),
+          );
+        }
         if (controller == null || result == null) {
           return const Center(child: CircularProgressIndicator());
         }

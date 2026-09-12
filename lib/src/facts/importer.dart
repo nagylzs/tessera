@@ -44,6 +44,53 @@ final class ImportIssue {
   String toString() => 'row $row, $column: $message ($raw)';
 }
 
+/// Progress of a running import, as reported to an [ImportProgressCallback].
+final class ImportProgress {
+  const ImportProgress({
+    required this.rowsRead,
+    required this.estimatedTotal,
+    this.done = false,
+  });
+
+  final int rowsRead;
+
+  /// From [DataSource.estimatedRowCount]; `null` when unknown.
+  final int? estimatedTotal;
+
+  /// `true` for the final report, after the last row.
+  final bool done;
+
+  /// Progress as 0..1, or `null` when the total is unknown. Because the
+  /// total is an estimate, this stays below 1 until [done].
+  double? get fraction {
+    final total = estimatedTotal;
+    if (done) return 1;
+    if (total == null || total <= 0) return null;
+    final f = rowsRead / total;
+    return f < 0.99 ? f : 0.99;
+  }
+
+  @override
+  String toString() =>
+      'ImportProgress($rowsRead${estimatedTotal == null ? '' : ' / ~$estimatedTotal'}${done ? ', done' : ''})';
+}
+
+/// Called every [FactTableImporter.progressEvery] rows and once more when
+/// the import is done. Return `false` to cancel the import, which then
+/// throws [ImportCancelled].
+typedef ImportProgressCallback = bool Function(ImportProgress progress);
+
+/// Thrown when an [ImportProgressCallback] returned `false`.
+final class ImportCancelled implements Exception {
+  const ImportCancelled(this.rowsRead);
+
+  /// Rows imported before the cancellation.
+  final int rowsRead;
+
+  @override
+  String toString() => 'ImportCancelled after $rowsRead rows';
+}
+
 /// Thrown by [TypeMismatchPolicy.fail].
 final class ImportException implements Exception {
   const ImportException(this.issue);
@@ -102,15 +149,27 @@ final class FactTableImporter {
   const FactTableImporter({
     this.policy = TypeMismatchPolicy.widen,
     this.maxIssues = 100,
+    this.progressEvery = 10000,
   });
 
   final TypeMismatchPolicy policy;
 
+  /// How many rows go by between two progress reports.
+  final int progressEvery;
+
   /// Cap on [ImportReport.issues] to keep the report small.
   final int maxIssues;
 
-  /// Throws [ArgumentError] if the schema names a column the source lacks.
-  Future<ImportResult> import(DataSource source, Schema schema) async {
+  /// Throws [ArgumentError] if the schema names a column the source lacks,
+  /// [ImportCancelled] if [onProgress] asked for it.
+  Future<ImportResult> import(
+    DataSource source,
+    Schema schema, {
+    ImportProgressCallback? onProgress,
+  }) async {
+    final estimatedTotal = onProgress == null
+        ? null
+        : await source.estimatedRowCount();
     final names = await source.columnNames();
     final specs = schema.included.toList();
     final indices = <int>[];
@@ -141,6 +200,15 @@ final class FactTableImporter {
 
     var rowIndex = 0;
     await for (final row in source.rows()) {
+      if (onProgress != null && rowIndex > 0 && rowIndex % progressEvery == 0) {
+        final proceed = onProgress(
+          ImportProgress(rowsRead: rowIndex, estimatedTotal: estimatedTotal),
+        );
+        if (!proceed) throw ImportCancelled(rowIndex);
+        // Let the event loop run: UI repaints, isolate messages (a cancel
+        // request) get delivered.
+        await Future<void>.delayed(Duration.zero);
+      }
       for (var j = 0; j < specs.length; j++) {
         final idx = indices[j];
         final raw = idx < row.length ? row[idx] : null;
@@ -186,6 +254,13 @@ final class FactTableImporter {
       rowIndex++;
     }
 
+    onProgress?.call(
+      ImportProgress(
+        rowsRead: rowIndex,
+        estimatedTotal: estimatedTotal,
+        done: true,
+      ),
+    );
     final columns = [
       for (var j = 0; j < specs.length; j++)
         builders[j].build(currentSpecs[j].displayLabel),
@@ -335,12 +410,15 @@ final class _Mismatch {
 }
 
 /// Convenience: infer the schema (unless [schema] is given) and import.
+///
+/// Runs in the calling isolate; see `loadFactsInIsolate` for large sources.
 Future<ImportResult> loadFacts(
   DataSource source, {
   Schema? schema,
   InferenceOptions inference = const InferenceOptions(),
   FactTableImporter importer = const FactTableImporter(),
+  ImportProgressCallback? onProgress,
 }) async {
   schema ??= await inferSchema(source, options: inference);
-  return importer.import(source, schema);
+  return importer.import(source, schema, onProgress: onProgress);
 }

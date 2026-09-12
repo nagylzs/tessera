@@ -97,6 +97,27 @@ CubeView(
 );
 ```
 
+For big files, import off the UI isolate with progress:
+
+```dart
+final file = File(path);
+final source = CsvDataSource.fromBytes(file.openRead, length: file.lengthSync());
+final result = await loadFactsInIsolate(
+  source,
+  onProgress: (p) {
+    print('${p.rowsRead} rows${p.fraction == null ? '' : ' (${(p.fraction! * 100).round()}%)'}');
+    return !cancelRequested; // false cancels → ImportCancelled
+  },
+);
+```
+
+The source is sent to the worker isolate, so it must be sendable — plain
+data (`CsvDataSource.fromData(bytes)`) or a `File` work; a live stream does
+not.
+
+Plain Dart programs can import `package:tessera/core.dart`, which has no
+Flutter dependency.
+
 `CubeView` renders lazily (it is built on `TableView` from
 `two_dimensional_scrollables`), so large cubes scroll cheaply. Expand and
 collapse groups with the `+`/`−` icons; tap a dimension name to sort that

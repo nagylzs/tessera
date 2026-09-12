@@ -46,19 +46,39 @@ final class CsvDataSource implements DataSource {
     String text, {
     this.name = 'csv',
     this.options = const CsvOptions(),
-  }) : _openText = (() => Stream.value(text));
+  }) : _openText = (() => Stream.value(text)),
+       _length = text.length;
 
   /// Reads from a re-openable byte stream (a file, a network response, an
-  /// asset). [open] is invoked once per iteration.
+  /// asset). [open] is invoked once per iteration. Pass the total [length]
+  /// in bytes when you know it (a file's size) to enable
+  /// [estimatedRowCount].
   CsvDataSource.fromBytes(
     Stream<List<int>> Function() open, {
     this.name = 'csv',
     this.options = const CsvOptions(),
     Encoding encoding = utf8,
+    this._length,
   }) : _openText = (() => open().transform(encoding.decoder));
 
+  /// Reads from bytes already in memory (a downloaded file, an asset).
+  /// Unlike [CsvDataSource.fromBytes] this needs no callback, so the source
+  /// is always sendable to another isolate.
+  CsvDataSource.fromData(
+    List<int> bytes, {
+    this.name = 'csv',
+    this.options = const CsvOptions(),
+    Encoding encoding = utf8,
+  }) : _openText = (() => Stream.value(encoding.decode(bytes))),
+       _length = bytes.length;
+
+  /// Records read to estimate the average row length.
+  static const _estimateSample = 200;
+
   final Stream<String> Function() _openText;
+  final int? _length;
   List<String>? _columnNames;
+  int? _estimatedRows;
 
   @override
   final String name;
@@ -103,6 +123,34 @@ final class CsvDataSource implements DataSource {
         yield [...record, for (var i = record.length; i < width; i++) null];
       }
     }
+  }
+
+  /// Total length divided by the average length of the first
+  /// [_estimateSample] records; `null` when the length is unknown. Exact
+  /// when the source is shorter than the sample.
+  @override
+  Future<int?> estimatedRowCount() async {
+    final cached = _estimatedRows;
+    if (cached != null) return cached;
+    final length = _length;
+    if (length == null) return null;
+    final stats = CsvParseStats();
+    var complete = true;
+    await for (final _ in parseCsv(_openText(), options, stats: stats)) {
+      if (stats.records >= _estimateSample) {
+        complete = false;
+        break;
+      }
+    }
+    final headerRecords = options.hasHeader ? 1 : 0;
+    final int rows;
+    if (complete || stats.records == 0) {
+      rows = stats.records - headerRecords;
+    } else {
+      final average = stats.characters / stats.records;
+      rows = (length / average).round() - headerRecords;
+    }
+    return _estimatedRows = rows < 0 ? 0 : rows;
   }
 
   static List<String> _uniqueNames(List<String> header) {
