@@ -1,21 +1,54 @@
 # tessera — project notes for Claude
 
-Flutter library (pub.dev package, not yet published) for analyzing, grouping
-and aggregating tabular data: a pivot-table engine plus a widget. Owner:
-László Zsolt Nagy (nagylzs@gmail.com). MIT.
+Pub workspace (not yet published) for analyzing, grouping and aggregating
+tabular data: a pivot-table engine plus Flutter widgets. Owner: László
+Zsolt Nagy (nagylzs@gmail.com). MIT.
+
+## Repository layout
+
+Pub workspace (root `pubspec.yaml` lists the members; one lock file at
+the root, ignored; members carry `resolution: workspace`):
+
+- `packages/tessera` — the engine, **pure Dart** (`environment: sdk`
+  only, no Flutter, no deps; `lints` + `test` for dev). Layers 1–3 plus
+  `l10n/` (`TesseraStrings`) and the pure-Dart renderer helpers
+  (`AxisGeometry`, `AggregateKind`). Tests read `test/data/sales.csv`.
+- `packages/tessera_flutter` — the widgets (layer 4) and
+  `TesseraLocalizations` (the Flutter `LocalizationsDelegate` / `of`
+  glue). Depends on `tessera` and `two_dimensional_scrollables`;
+  `lib/tessera_flutter.dart` re-exports `package:tessera/tessera.dart`
+  so apps need one import. Its `example/` is the demo app (a workspace
+  member too; pub.dev's Example tab picks it up from here).
+- Planned: exporters (`tessera_xlsx`, `tessera_pdf`, …) as further
+  pure-Dart packages that render a `CubeLayout`; HTML export can live in
+  the engine (no deps).
+
+Why the split: pub resolves `flutter: sdk: flutter` per package, so a
+package that depends on Flutter cannot be used with the standalone Dart
+SDK at all (servers, `dart:stable` images) — a Flutter-free entrypoint
+inside a Flutter package does not help.
 
 ## Commands
 
 ```bash
-flutter analyze                      # must be clean (flutter_lints)
-flutter test                         # unit tests in test/
-dart format lib test example/lib     # run before committing
-flutter pub publish --dry-run        # pub.dev validation; keep at 0 warnings
-cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (seeded)
-cd example && flutter run -d linux               # run the example (X11: xdotool + `import -window` for screenshots; i3 tiles it)
+dart pub get                                   # at the root: resolves all members
+dart analyze                                   # at the root: all packages, must be clean
+(cd packages/tessera && dart test)             # engine tests (package:test, no Flutter)
+(cd packages/tessera_flutter && flutter test)  # widget tests
+(cd packages/tessera_flutter/example && flutter test)
+dart format packages                           # run before committing
+(cd packages/tessera && flutter pub publish --dry-run)          # keep at 0 warnings
+(cd packages/tessera_flutter && flutter pub publish --dry-run)  # (uncommitted files count)
+cd packages/tessera_flutter/example && dart run tool/gen_sales_csv.dart   # regenerates assets/sales.csv AND packages/tessera/test/data/sales.csv (seeded)
+cd packages/tessera_flutter/example && flutter run -d linux   # run the example (X11: xdotool + `import -window` for screenshots; i3 tiles it)
 # find the window with `xdotool search --class tessera_example`; stop with
 # pkill -f '[f]lutter run -d linux' (the bracket keeps pkill from killing the shell)
 ```
+
+Paths below are relative to the package (`lib/src/...` means
+`packages/tessera/lib/src/...` for layers 1–3 and l10n,
+`packages/tessera_flutter/lib/src/...` for widgets; `example/` is
+`packages/tessera_flutter/example/`).
 
 ## Status
 
@@ -44,8 +77,8 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
   cells), `standardDimensions(facts)` (column + date-part dimensions for a
   picker dialog), ISO week.
 - Implemented: `CubeView` (`widgets/cube_view.dart`) on `TableView`;
-  `widgets/axis_geometry.dart` (pure Dart) resolves the merged header
-  areas; `CubeTheme` / `ResolvedCubeTheme`. Dependency:
+  `cube/axis_geometry.dart` (engine package, exported) resolves the
+  merged header areas; `CubeTheme` / `ResolvedCubeTheme`. Dependency:
   `two_dimensional_scrollables`. Nothing throws `UnimplementedError` any
   more.
 - Implemented: `AxisEditor` (`widgets/axis_editor.dart`; chips per axis,
@@ -59,7 +92,8 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
   with delete — never the last one; removing resets any `AxisSort` that
   used it; `selected`/`onSelected` let the app choose what `CubeView`
   shows) and `showAggregatePicker` / `AggregatePickerDialog` /
-  `AggregateKind` / `standardMeasures` (`widgets/aggregate_picker.dart`).
+  `standardMeasures` (`widgets/aggregate_picker.dart`); `AggregateKind`
+  is in the engine (`cube/aggregate_kind.dart`).
   `CubeView` falls back to the spec's first aggregate when its `aggregate`
   is not in the spec. Example uses the editor instead of a dropdown.
 - Example app: `example/lib/main.dart` is a launcher (`LauncherPage`)
@@ -112,15 +146,19 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
 - Grid geometry: `levelRows = max(columnDepth, 1)` header rows for group
   labels + 1 aggregate row; `headerColumns = max(rowDepth, 1)`. Pinned
   rows/columns = those. Cells draw their own right/bottom borders.
-- The library must NOT depend on `intl`. Localization lives in
-  `lib/src/l10n/`: abstract `TesseraLocalizations` (every member abstract
-  so built-in locales are compiler-checked for completeness; concrete
-  helpers `aggregateLabel`, `dimensionLabel`, `formatValue`,
-  `formatNumber`, `aggregateKindLabel`), `delegate` (matches on language
-  code, `SynchronousFuture`), `TesseraLocalizationsScope` (InheritedWidget
-  override, checked first by `of(context)`), English fallback. Fourteen
-  built-in locales in `l10n_xx.dart`, registry `locales.dart`
-  (`builtInLocalizations`). Label composition is a method per locale
+- The library must NOT depend on `intl`. Localization is split: the
+  engine's `l10n/` has the abstract `TesseraStrings` (every member
+  abstract so built-in locales are compiler-checked for completeness;
+  concrete helpers `aggregateLabel`, `dimensionLabel`, `formatValue`,
+  `formatNumber`, `aggregateKindLabel`; `forLanguage(code)`,
+  `supportedLanguages`), fourteen built-in locales in `l10n_xx.dart`
+  (`TesseraStringsHu` …), registry `locales.dart` (`builtInStrings`).
+  `tessera_flutter`'s `l10n/tessera_localizations.dart` adds the static
+  namespace `TesseraLocalizations` (`delegate` matching on language code
+  with `SynchronousFuture`, `supportedLocales`, `of(context)` /
+  `maybeOf`) and `TesseraLocalizationsScope` (InheritedWidget override,
+  checked first by `of`), English fallback. Exporters use
+  `TesseraStrings` directly. Label composition is a method per locale
   (inflected languages use "suma: X"); `Dimension.explicitLabel` tells the
   localization whether to compose. Core keeps English `label`/`labelFor`
   for plain-Dart use; widgets never call them for built-in types.
@@ -128,13 +166,13 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
   params are nullable overrides. `Accumulator` was renamed
   `AggregateAccumulator` (clashed with Flutter's). The example uses
   `flutter_localizations` (not intl any more) and has a language menu.
-- `example/` is the untouched `flutter create` app plus `assets/sales.csv`.
-- README describes the target API. `pubspec.yaml` `description` is set;
-  `CHANGELOG.md` is the template.
+- Each package has its own README, CHANGELOG and LICENSE copy (pub
+  requires them per package); the root README is the repo overview.
 
-## Architecture (see `lib/tessera.dart` doc for the long version)
+## Architecture (see `packages/tessera/lib/tessera.dart` doc for the long version)
 
-Four layers, one directory each under `lib/src/`:
+Four layers, one directory each under `lib/src/` (1–3 in
+`packages/tessera`, 4 in `packages/tessera_flutter`):
 
 1. `schema/` + `source/` — `DataSource` (column names + re-openable
    `Stream<SourceRow>`), `inferSchema` samples a prefix of rows,
@@ -150,7 +188,8 @@ Four layers, one directory each under `lib/src/`:
 4. `widgets/` — `CubeController extends ChangeNotifier` holds the cube;
    `CubeView` renders one aggregate per cell.
 
-Layers 1–3 must not import Flutter.
+Layers 1–3 must not import Flutter — enforced now by the package split
+(the engine's pubspec has no Flutter dependency).
 
 ## Key design decisions (agreed with the owner)
 
@@ -219,7 +258,9 @@ Layers 1–3 must not import Flutter.
 
 ## Test data
 
-`example/assets/sales.csv` — 1000 rows, columns `id,date,region,country,
+`example/assets/sales.csv` (identical copy at
+`packages/tessera/test/data/sales.csv`, both written by the generator) —
+1000 rows, columns `id,date,region,country,
 category,product,salesperson,quantity,unit_price,discount,total`.
 Deliberate edge cases (probabilities in `example/tool/gen_sales_csv.dart`):
 rows with region but no country/category/product; category without product;
@@ -232,7 +273,12 @@ consistent otherwise.
 
 - `pubspec.yaml` has no `author` field on purpose (deprecated, pub warns);
   author lives in README and LICENSE.
+- Widgets import `package:tessera/tessera.dart` (never
+  `package:tessera/src/...`); the engine package must stay Flutter-free.
 - Example app org id: `eu.nagylzs` (`eu.nagylzs.tessera_example`).
-- Doc comments on every public type; keep the library-level doc in
-  `lib/tessera.dart` in sync with the layer list above.
-- Test the pure-Dart layers directly; widget tests only for `widgets/`.
+- Doc comments on every public type; keep the library-level docs in
+  `packages/tessera/lib/tessera.dart` and
+  `packages/tessera_flutter/lib/tessera_flutter.dart` in sync with the
+  layer list above.
+- Test the pure-Dart layers with `package:test` in `packages/tessera`;
+  widget tests (`flutter_test`) only in `packages/tessera_flutter`.
