@@ -38,4 +38,5 @@ export 'src/source/data_source.dart';
 export 'src/source/list_data_source.dart';
 export 'src/source/schema_inference.dart';
 export 'src/widgets/cube_controller.dart';
+export 'src/widgets/cube_theme.dart';
 export 'src/widgets/cube_view.dart';

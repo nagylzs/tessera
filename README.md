@@ -3,9 +3,9 @@
 Analyze, group and aggregate tabular data in Flutter — a pivot-table engine
 with a widget on top.
 
-> **Status: early development.** The public API is designed and documented
-> (see `lib/`), but most of it still throws `UnimplementedError`. Nothing is
-> published to pub.dev yet.
+> **Status: early development.** The pipeline works end to end (CSV →
+> facts → cube → widget) and is covered by tests, but the API is still
+> moving and nothing is published to pub.dev yet.
 
 ## What it does
 
@@ -56,15 +56,12 @@ blank instead of showing `0`.
 
 Layers 1–3 do not depend on Flutter and are fully testable with plain Dart.
 
-## Intended usage
-
-This is the target API; the pieces marked *(not yet)* still need their
-implementation.
+## Usage
 
 ```dart
 import 'package:tessera/tessera.dart';
 
-// 1. Load. Types are inferred from a sample of rows.   (not yet)
+// 1. Load. Types are inferred from a sample of rows.
 final source = CsvDataSource.fromString(csvText, name: 'sales.csv');
 final result = await loadFacts(source);
 final facts = result.facts;
@@ -87,17 +84,25 @@ final spec = CubeSpec(
   filter: ValueFilter(const ColumnDimension('region'), {'Europe', 'Asia'}),
 );
 
-// 3. Build the cube and read it.                        (not yet)
+// 3. Build the cube and read it.
 final cube = Cube(facts: facts, spec: spec);
 final cell = cube.layout.cellAt(0, 0);
 final revenue = cell.aggregate(Aggregate.sum(const Measure('total')));
 
-// 4. Or display it.                                     (not yet)
+// 4. Or display it.
 CubeView(
   controller: CubeController(cube),
   aggregate: Aggregate.sum(const Measure('total')),
+  formatCell: (cell, value) => myNumberFormat.format(value),
 );
 ```
+
+`CubeView` renders lazily (it is built on `TableView` from
+`two_dimensional_scrollables`), so large cubes scroll cheaply. Expand and
+collapse groups with the `+`/`−` icons; tap a dimension name to sort that
+level by value, or the aggregate name under a column to sort the rows by
+that column. Colours, sizes and text styles come from a `CubeTheme` and
+default to the ambient Material theme.
 
 ## Example app
 

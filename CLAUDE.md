@@ -40,7 +40,11 @@ cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (
   `AxisLayout.descendantCount` (subtree size for header spans / merged
   cells), `standardDimensions(facts)` (column + date-part dimensions for a
   picker dialog), ISO week.
-- Still `UnimplementedError`: `CubeView.build`.
+- Implemented: `CubeView` (`widgets/cube_view.dart`) on `TableView`;
+  `widgets/axis_geometry.dart` (pure Dart) resolves the merged header
+  areas; `CubeTheme` / `ResolvedCubeTheme`. Dependency:
+  `two_dimensional_scrollables`. Nothing throws `UnimplementedError` any
+  more. Not yet built: `AxisEditor`, `DimensionPickerDialog`, example app.
 
 ## Widget plan (agreed)
 
@@ -53,11 +57,17 @@ cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (
   children follow; header band = one row per column dimension + aggregate
   label row; row header = one column per row dimension; top-left corner
   shows column-dimension names.
-- Hooks: `CellFormatter`, cell `TextStyle` callback (zero/negative
-  colours), `CubeTheme.levelColor(depth, maxDepth)` with presets,
-  separate row/column summary labels, expansion confirmation callback with
-  a limit. Sort indicators on dimension titles (value sort) and under
-  column entries (aggregate sort at that `keyPath`).
+- Hooks: `CellFormatter`, `CellStyler` (zero/negative colours),
+  `CubeTheme.levelColor(depth, maxDepth)` + `CubeTheme.gradient(colors)`,
+  separate row/column summary labels, `expansionLimit` +
+  `confirmExpansion` (default: AlertDialog), `onCellTap`. Sort UI rule:
+  tapping a dimension title toggles value sort on that level; tapping the
+  aggregate name under a column sets aggregate sort with that `keyPath`
+  on ALL row levels (tap again flips direction). Sort-key column is
+  tinted with `sortKeyColor`.
+- Grid geometry: `levelRows = max(columnDepth, 1)` header rows for group
+  labels + 1 aggregate row; `headerColumns = max(rowDepth, 1)`. Pinned
+  rows/columns = those. Cells draw their own right/bottom borders.
 - The library must NOT depend on `intl`; the example app uses it for
   locale formatting (`hu`: decimal comma).
 - `example/` is the untouched `flutter create` app plus `assets/sales.csv`.
