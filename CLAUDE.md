@@ -45,7 +45,14 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
   `widgets/axis_geometry.dart` (pure Dart) resolves the merged header
   areas; `CubeTheme` / `ResolvedCubeTheme`. Dependency:
   `two_dimensional_scrollables`. Nothing throws `UnimplementedError` any
-  more. Not yet built: `AxisEditor`, `DimensionPickerDialog`.
+  more.
+- Implemented: `AxisEditor` (`widgets/axis_editor.dart`; chips per axis,
+  `Draggable`/`DragTarget` with `DimensionDrag` payload — drop on a chip
+  inserts before it, drop on the editor appends, works across the two
+  editors; delete icon removes; `+` opens the picker) and
+  `showDimensionPicker` / `DimensionPickerDialog`
+  (`widgets/dimension_picker.dart`; searchable, used dimensions disabled).
+  Both verified on Linux desktop.
 - Example app (`example/lib/main.dart`) loads `assets/sales.csv` via
   `rootBundle`, shows rows `[region, country]` × columns `[date.year,
   date.quarter]`, aggregate dropdown, expand/collapse buttons, `intl`
@@ -57,6 +64,7 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
 - Three widgets: `CubeView` (grid only), `AxisEditor` (chips per axis,
   drag-and-drop within and between axes), `DimensionPickerDialog` fed by
   `standardDimensions`. `CubeController` is the single mutable object.
+  All three exist; the example app composes them.
 - `CubeView` is built on `TableView` from `two_dimensional_scrollables`
   (lazy cells, pinned headers, merged cells for the L-shaped group
   headers). Expanded parent = first entry of its span (its own subtotal),

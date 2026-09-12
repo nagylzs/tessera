@@ -42,6 +42,7 @@ class _SalesPageState extends State<SalesPage> {
   );
   late final Future<ImportResult> _import = _load();
   CubeController? _controller;
+  List<Dimension> _dimensions = const [];
   Aggregate _shown = sumTotal;
 
   Future<ImportResult> _load() async {
@@ -52,6 +53,17 @@ class _SalesPageState extends State<SalesPage> {
       name: 'sales.csv',
     );
     final result = await loadFacts(source);
+    // Everything except the id and the measures makes sense to group by.
+    _dimensions = [
+      for (final d in standardDimensions(result.facts))
+        if (!const {
+          'id',
+          'unit_price',
+          'discount',
+          'total',
+        }.contains(d.sourceColumn))
+          d,
+    ];
     _controller = CubeController(
       Cube(
         facts: result.facts,
@@ -131,6 +143,30 @@ class _SalesPageState extends State<SalesPage> {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: AxisEditor(
+                      controller: _controller!,
+                      side: AxisSide.rows,
+                      available: _dimensions,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: AxisEditor(
+                      controller: _controller!,
+                      side: AxisSide.columns,
+                      available: _dimensions,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
             Expanded(
               child: CubeView(
                 controller: _controller!,
