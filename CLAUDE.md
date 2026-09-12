@@ -27,8 +27,14 @@ cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (
   `Float64List` (NaN = null, ints exact to 2^53, dates as UTC millis), text
   dictionary-encoded (`Int32List` codes, -1 = null), booleans `Uint8List`.
   `loadFacts(source)` works end to end on `sales.csv`.
-- Still `UnimplementedError`: all `Accumulator`s, `Cube._computeLayout`,
-  `expand*ToDepth`, `CubeView.build`, ISO week in `DatePartDimension`.
+- Implemented: the cube layer. `cube/cube_engine.dart` (internal) holds
+  `CubeCache` (per-dimension `DimensionCodes`, filtered rows; shared across
+  `copyWith`), `AxisTree`/`AxisNode` (visible groups only — children exist
+  only under expanded nodes), one pass over the facts into leaf cells, then
+  row roll-up and column roll-up via `Accumulator.merge`, then ordering
+  (`AxisSort`) and summary placement. All built-in accumulators done.
+- Still `UnimplementedError`: `CubeView.build`, ISO week in
+  `DatePartDimension`.
 - `example/` is the untouched `flutter create` app plus `assets/sales.csv`.
 - README describes the target API. `pubspec.yaml` `description` is set;
   `CHANGELOG.md` is the template.

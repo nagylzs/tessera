@@ -20,6 +20,10 @@ enum NullPosition { first, last }
 enum SummaryPosition { start, end, hidden }
 
 /// Ordering of the groups produced by one [AxisDimension].
+///
+/// With [SortBy.value] the empty group goes where [nulls] says. With
+/// [SortBy.aggregate] every group — the empty one included — is ordered by
+/// its summary value; groups whose aggregate is `null` sort as the smallest.
 final class AxisSort {
   const AxisSort({
     this.by = SortBy.value,

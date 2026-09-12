@@ -1,3 +1,4 @@
+import '../facts/dimension.dart';
 import 'aggregate.dart';
 import 'cube_spec.dart';
 import 'dimension_path.dart';
@@ -10,6 +11,13 @@ abstract interface class HeaderEntry {
   int get depth;
 
   bool get isSummary;
+
+  /// Dimension of the deepest path entry; `null` for the summary.
+  Dimension? get dimension;
+
+  /// Value of the deepest path entry; `null` for the empty group and for the
+  /// summary (tell them apart with [isSummary]).
+  Object? get value;
 
   /// Formatted value of the deepest path entry (empty string for the empty
   /// group and the summary; the widget decides how to label those).
@@ -48,7 +56,8 @@ abstract interface class CubeCell {
 
   bool get isEmpty;
 
-  /// Result of [aggregate], which must be one of the spec's aggregates.
+  /// Result of [aggregate], which must be one of the spec's aggregates
+  /// (otherwise [ArgumentError]).
   R? aggregate<R>(Aggregate<R> aggregate);
 
   Map<Aggregate, Object?> get aggregates;
