@@ -1,3 +1,5 @@
+import 'fact_table.dart';
+
 /// A numeric attribute of the facts that aggregates are computed from.
 ///
 /// A measure refers to a numeric column of the [FactTable]. Which columns are
@@ -12,7 +14,13 @@ final class Measure {
 
   String get id => column;
 
+  /// Human readable name, without reference to any fact table.
   String get label => _label ?? column;
+
+  /// An explicitly given label, otherwise the column's label in [facts]
+  /// (falling back to the column name).
+  String labelFor(FactTable facts) =>
+      _label ?? facts.findColumn(column)?.label ?? column;
 
   @override
   bool operator ==(Object other) => other is Measure && other.column == column;

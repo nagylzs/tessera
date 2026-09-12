@@ -585,7 +585,9 @@ final class CubeLayoutImpl implements CubeLayout {
   }) : rows = AxisLayoutImpl(rowTree, filteredRows),
        columns = AxisLayoutImpl(colTree, filteredRows);
 
+  @override
   final FactTable facts;
+
   final Int32List filteredRows;
   final AxisTree rowTree;
   final AxisTree colTree;

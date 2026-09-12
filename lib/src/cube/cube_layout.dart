@@ -1,4 +1,5 @@
 import '../facts/dimension.dart';
+import '../facts/fact_table.dart';
 import 'aggregate.dart';
 import 'cube_spec.dart';
 import 'dimension_path.dart';
@@ -82,6 +83,9 @@ abstract interface class CubeCell {
 /// spec or the expansion state changes.
 abstract interface class CubeLayout {
   CubeSpec get spec;
+
+  /// The facts the layout was computed from.
+  FactTable get facts;
 
   AxisLayout get rows;
 

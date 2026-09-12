@@ -182,7 +182,7 @@ class _CubeGrid extends StatelessWidget {
               ? () => _sortByValue(isRow: false, level: r)
               : null,
           child: _titleText(
-            level.dimension.label,
+            level.dimension.labelFor(layout.facts),
             level.sort,
             trailingIcon: true,
           ),
@@ -201,7 +201,7 @@ class _CubeGrid extends StatelessWidget {
         alignment: Alignment.centerLeft,
         onTap: view.sortable ? () => _sortByValue(isRow: true, level: c) : null,
         child: _titleText(
-          level.dimension.label,
+          level.dimension.labelFor(layout.facts),
           level.sort,
           trailingIcon: true,
         ),
@@ -250,7 +250,7 @@ class _CubeGrid extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  shown?.label ?? '',
+                  shown?.labelFor(layout.facts) ?? '',
                   style: theme.headerTextStyle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

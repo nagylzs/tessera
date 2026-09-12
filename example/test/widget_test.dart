@@ -67,7 +67,7 @@ void main() {
       // the cube survived the re-import with the same axes
       expect(find.widgetWithText(InputChip, 'region'), findsOneWidget);
       expect(find.widgetWithText(InputChip, 'date year'), findsOneWidget);
-      expect(find.widgetWithText(InputChip, 'sum of total'), findsOneWidget);
+      expect(find.widgetWithText(InputChip, 'sum of Revenue'), findsOneWidget);
       // quantity is text now, so it is offered as a plain dimension but not as a measure
       await tester.tap(
         find.descendant(

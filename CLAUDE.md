@@ -146,6 +146,12 @@ Layers 1–3 must not import Flutter.
   contradictions during import. Widening order in `ColumnType.canWidenTo`.
 - **Filter is separate from axes** (pivot "filter area"), sorting lives on
   `AxisDimension.sort` (by value or by aggregate, null position).
+- **Labels resolve against the fact table.** `Dimension`, `Measure` and
+  `Aggregate` have `label` (standalone) and `labelFor(facts)` (explicit
+  label, else the column's `FactColumn.label` from the schema). Widgets
+  always use `labelFor`, so relabelling a column in the schema shows up in
+  chips, corner titles and the aggregate header. `FactTable.findColumn`
+  is the null-safe column lookup.
 - **Immutable values everywhere**; `CubeController` is the only mutable
   object. `copyWith` for derived versions; equality by value (`Dimension`
   and `Aggregate` by `id`).

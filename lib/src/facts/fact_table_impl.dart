@@ -408,6 +408,9 @@ final class FactTableImpl implements FactTable {
   }
 
   @override
+  FactColumnImpl? findColumn(String name) => _byName[name];
+
+  @override
   Object? valueAt(int row, String column) => this.column(column).valueAt(row);
 
   @override

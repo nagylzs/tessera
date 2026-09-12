@@ -1,3 +1,5 @@
+import 'fact_table.dart';
+
 /// Compares two dimension values with `null` ordered first.
 ///
 /// [Comparable] values compare naturally; [bool] orders `false < true`.
@@ -34,8 +36,14 @@ sealed class Dimension {
   /// Unique identifier, e.g. `country` or `date.month`.
   String get id;
 
-  /// Human readable name.
+  /// Human readable name, without reference to any fact table.
   String get label;
+
+  /// Human readable name for use with [facts]: an explicitly given label,
+  /// otherwise derived from the column's label in the table (which may
+  /// have been set in the [Schema]). Falls back to [label] if the column
+  /// is not in the table.
+  String labelFor(FactTable facts) => label;
 
   /// Name of the [FactTable] column this dimension reads.
   String get sourceColumn;
@@ -76,6 +84,10 @@ final class ColumnDimension extends Dimension {
   String get label => _label ?? sourceColumn;
 
   @override
+  String labelFor(FactTable facts) =>
+      _label ?? facts.findColumn(sourceColumn)?.label ?? sourceColumn;
+
+  @override
   Object? valueOf(Object? columnValue) => columnValue;
 }
 
@@ -101,6 +113,13 @@ final class DatePartDimension extends Dimension {
   @override
   String get label =>
       _label ?? '${sourceColumn.replaceAll('_', ' ')} ${part.name}';
+
+  @override
+  String labelFor(FactTable facts) {
+    if (_label != null) return _label;
+    final column = facts.findColumn(sourceColumn);
+    return column == null ? label : '${column.label} ${part.name}';
+  }
 
   @override
   int? valueOf(Object? columnValue) {

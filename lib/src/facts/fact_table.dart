@@ -34,6 +34,9 @@ abstract interface class FactTable {
   /// Throws [ArgumentError] for an unknown column.
   FactColumn column(String name);
 
+  /// Like [column] but `null` for an unknown column.
+  FactColumn? findColumn(String name);
+
   /// Raw stored value of [column] in [row]; `null` for missing values.
   Object? valueAt(int row, String column);
 

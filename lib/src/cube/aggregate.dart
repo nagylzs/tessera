@@ -29,7 +29,12 @@ abstract class Aggregate<R> {
   /// Unique identifier, e.g. `sum(total)`.
   String get id;
 
+  /// Human readable name, without reference to any fact table.
   String get label;
+
+  /// Human readable name for use with [facts]; built-in aggregates use the
+  /// column labels of the table (see [Measure.labelFor]).
+  String labelFor(FactTable facts) => label;
 
   Accumulator<R> createAccumulator();
 
@@ -72,6 +77,9 @@ abstract class MeasureAggregate<R> extends Aggregate<R> {
 
   @override
   String get label => '$function of ${measure.label}';
+
+  @override
+  String labelFor(FactTable facts) => '$function of ${measure.labelFor(facts)}';
 }
 
 /// Σ of non-null values. `null` if every value was missing.
@@ -155,6 +163,9 @@ final class DistinctCountAggregate extends Aggregate<int> {
 
   @override
   String get label => 'distinct ${dimension.label}';
+
+  @override
+  String labelFor(FactTable facts) => 'distinct ${dimension.labelFor(facts)}';
 
   @override
   Accumulator<int> createAccumulator() => _DistinctCountAccumulator(dimension);

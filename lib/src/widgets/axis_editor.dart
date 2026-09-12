@@ -115,8 +115,9 @@ class AxisEditor extends StatelessWidget {
   );
 
   Widget _chip(BuildContext context, Dimension dimension, int index) {
+    final label = dimension.labelFor(controller.cube.facts);
     final chip = InputChip(
-      label: Text(dimension.label),
+      label: Text(label),
       onDeleted: () => _remove(dimension),
       visualDensity: VisualDensity.compact,
     );
@@ -140,7 +141,7 @@ class AxisEditor extends StatelessWidget {
             elevation: 4,
             borderRadius: BorderRadius.circular(8),
             child: Chip(
-              label: Text(dimension.label),
+              label: Text(label),
               visualDensity: VisualDensity.compact,
             ),
           ),

@@ -50,7 +50,8 @@ class AggregateEditor extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
     builder: (context, _) {
-      final aggregates = controller.cube.spec.aggregates;
+      final cube = controller.cube;
+      final aggregates = cube.spec.aggregates;
       final theme = Theme.of(context);
       return Container(
         constraints: const BoxConstraints(minHeight: 48),
@@ -72,7 +73,7 @@ class AggregateEditor extends StatelessWidget {
                 children: [
                   for (final a in aggregates)
                     InputChip(
-                      label: Text(a.label),
+                      label: Text(a.labelFor(cube.facts)),
                       selected: a == selected,
                       onSelected: onSelected == null
                           ? null
