@@ -17,9 +17,14 @@ cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (
 ## Status
 
 - API skeleton written with doc comments in `lib/src/`; value types are
-  implemented, behaviour throws `UnimplementedError` (CSV parsing,
-  `inferSchema`, `FactTableImporter.import`, all `Accumulator`s,
-  `Cube._computeLayout`, `expand*ToDepth`, `CubeView.build`, ISO week).
+  implemented.
+- Implemented: `CsvDataSource` (streaming parser in `source/csv_parser.dart`),
+  `inferSchema`, and the shared value parsers in `schema/value_parsing.dart`
+  (`NumberSyntax`, `parseBoolean`, `DatePattern`) that the importer must
+  reuse so import and inference agree.
+- Still `UnimplementedError`: `FactTableImporter.import`, all
+  `Accumulator`s, `Cube._computeLayout`, `expand*ToDepth`, `CubeView.build`,
+  ISO week in `DatePartDimension`.
 - `example/` is the untouched `flutter create` app plus `assets/sales.csv`.
 - README describes the target API. `pubspec.yaml` `description` is set;
   `CHANGELOG.md` is the template.

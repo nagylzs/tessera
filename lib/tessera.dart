@@ -31,6 +31,7 @@ export 'src/facts/measure.dart';
 export 'src/schema/column_spec.dart';
 export 'src/schema/column_type.dart';
 export 'src/schema/schema.dart';
+export 'src/schema/value_parsing.dart';
 export 'src/source/csv_data_source.dart';
 export 'src/source/data_source.dart';
 export 'src/source/list_data_source.dart';

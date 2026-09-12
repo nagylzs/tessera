@@ -1,4 +1,5 @@
 import 'column_type.dart';
+import 'value_parsing.dart';
 
 /// Converts a raw source value (usually a [String]) into the Dart value stored
 /// for the column, or `null` when the value should be treated as missing.
@@ -19,6 +20,7 @@ final class ColumnSpec {
     this.label,
     this.include = true,
     this.format,
+    this.numberSyntax = NumberSyntax.standard,
     this.parser,
     this.nullValues = defaultNullValues,
   });
@@ -46,11 +48,14 @@ final class ColumnSpec {
   /// When `false` the column is skipped entirely during import.
   final bool include;
 
-  /// Declarative parsing hint interpreted per [type]: a date pattern such as
-  /// `dd.MM.yyyy` for [ColumnType.date]/[ColumnType.dateTime], or a locale
-  /// such as `hu_HU` (decimal comma, space as thousands separator) for numeric
-  /// types. Ignored when [parser] is set.
+  /// Date pattern (see [DatePattern]) used to parse [ColumnType.date] and
+  /// [ColumnType.dateTime] values from text, e.g. `dd.MM.yyyy`. Ignored for
+  /// other types and when [parser] is set.
   final String? format;
+
+  /// Separators used to parse numeric values from text. Ignored for
+  /// non-numeric types and when [parser] is set.
+  final NumberSyntax numberSyntax;
 
   /// Escape hatch for anything [format] cannot express. Receives the raw
   /// source value and must return a value of [type] (or `null`).
@@ -66,6 +71,7 @@ final class ColumnSpec {
     ColumnType? type,
     bool? include,
     String? format,
+    NumberSyntax? numberSyntax,
     ValueParser? parser,
     Set<String>? nullValues,
   }) {
@@ -75,6 +81,7 @@ final class ColumnSpec {
       type: type ?? this.type,
       include: include ?? this.include,
       format: format ?? this.format,
+      numberSyntax: numberSyntax ?? this.numberSyntax,
       parser: parser ?? this.parser,
       nullValues: nullValues ?? this.nullValues,
     );
