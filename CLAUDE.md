@@ -146,6 +146,20 @@ Paths below are relative to the package (`lib/src/...` means
 - Grid geometry: `levelRows = max(columnDepth, 1)` header rows for group
   labels + 1 aggregate row; `headerColumns = max(rowDepth, 1)`. Pinned
   rows/columns = those. Cells draw their own right/bottom borders.
+- Column widths are content-sized (`widgets/column_widths.dart`,
+  `ColumnWidthMeasurer`, internal): `TableView` needs every extent before
+  any cell exists, so `_CubeGridState` measures up front from the layout —
+  values of the first `CubeView.measuredRows` rows (default 1000) plus
+  summary rows, entry labels (column labels only when they stay in one
+  column, i.e. not expanded), titles, the aggregate label — keeps the 4
+  longest strings per column (length as proxy), lays those out with
+  `TextPainter`, adds padding + border + 2 px slack + 18 px for icons, and
+  clamps to `CubeTheme.min/maxColumnWidth` (72/320) and
+  `min/maxRowHeaderWidth` (100/400); equal min and max = fixed widths.
+  Cached per (layout, aggregate, strings, theme text bits, text scaler…),
+  so it reruns only on toggle/spec change. Rows stay fixed-height. Test
+  font renders every glyph 1 em wide, so widths in widget tests are large
+  (tests set `tester.view.physicalSize` where that matters).
 - The library must NOT depend on `intl`. Localization is split: the
   engine's `l10n/` has the abstract `TesseraStrings` (every member
   abstract so built-in locales are compiler-checked for completeness;

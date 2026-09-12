@@ -328,11 +328,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: CubeView(
-                controller: controller,
-                aggregate: shown,
-                theme: const CubeTheme(columnWidth: 130, rowHeaderWidth: 170),
-              ),
+              child: CubeView(controller: controller, aggregate: shown),
             ),
           ],
         );

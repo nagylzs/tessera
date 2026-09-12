@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
 
@@ -327,6 +328,10 @@ void main() {
     });
 
     testWidgets('cell taps report the cell', (tester) async {
+      // Measured columns are wider than the default 800 px test window.
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       CubeCell? tapped;
       await tester.pumpWidget(
         host(
@@ -377,6 +382,103 @@ void main() {
       expect(find.text('Iceland'), findsOneWidget);
       // ∅ column (category), ∅ under A (country), ∅ row (region)
       expect(find.text('(empty)'), findsNWidgets(3));
+    });
+  });
+
+  group('column widths', () {
+    /// Whether any Text in the tree was cut with an ellipsis.
+    bool anyOverflow(WidgetTester tester) => tester
+        .renderObjectList<RenderParagraph>(find.byType(RichText))
+        .any((p) => p.didExceedMaxLines);
+
+    /// Width of the box holding [text].
+    double cellWidth(WidgetTester tester, String text) => tester
+        .getSize(
+          find.ancestor(of: find.text(text), matching: find.byType(Container)),
+        )
+        .width;
+
+    late FactTable big;
+    setUpAll(() async {
+      final source = ListDataSource(
+        columns: ['region', 'amount'],
+        rows: const [
+          ['Europe', 1234567890123],
+          ['A rather long region name', 1],
+        ],
+        declaredSchema: Schema([
+          const ColumnSpec(name: 'region', type: ColumnType.text),
+          const ColumnSpec(name: 'amount', type: ColumnType.integer),
+        ]),
+      );
+      big = (await loadFacts(source)).facts;
+    });
+
+    final sumAmount = Aggregate.sum(const Measure('amount'));
+    CubeView viewOf(FactTable f, Aggregate aggregate, CubeTheme theme) =>
+        CubeView(
+          controller: CubeController(
+            Cube(
+              facts: f,
+              spec: CubeSpec(
+                rows: CubeAxis.of([region]),
+                aggregates: [aggregate],
+              ),
+            ),
+          ),
+          aggregate: aggregate,
+          theme: theme,
+        );
+
+    testWidgets('columns grow to fit their widest text', (tester) async {
+      await tester.pumpWidget(host(viewOf(big, sumAmount, const CubeTheme())));
+      expect(anyOverflow(tester), isFalse);
+      expect(find.text('1,234,567,890,124'), findsOneWidget); // summary
+      // The row header is sized by the long region name, the data column
+      // by the grand total; both above the minimum.
+      expect(
+        cellWidth(tester, 'A rather long region name'),
+        greaterThan(const CubeTheme().minRowHeaderWidth),
+      );
+      expect(
+        cellWidth(tester, '1,234,567,890,124'),
+        greaterThan(const CubeTheme().minColumnWidth),
+      );
+      // Every data column has the same width (there is only one), and it
+      // is the same for the header and the cells.
+      expect(
+        cellWidth(tester, 'sum of amount'),
+        cellWidth(tester, '1,234,567,890,124'),
+      );
+    });
+
+    testWidgets('widths are clamped to the theme bounds', (tester) async {
+      await tester.pumpWidget(
+        host(
+          viewOf(
+            big,
+            sumAmount,
+            const CubeTheme(
+              minColumnWidth: 60,
+              maxColumnWidth: 60,
+              minRowHeaderWidth: 80,
+              maxRowHeaderWidth: 80,
+            ),
+          ),
+        ),
+      );
+      expect(cellWidth(tester, '1,234,567,890,124'), 60);
+      expect(cellWidth(tester, 'A rather long region name'), 80);
+      expect(anyOverflow(tester), isTrue);
+    });
+
+    testWidgets('the minimum width applies to narrow content', (tester) async {
+      await tester.pumpWidget(
+        host(viewOf(f, sumQty, const CubeTheme(minColumnWidth: 200))),
+      );
+      expect(anyOverflow(tester), isFalse);
+      expect(cellWidth(tester, '28'), 200);
+      expect(cellWidth(tester, 'sum of qty'), 200);
     });
   });
 }

@@ -22,8 +22,10 @@ final class CubeTheme {
     this.headerTextStyle,
     this.rowHeight = 28,
     this.headerRowHeight = 28,
-    this.columnWidth = 120,
-    this.rowHeaderWidth = 160,
+    this.minColumnWidth = 72,
+    this.maxColumnWidth = 320,
+    this.minRowHeaderWidth = 100,
+    this.maxRowHeaderWidth = 400,
     this.cellPadding = const EdgeInsets.symmetric(horizontal: 6),
   });
 
@@ -48,10 +50,16 @@ final class CubeTheme {
 
   final double rowHeight;
   final double headerRowHeight;
-  final double columnWidth;
 
-  /// Width of each row-header column.
-  final double rowHeaderWidth;
+  /// Bounds for the width of data columns. Columns are sized to their
+  /// content (see [CubeView.measuredRows]) and clamped to this range; set
+  /// both to the same value for fixed-width columns.
+  final double minColumnWidth;
+  final double maxColumnWidth;
+
+  /// Bounds for the width of row-header columns, as above.
+  final double minRowHeaderWidth;
+  final double maxRowHeaderWidth;
 
   final EdgeInsets cellPadding;
 
@@ -77,8 +85,10 @@ final class CubeTheme {
     TextStyle? headerTextStyle,
     double? rowHeight,
     double? headerRowHeight,
-    double? columnWidth,
-    double? rowHeaderWidth,
+    double? minColumnWidth,
+    double? maxColumnWidth,
+    double? minRowHeaderWidth,
+    double? maxRowHeaderWidth,
     EdgeInsets? cellPadding,
   }) => CubeTheme(
     levelColor: levelColor ?? this.levelColor,
@@ -90,8 +100,10 @@ final class CubeTheme {
     headerTextStyle: headerTextStyle ?? this.headerTextStyle,
     rowHeight: rowHeight ?? this.rowHeight,
     headerRowHeight: headerRowHeight ?? this.headerRowHeight,
-    columnWidth: columnWidth ?? this.columnWidth,
-    rowHeaderWidth: rowHeaderWidth ?? this.rowHeaderWidth,
+    minColumnWidth: minColumnWidth ?? this.minColumnWidth,
+    maxColumnWidth: maxColumnWidth ?? this.maxColumnWidth,
+    minRowHeaderWidth: minRowHeaderWidth ?? this.minRowHeaderWidth,
+    maxRowHeaderWidth: maxRowHeaderWidth ?? this.maxRowHeaderWidth,
     cellPadding: cellPadding ?? this.cellPadding,
   );
 
@@ -118,8 +130,10 @@ final class CubeTheme {
           headerTextStyle ?? base.copyWith(fontWeight: FontWeight.w500),
       rowHeight: rowHeight,
       headerRowHeight: headerRowHeight,
-      columnWidth: columnWidth,
-      rowHeaderWidth: rowHeaderWidth,
+      minColumnWidth: minColumnWidth,
+      maxColumnWidth: maxColumnWidth,
+      minRowHeaderWidth: minRowHeaderWidth,
+      maxRowHeaderWidth: maxRowHeaderWidth,
       cellPadding: cellPadding,
     );
   }
@@ -137,8 +151,10 @@ final class ResolvedCubeTheme {
     required this.headerTextStyle,
     required this.rowHeight,
     required this.headerRowHeight,
-    required this.columnWidth,
-    required this.rowHeaderWidth,
+    required this.minColumnWidth,
+    required this.maxColumnWidth,
+    required this.minRowHeaderWidth,
+    required this.maxRowHeaderWidth,
     required this.cellPadding,
   });
 
@@ -151,7 +167,9 @@ final class ResolvedCubeTheme {
   final TextStyle headerTextStyle;
   final double rowHeight;
   final double headerRowHeight;
-  final double columnWidth;
-  final double rowHeaderWidth;
+  final double minColumnWidth;
+  final double maxColumnWidth;
+  final double minRowHeaderWidth;
+  final double maxRowHeaderWidth;
   final EdgeInsets cellPadding;
 }

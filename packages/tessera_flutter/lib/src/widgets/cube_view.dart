@@ -5,6 +5,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'column_widths.dart';
 import 'cube_controller.dart';
 import 'cube_theme.dart';
 
@@ -42,6 +43,10 @@ typedef ExpansionConfirmation = Future<bool> Function(
 /// values (tap again to flip). Cells are built lazily, so large cubes stay
 /// cheap to scroll.
 ///
+/// Column widths follow the content: the widest text of each column (its
+/// values, labels and titles) is measured up front and the width clamped to
+/// the [CubeTheme]'s bounds. Rows have a fixed height.
+///
 /// v1 shows a single [aggregate] per cell. Needs a [Material] ancestor.
 class CubeView extends StatelessWidget {
   const CubeView({
@@ -58,6 +63,7 @@ class CubeView extends StatelessWidget {
     this.expansionLimit = 200,
     this.confirmExpansion,
     this.onCellTap,
+    this.measuredRows = 1000,
   });
 
   final CubeController controller;
@@ -97,6 +103,12 @@ class CubeView extends StatelessWidget {
 
   final void Function(CubeCell cell)? onCellTap;
 
+  /// How many rows (from the top) contribute their values when the column
+  /// widths are measured; summary rows always do. Bounds the cost of
+  /// formatting every cell of a huge cube on each rebuild — a longer value
+  /// further down is shown with an ellipsis.
+  final int measuredRows;
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
@@ -108,18 +120,37 @@ class CubeView extends StatelessWidget {
   );
 }
 
-class _CubeGrid extends StatelessWidget {
-  _CubeGrid({required this.view, required this.theme, required this.strings})
-    : layout = view.controller.cube.layout,
-      rowGeometry = AxisGeometry(view.controller.cube.layout.rows),
-      columnGeometry = AxisGeometry(view.controller.cube.layout.columns);
+class _CubeGrid extends StatefulWidget {
+  const _CubeGrid({
+    required this.view,
+    required this.theme,
+    required this.strings,
+  });
 
   final CubeView view;
   final ResolvedCubeTheme theme;
   final TesseraStrings strings;
-  final CubeLayout layout;
-  final AxisGeometry rowGeometry;
-  final AxisGeometry columnGeometry;
+
+  @override
+  State<_CubeGrid> createState() => _CubeGridState();
+}
+
+/// Everything derived from the layout is recomputed on demand; the column
+/// widths are cached across rebuilds of the same layout (see [_widths]).
+class _CubeGridState extends State<_CubeGrid> {
+  CubeView get view => widget.view;
+  ResolvedCubeTheme get theme => widget.theme;
+  TesseraStrings get strings => widget.strings;
+  CubeLayout get layout => view.controller.cube.layout;
+
+  AxisGeometry? _rowGeometry;
+  AxisGeometry? _columnGeometry;
+  AxisGeometry get rowGeometry => _rowGeometry?.layout == layout.rows
+      ? _rowGeometry!
+      : _rowGeometry = AxisGeometry(layout.rows);
+  AxisGeometry get columnGeometry => _columnGeometry?.layout == layout.columns
+      ? _columnGeometry!
+      : _columnGeometry = AxisGeometry(layout.columns);
 
   CubeSpec get spec => layout.spec;
 
@@ -140,30 +171,100 @@ class _CubeGrid extends StatelessWidget {
   /// Header rows on top: [levelRows] plus the aggregate row.
   int get headerRows => levelRows + 1;
 
+  // --------------------------------------------------------- column widths
+
+  /// Room for an expand icon (14) and its gap, or a sort icon (12).
+  static const _iconWidth = 18.0;
+
+  /// Rounding slack on top of padding and border.
+  static const _slack = 2.0;
+
+  List<double>? _widths;
+  Object? _widthsKey;
+
+  /// One width per grid column, measured from the content of [layout] and
+  /// recomputed only when something that affects it changes.
+  List<double> _columnWidths(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    final textDirection = Directionality.of(context);
+    final key = (
+      layout,
+      shown,
+      strings,
+      view.formatCell,
+      view.measuredRows,
+      view.emptyGroupLabel,
+      view.rowSummaryLabel,
+      view.columnSummaryLabel,
+      theme.cellTextStyle,
+      theme.headerTextStyle,
+      theme.cellPadding,
+      theme.minColumnWidth,
+      theme.maxColumnWidth,
+      theme.minRowHeaderWidth,
+      theme.maxRowHeaderWidth,
+      textScaler,
+      textDirection,
+    );
+    if (_widths != null && _widthsKey == key) return _widths!;
+    final aggregate = shown;
+    _widthsKey = key;
+    return _widths =
+        ColumnWidthMeasurer(
+          cellStyle: theme.cellTextStyle,
+          headerStyle: theme.headerTextStyle,
+          horizontalPadding: theme.cellPadding.horizontal + 1 + _slack,
+          textDirection: textDirection,
+          textScaler: textScaler,
+        ).measure(
+          layout: layout,
+          headerColumns: headerColumns,
+          aggregate: aggregate,
+          aggregateLabel: aggregate == null
+              ? ''
+              : strings.aggregateLabel(aggregate, layout.facts),
+          formatCell: (cell, value, _) =>
+              (view.formatCell ?? _defaultFormat)(cell, value),
+          rowLabel: (entry) => _entryText(entry, isRow: true),
+          columnLabel: (entry) => _entryText(entry, isRow: false),
+          titleLabel: (d) => strings.dimensionLabel(d, layout.facts),
+          iconWidth: _iconWidth,
+          measuredRows: view.measuredRows,
+          minColumnWidth: theme.minColumnWidth,
+          maxColumnWidth: theme.maxColumnWidth,
+          minRowHeaderWidth: theme.minRowHeaderWidth,
+          maxRowHeaderWidth: theme.maxRowHeaderWidth,
+        );
+  }
+
   @override
-  Widget build(BuildContext context) => TableView.builder(
-    rowCount: headerRows + layout.rows.length,
-    columnCount: headerColumns + layout.columns.length,
-    pinnedRowCount: headerRows,
-    pinnedColumnCount: headerColumns,
-    columnBuilder: (index) => TableSpan(
-      extent: FixedTableSpanExtent(
-        index < headerColumns ? theme.rowHeaderWidth : theme.columnWidth,
+  Widget build(BuildContext context) {
+    final widths = _columnWidths(context);
+    return TableView.builder(
+      rowCount: headerRows + layout.rows.length,
+      columnCount: headerColumns + layout.columns.length,
+      pinnedRowCount: headerRows,
+      pinnedColumnCount: headerColumns,
+      columnBuilder: (index) =>
+          TableSpan(extent: FixedTableSpanExtent(widths[index])),
+      rowBuilder: (index) => TableSpan(
+        extent: FixedTableSpanExtent(
+          index < headerRows ? theme.headerRowHeight : theme.rowHeight,
+        ),
       ),
-    ),
-    rowBuilder: (index) => TableSpan(
-      extent: FixedTableSpanExtent(
-        index < headerRows ? theme.headerRowHeight : theme.rowHeight,
-      ),
-    ),
-    cellBuilder: (context, vicinity) {
-      final r = vicinity.row, c = vicinity.column;
-      if (r < headerRows && c < headerColumns) return _corner(context, r, c);
-      if (r < headerRows) return _columnHeader(context, r, c - headerColumns);
-      if (c < headerColumns) return _rowHeader(context, r - headerRows, c);
-      return _dataCell(context, r - headerRows, c - headerColumns);
-    },
-  );
+      cellBuilder: (context, vicinity) {
+        final r = vicinity.row, c = vicinity.column;
+        if (r < headerRows && c < headerColumns) {
+          return _corner(context, r, c);
+        }
+        if (r < headerRows) {
+          return _columnHeader(context, r, c - headerColumns);
+        }
+        if (c < headerColumns) return _rowHeader(context, r - headerRows, c);
+        return _dataCell(context, r - headerRows, c - headerColumns);
+      },
+    );
+  }
 
   // ---------------------------------------------------------------- corner
 
@@ -272,12 +373,7 @@ class _CubeGrid extends StatelessWidget {
         child: _box(
           color: theme.summaryColor,
           alignment: Alignment.topLeft,
-          child: _entryLabel(
-            context,
-            entry,
-            isRow: false,
-            summaryLabel: view.columnSummaryLabel ?? strings.total,
-          ),
+          child: _entryLabel(context, entry, isRow: false),
         ),
       );
     }
@@ -294,12 +390,7 @@ class _CubeGrid extends StatelessWidget {
         color: owner.isSummary ? theme.summaryColor : theme.headerColor,
         alignment: Alignment.topLeft,
         child: area.isLabel
-            ? _entryLabel(
-                context,
-                owner,
-                isRow: false,
-                summaryLabel: view.columnSummaryLabel ?? strings.total,
-              )
+            ? _entryLabel(context, owner, isRow: false)
             : const SizedBox(),
       ),
     );
@@ -314,12 +405,7 @@ class _CubeGrid extends StatelessWidget {
         child: _box(
           color: theme.summaryColor,
           alignment: Alignment.centerLeft,
-          child: _entryLabel(
-            context,
-            entry,
-            isRow: true,
-            summaryLabel: view.rowSummaryLabel ?? strings.total,
-          ),
+          child: _entryLabel(context, entry, isRow: true),
         ),
       );
     }
@@ -334,28 +420,27 @@ class _CubeGrid extends StatelessWidget {
         color: owner.isSummary ? theme.summaryColor : theme.headerColor,
         alignment: Alignment.topLeft,
         child: area.isLabel
-            ? _entryLabel(
-                context,
-                owner,
-                isRow: true,
-                summaryLabel: view.rowSummaryLabel ?? strings.total,
-              )
+            ? _entryLabel(context, owner, isRow: true)
             : const SizedBox(),
       ),
     );
   }
 
+  /// A header entry's text: the summary label, the empty-group label or
+  /// the formatted value.
+  String _entryText(HeaderEntry entry, {required bool isRow}) => entry.isSummary
+      ? (isRow ? view.rowSummaryLabel : view.columnSummaryLabel) ??
+            strings.total
+      : entry.value == null
+      ? view.emptyGroupLabel ?? strings.emptyGroup
+      : strings.formatValue(entry.dimension, entry.value);
+
   Widget _entryLabel(
     BuildContext context,
     HeaderEntry entry, {
     required bool isRow,
-    required String summaryLabel,
   }) {
-    final text = entry.isSummary
-        ? summaryLabel
-        : entry.value == null
-        ? view.emptyGroupLabel ?? strings.emptyGroup
-        : strings.formatValue(entry.dimension, entry.value);
+    final text = _entryText(entry, isRow: isRow);
     final style = entry.isSummary
         ? theme.headerTextStyle.copyWith(fontWeight: FontWeight.bold)
         : theme.headerTextStyle;
@@ -494,12 +579,7 @@ class _CubeGrid extends StatelessWidget {
         title: Text(strings.largeExpansionTitle),
         content: Text(
           strings.largeExpansion(
-            entry.isSummary
-                ? (isRow ? view.rowSummaryLabel : view.columnSummaryLabel) ??
-                      strings.total
-                : entry.value == null
-                ? view.emptyGroupLabel ?? strings.emptyGroup
-                : strings.formatValue(entry.dimension, entry.value),
+            _entryText(entry, isRow: isRow),
             entry.childCount,
             isRow: isRow,
           ),
