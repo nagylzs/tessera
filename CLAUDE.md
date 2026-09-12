@@ -65,8 +65,19 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
 - Example app: `example/lib/main.dart` is a launcher (`LauncherPage`)
   listing the entries of `example/lib/examples.dart`; each example lives in
   its own folder under `example/lib/` (kept as one project so pub.dev's
-  Example tab and `flutter run` cover everything). Shared bits:
+  Example tab and `flutter run` cover everything). Shared bits in
+  `example/lib/common/`: `CubeWorkbench` (infer → isolate import with
+  progress → editors + CubeView + schema page; `initialSpec`,
+  `dimensions`, `adjustSchema` hooks), `SchemaPage`, `HttpCsvDataSource`
+  (custom DataSource: streaming GET per iteration, early cancel for prefix
+  reads, disk cache after one full pass, HEAD Content-Length →
+  `estimatedRowCount`; sendable to the import isolate; dart:io so not web);
   `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`).
+- "Public datasets" (`example/lib/datasets/`): six real CSVs (GitHub raw
+  with Content-Length; data.wa.gov chunked without) listed in
+  `publicDatasets`, cached under `systemTemp/tessera_examples/`; "Clear
+  downloaded files" action. Tested with a local HttpServer in
+  `example/test/http_csv_data_source_test.dart`.
 - "Simple pivot" (`example/lib/simple/`) loads `assets/sales.csv` via
   `rootBundle`, infers the schema, imports, shows rows `[region, country]`
   × columns `[date.year, date.quarter]`, axis + aggregate editors,

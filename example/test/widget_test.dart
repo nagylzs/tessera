@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tessera/tessera.dart';
 import 'package:tessera_example/main.dart';
 import 'package:tessera_example/simple/sales_page.dart';
-import 'package:tessera_example/simple/schema_page.dart';
+import 'package:tessera_example/common/schema_page.dart';
 
 /// Pumps until [finder] matches (asset loading is real I/O, so this runs
 /// under [WidgetTester.runAsync]).

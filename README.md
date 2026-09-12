@@ -134,7 +134,11 @@ missing values, hierarchical dimensions and orphan values — see
 `example/tool/gen_sales_csv.dart`) and lets you configure everything
 interactively: the inferred schema (include, type, label, date format,
 number syntax per column), the axes (drag-and-drop), the aggregates, the
-language, and the cube itself.
+language, and the cube itself. *Public datasets* (`example/lib/datasets/`)
+downloads real-world CSV files of up to ~70 MB through a custom
+`HttpCsvDataSource` (`example/lib/common/http_csv_data_source.dart`) — a
+worked example of implementing `DataSource`, with early-cancelled prefix
+reads, a download cache and `Content-Length`-based progress.
 
 ```bash
 cd example && flutter run
