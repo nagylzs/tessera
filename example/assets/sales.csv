@@ -1,0 +1,1001 @@
+id,date,region,country,category,product,salesperson,quantity,unit_price,discount,total
+1,2025-05-26,Europe,Poland,Office Supplies,Binder,Priya Sharma,20,6.71,0.15,114.12
+2,2024-12-12,Europe,United Kingdom,Furniture,Desk Lamp,Nagy Péter,4,51.25,0.25,153.74
+3,2024-08-28,Europe,Hungary,Furniture,Bookshelf,Nagy Péter,20,171.97,0.15,2923.46
+4,2025-04-06,South America,Argentina,Electronics,Mouse,Kovács Anna,20,,0.20,
+5,2025-03-07,South America,Brazil,Electronics,Headphones,Szabó Éva,12,86.11,,1033.27
+6,2025-01-07,Oceania,New Zealand,Furniture,Office Chair,Kovács Anna,9,216.66,0.20,1559.99
+7,2025-06-24,North America,United States,Electronics,,Priya Sharma,2,159.33,0.20,254.94
+8,2025-03-04,Europe,Germany,Electronics,,Kovács Anna,12,141.46,0.30,1188.23
+9,2024-04-09,South America,Brazil,Software,Office Suite,Szabó Éva,8,166.93,0.05,1268.65
+10,2025-08-03,South America,Brazil,,Gift Card,Emily Johnson,17,87.67,0.30,1043.23
+11,2025-01-14,Europe,,,,Hans Müller,11,517.22,0.05,5404.98
+12,2024-09-01,South America,Brazil,Electronics,Headphones,Emily Johnson,13,93.74,0.20,974.93
+13,2025-09-19,Europe,France,,Extended Warranty,John Smith,17,,0.20,
+14,2024-05-01,Asia,India,,Gift Card,Marie Dubois,9,103.23,0.20,743.25
+15,2024-08-20,South America,Brazil,,Gift Card,Kovács Anna,14,91.57,0.05,1217.94
+16,2024-11-25,Asia,Japan,Office Supplies,Stapler,Yuki Tanaka,3,13.36,0.20,32.06
+17,2024-05-11,Europe,Hungary,Office Supplies,Binder,John Smith,11,5.56,0.15,51.96
+18,2024-09-23,Europe,United Kingdom,Furniture,Desk,Szabó Éva,1,342.69,0.15,291.29
+19,2024-05-26,Europe,France,Furniture,Bookshelf,John Smith,9,195.57,0.30,1232.09
+20,2025-07-14,North America,United States,,Extended Warranty,Yuki Tanaka,7,73.79,0.10,464.91
+21,2025-07-24,Africa,Egypt,Software,Antivirus,Hans Müller,17,50.48,0.25,643.63
+22,2025-04-19,Europe,Hungary,Furniture,Office Chair,Carlos García,,280.30,0.10,
+23,2025-05-02,Asia,Japan,,Extended Warranty,Marie Dubois,6,86.64,,519.81
+24,2024-10-22,,Iceland,Software,IDE License,Marie Dubois,11,213.58,0.05,2231.96
+25,2024-04-16,North America,Mexico,Software,Office Suite,Emily Johnson,10,160.82,0.20,1286.56
+26,2024-09-28,North America,Canada,Office Supplies,Printer Paper,Marie Dubois,20,7.88,0.15,133.99
+27,2024-01-28,Europe,Poland,,Gift Card,Carlos García,14,106.12,0.05,1411.46
+28,2024-06-24,Europe,Germany,Office Supplies,Binder,Yuki Tanaka,8,6.40,0.00,51.16
+29,2024-04-24,Europe,United Kingdom,Software,Antivirus,,14,49.76,0.15,592.17
+30,2025-06-11,Asia,Japan,Office Supplies,Pens,Emily Johnson,14,4.04,0.10,50.96
+31,2024-07-22,Europe,United Kingdom,Furniture,Desk,Carlos García,18,403.38,0.20,5808.68
+32,2025-01-08,Asia,,,,Priya Sharma,14,468.31,0.25,4917.22
+33,2025-04-29,Oceania,Australia,Software,Office Suite,Carlos García,7,128.53,0.25,674.76
+34,2024-12-29,Europe,Germany,Office Supplies,Binder,Yuki Tanaka,10,6.53,0.05,62.02
+35,2024-06-25,Oceania,New Zealand,Electronics,Keyboard,John Smith,13,56.28,,731.67
+36,2025-08-02,Asia,South Korea,Office Supplies,Stapler,Szabó Éva,14,11.78,0.20,131.94
+37,2025-01-06,,Singapore,Furniture,Office Chair,Emily Johnson,19,248.06,0.05,4477.47
+38,2025-11-23,Oceania,Australia,Software,Office Suite,Emily Johnson,9,168.09,0.25,1134.62
+39,2025-12-11,South America,Brazil,Office Supplies,Printer Paper,Szabó Éva,14,7.18,0.10,90.41
+40,2025-04-30,Oceania,New Zealand,Furniture,Office Chair,Emily Johnson,14,280.04,0.00,3920.62
+41,2025-05-13,North America,United States,Electronics,Laptop,Yuki Tanaka,20,1117.60,0.10,20116.84
+42,2025-02-13,Oceania,New Zealand,,Gift Card,,14,91.17,0.10,1148.75
+43,2024-08-08,Oceania,Australia,Furniture,Office Chair,Yuki Tanaka,19,,0.25,
+44,2025-04-15,Asia,Japan,Furniture,Bookshelf,Priya Sharma,11,,0.05,
+45,2024-08-14,North America,Mexico,Office Supplies,Printer Paper,Carlos García,9,7.05,0.10,57.11
+46,2025-05-24,Africa,South Africa,,Gift Card,Carlos García,9,92.50,,832.50
+47,2025-01-09,Oceania,New Zealand,Electronics,Mouse,Emily Johnson,11,21.65,0.05,226.21
+48,2025-11-14,Oceania,Australia,Office Supplies,Printer Paper,Kovács Anna,12,8.51,0.05,96.97
+49,2024-09-26,South America,Brazil,Electronics,Headphones,Yuki Tanaka,4,83.38,0.25,250.14
+50,2024-06-08,Asia,India,Electronics,Keyboard,Hans Müller,20,58.54,0.15,995.23
+51,2024-05-17,Europe,Germany,Furniture,Bookshelf,Carlos García,20,158.57,0.05,3012.90
+52,2025-08-28,Europe,Hungary,,Gift Card,Hans Müller,7,110.63,0.05,735.66
+53,2025-02-04,Africa,Egypt,Furniture,Desk Lamp,Priya Sharma,15,43.94,0.05,626.19
+54,2025-10-12,North America,Mexico,Electronics,,Szabó Éva,15,99.43,0.20,1193.19
+55,2024-04-20,,Iceland,,Shipping,John Smith,6,15.80,0.30,66.37
+56,2025-07-01,South America,Argentina,Electronics,Headphones,John Smith,4,96.16,0.00,384.63
+57,2025-08-19,North America,Mexico,Office Supplies,Pens,Nagy Péter,6,4.27,0.25,19.20
+58,2024-01-06,Africa,Egypt,Electronics,Monitor,Carlos García,6,299.05,0.20,1435.44
+59,2025-01-12,Oceania,New Zealand,,Gift Card,Carlos García,6,112.27,0.25,505.20
+60,2024-08-30,Africa,South Africa,Electronics,Headphones,Carlos García,,78.55,0.10,
+61,2024-03-09,Europe,France,Office Supplies,Stapler,Nagy Péter,15,10.73,0.30,112.65
+62,2025-04-22,Asia,India,,Extended Warranty,Szabó Éva,,72.71,0.30,
+63,2025-01-11,South America,Argentina,Office Supplies,Binder,Nagy Péter,18,6.07,0.00,109.20
+64,2024-10-16,Africa,South Africa,Furniture,Office Chair,Yuki Tanaka,3,253.03,,759.09
+65,2025-05-05,Europe,Germany,Furniture,Office Chair,Carlos García,4,271.23,0.20,867.93
+66,2025-12-03,Europe,United Kingdom,Office Supplies,Printer Paper,Hans Müller,11,7.48,0.00,82.24
+67,2025-04-09,Europe,Germany,,Gift Card,Nagy Péter,7,92.75,0.15,551.87
+68,2025-03-31,South America,Argentina,Software,IDE License,Marie Dubois,14,187.50,0.10,2362.47
+69,2025-12-24,North America,United States,Office Supplies,Pens,Nagy Péter,2,4.58,,9.16
+70,2025-11-10,North America,Canada,Furniture,Bookshelf,Hans Müller,2,204.04,0.05,387.67
+71,2025-08-18,Asia,India,Electronics,Laptop,Yuki Tanaka,17,1242.49,0.05,20066.29
+72,2024-01-15,South America,Brazil,Office Supplies,Binder,John Smith,18,5.40,0.25,72.93
+73,2025-08-24,South America,Argentina,Furniture,Desk,Kovács Anna,4,444.30,0.00,1777.18
+74,2024-11-12,Asia,South Korea,Furniture,Bookshelf,Nagy Péter,16,191.08,0.30,2140.13
+75,2025-12-15,South America,Argentina,Office Supplies,Binder,John Smith,1,5.91,0.15,5.03
+76,2025-06-29,Africa,,,,Hans Müller,6,216.91,0.15,1106.24
+77,2024-06-09,Asia,India,Software,,Marie Dubois,20,188.35,0.30,2636.95
+78,2024-08-09,Asia,China,Furniture,Desk,John Smith,13,399.32,0.00,5191.14
+79,2025-06-09,Asia,India,Office Supplies,Binder,Nagy Péter,6,6.11,0.15,31.19
+80,2025-09-21,Asia,South Korea,Electronics,Headphones,Nagy Péter,15,97.99,0.15,1249.42
+81,2025-07-14,Asia,China,Software,Antivirus,Nagy Péter,15,46.67,0.15,595.02
+82,2025-12-11,Asia,South Korea,Office Supplies,Printer Paper,Marie Dubois,2,8.01,0.15,13.62
+83,2024-08-24,Asia,,,,Priya Sharma,18,275.32,0.00,4955.70
+84,2025-09-16,Europe,Germany,Electronics,Mouse,Kovács Anna,2,22.43,0.10,40.37
+85,2025-07-06,Asia,Japan,Electronics,Laptop,Carlos García,16,1106.67,0.15,15050.76
+86,2025-09-17,South America,Argentina,Software,Office Suite,Hans Müller,5,141.79,0.25,531.71
+87,2024-07-10,North America,United States,Office Supplies,Stapler,Yuki Tanaka,1,10.63,0.10,9.56
+88,2024-05-19,North America,Canada,,Gift Card,Nagy Péter,10,105.02,0.00,1050.21
+89,2025-05-29,North America,,,,Hans Müller,18,84.87,0.30,1069.35
+90,2024-07-04,North America,United States,,Extended Warranty,Szabó Éva,4,88.27,0.20,282.47
+91,2025-01-07,North America,Canada,Furniture,Office Chair,Marie Dubois,2,221.70,0.05,421.23
+92,2024-01-23,North America,United States,Software,Antivirus,Carlos García,1,49.58,0.25,37.18
+93,2024-11-17,North America,United States,,Gift Card,Nagy Péter,11,90.03,0.10,891.27
+94,2024-04-04,Europe,Hungary,Software,IDE License,Hans Müller,6,211.70,,1270.19
+95,2024-12-15,Asia,South Korea,Electronics,Laptop,Carlos García,17,1287.35,0.10,19696.45
+96,2024-04-23,Asia,China,,Extended Warranty,Priya Sharma,13,79.65,0.15,880.19
+97,2025-02-08,,Iceland,,Gift Card,Emily Johnson,4,92.78,0.25,278.35
+98,2024-05-31,Europe,France,Software,Office Suite,Hans Müller,5,144.99,0.15,616.19
+99,2024-11-04,Asia,Japan,Electronics,Laptop,Carlos García,16,1100.64,0.05,16729.76
+100,2024-10-22,Asia,South Korea,Office Supplies,Printer Paper,Priya Sharma,16,9.15,0.05,139.10
+101,2024-02-11,North America,Mexico,Electronics,Mouse,Yuki Tanaka,7,23.95,0.25,125.75
+102,2024-10-16,Europe,Poland,Software,IDE License,John Smith,5,227.58,0.00,1137.90
+103,2024-05-20,Asia,Japan,Office Supplies,Stapler,Priya Sharma,9,13.20,0.05,112.89
+104,2025-06-23,Africa,Egypt,Office Supplies,Printer Paper,Marie Dubois,19,8.02,,152.47
+105,2025-11-04,Oceania,Australia,Electronics,Mouse,Szabó Éva,17,22.83,0.30,271.64
+106,2025-07-05,Africa,South Africa,Electronics,Laptop,Hans Müller,14,,0.10,
+107,2024-02-29,South America,Argentina,Office Supplies,Pens,Kovács Anna,17,3.54,0.15,51.09
+108,2025-08-01,Asia,South Korea,Electronics,Mouse,John Smith,20,23.32,0.00,466.40
+109,2025-12-23,Oceania,Australia,Electronics,Keyboard,Kovács Anna,6,52.68,0.20,252.84
+110,2025-09-25,Asia,Japan,Electronics,Mouse,,12,24.78,0.00,297.38
+111,2025-05-01,Europe,Germany,,Gift Card,Kovács Anna,16,95.42,,1526.65
+112,2025-06-14,South America,Brazil,,Shipping,Carlos García,5,15.05,0.15,63.96
+113,2024-01-03,Oceania,New Zealand,Software,IDE License,,10,195.60,0.20,1564.78
+114,2025-12-20,South America,Brazil,Software,Office Suite,John Smith,17,157.39,0.15,2274.23
+115,2025-01-27,Asia,Japan,Furniture,Desk Lamp,Nagy Péter,4,43.08,0.00,172.31
+116,2025-10-14,South America,Argentina,Furniture,Office Chair,Szabó Éva,11,213.26,0.10,2111.24
+117,2025-08-16,Europe,Germany,Software,IDE License,Carlos García,9,203.63,0.05,1741.03
+118,2025-12-30,Asia,India,Furniture,Desk,John Smith,7,449.66,,3147.60
+119,2025-09-11,,Singapore,,Extended Warranty,Nagy Péter,6,91.03,0.00,546.21
+120,2024-04-21,Asia,South Korea,Software,Office Suite,Emily Johnson,10,163.87,0.30,1147.08
+121,2025-11-30,Asia,India,,Extended Warranty,Priya Sharma,20,73.19,0.00,1463.86
+122,2025-06-10,Oceania,Australia,,Gift Card,Szabó Éva,2,88.71,,177.43
+123,2025-05-17,North America,Mexico,Electronics,Monitor,Emily Johnson,17,327.24,0.05,5284.97
+124,2024-10-16,Asia,Japan,,Shipping,Nagy Péter,3,14.68,0.30,30.82
+125,2024-07-16,Asia,,,,Nagy Péter,4,515.71,0.00,2062.85
+126,2025-06-27,Asia,India,Furniture,Office Chair,Hans Müller,12,271.74,0.15,2771.72
+127,2025-03-16,North America,Mexico,,Gift Card,Emily Johnson,2,101.03,,202.06
+128,2024-12-12,,Iceland,Electronics,Headphones,Hans Müller,11,78.74,0.30,606.32
+129,2025-05-21,North America,Canada,Electronics,Headphones,Hans Müller,17,86.86,,1476.58
+130,2024-03-15,South America,Brazil,Office Supplies,Binder,Priya Sharma,12,5.42,0.15,55.27
+131,2025-03-16,,Iceland,Furniture,Desk,Carlos García,18,428.53,0.00,7713.45
+132,2024-04-11,Europe,France,Electronics,Mouse,Nagy Péter,6,27.70,0.25,124.66
+133,2025-11-30,South America,,,,Carlos García,3,309.15,0.15,788.32
+134,2025-05-17,Asia,China,Furniture,Desk Lamp,Szabó Éva,4,39.95,0.25,119.86
+135,2024-12-29,Asia,,,,Yuki Tanaka,19,472.43,0.10,8078.60
+136,2025-10-13,Asia,South Korea,Software,Office Suite,Priya Sharma,6,141.82,0.30,595.66
+137,2025-08-31,South America,Brazil,Office Supplies,,Carlos García,13,91.55,0.00,1190.14
+138,2024-02-02,Asia,,,,Emily Johnson,12,125.44,0.30,1053.68
+139,2025-07-06,Asia,South Korea,Software,Office Suite,,2,129.53,0.10,233.15
+140,2025-03-10,North America,Mexico,Furniture,Office Chair,John Smith,18,265.29,,4775.19
+141,2025-01-29,Europe,United Kingdom,Office Supplies,Stapler,Szabó Éva,15,12.44,0.10,167.88
+142,2025-01-24,Asia,Japan,Electronics,Mouse,Kovács Anna,15,23.23,0.15,296.13
+143,2024-07-20,North America,Mexico,Furniture,Desk,Nagy Péter,4,369.19,,1476.76
+144,2025-02-24,Oceania,Australia,Software,Office Suite,Yuki Tanaka,3,150.85,0.05,429.92
+145,2024-11-09,Oceania,New Zealand,Office Supplies,Printer Paper,Hans Müller,10,7.60,0.25,57.03
+146,2025-08-02,,Singapore,Furniture,Bookshelf,Yuki Tanaka,,170.28,0.15,
+147,2024-10-27,Asia,China,Electronics,Laptop,Szabó Éva,10,1221.37,,12213.71
+148,2025-06-18,Europe,,,,Szabó Éva,4,212.30,0.30,594.44
+149,2024-09-16,Asia,China,Office Supplies,Binder,Marie Dubois,3,5.40,0.05,15.38
+150,2024-01-12,Asia,Japan,Furniture,Office Chair,Emily Johnson,2,245.00,0.30,343.00
+151,2025-08-04,North America,Canada,Office Supplies,Pens,Nagy Péter,15,3.72,0.30,39.02
+152,2025-09-12,Europe,Poland,Furniture,Bookshelf,Emily Johnson,7,153.24,0.10,965.39
+153,2024-12-25,Europe,Hungary,Software,,Yuki Tanaka,12,228.12,0.15,2326.86
+154,2024-02-15,,Iceland,Furniture,Bookshelf,John Smith,4,175.50,0.05,666.89
+155,2025-05-11,Oceania,New Zealand,Software,,,3,121.21,0.15,309.08
+156,2024-02-19,North America,,,,Nagy Péter,14,276.34,,3868.70
+157,2024-07-03,Europe,France,Furniture,Desk,Nagy Péter,5,389.68,0.15,1656.16
+158,2024-12-27,North America,Canada,Office Supplies,Printer Paper,John Smith,11,7.66,0.10,75.80
+159,2024-07-29,Europe,France,Electronics,Keyboard,Szabó Éva,16,61.53,0.00,984.52
+160,2024-07-02,Oceania,New Zealand,,Gift Card,Carlos García,11,,0.25,
+161,2024-10-09,Asia,Japan,,Gift Card,Emily Johnson,12,101.27,,1215.19
+162,2025-09-15,North America,Mexico,Furniture,Desk,John Smith,18,446.72,0.15,6834.75
+163,2024-03-25,Europe,Poland,Electronics,Headphones,Nagy Péter,8,90.23,0.30,505.30
+164,2024-04-26,Europe,United Kingdom,Office Supplies,Printer Paper,Priya Sharma,3,7.68,0.00,23.04
+165,2024-06-01,Africa,Egypt,Office Supplies,Binder,Priya Sharma,7,6.73,,47.08
+166,2025-04-18,Oceania,New Zealand,,Shipping,Hans Müller,2,,0.10,
+167,2025-07-27,Europe,Poland,,Extended Warranty,Hans Müller,13,91.70,,1192.05
+168,2025-11-29,Oceania,,,,Szabó Éva,18,319.56,0.30,4026.40
+169,2024-02-19,South America,Argentina,Furniture,Desk Lamp,Nagy Péter,19,41.91,0.00,796.24
+170,2024-07-21,South America,Argentina,Office Supplies,Stapler,Carlos García,2,12.42,0.20,19.87
+171,2025-01-26,Asia,South Korea,Software,,Marie Dubois,2,223.46,0.30,312.84
+172,2025-05-19,Oceania,Australia,Furniture,Desk Lamp,Marie Dubois,17,,,
+173,2025-04-06,Oceania,New Zealand,Electronics,Laptop,Nagy Péter,7,1098.56,0.00,7689.89
+174,2025-11-26,North America,Canada,Electronics,,Carlos García,5,200.02,0.05,950.10
+175,2025-05-21,North America,Canada,Software,IDE License,Kovács Anna,18,189.89,,3418.07
+176,2024-06-25,,Singapore,Office Supplies,Printer Paper,Hans Müller,9,7.60,0.05,65.00
+177,2025-03-01,Europe,Hungary,Office Supplies,Binder,Priya Sharma,9,,0.20,
+178,2025-11-12,Europe,France,,Gift Card,Hans Müller,14,113.87,0.10,1434.76
+179,2025-01-16,Africa,Egypt,,Shipping,John Smith,1,15.07,,15.07
+180,2024-04-23,Asia,South Korea,Furniture,Office Chair,Carlos García,1,234.58,0.20,187.66
+181,2024-12-20,South America,Brazil,Furniture,Office Chair,Szabó Éva,15,255.75,0.25,2877.16
+182,2025-06-09,Africa,Egypt,Office Supplies,Binder,Emily Johnson,6,6.37,0.10,34.41
+183,2025-12-04,North America,United States,,Shipping,John Smith,10,12.95,0.30,90.62
+184,2024-10-21,Oceania,New Zealand,Electronics,Monitor,Carlos García,19,,0.05,
+185,2024-12-10,Europe,Germany,Electronics,Headphones,John Smith,2,86.83,0.30,121.56
+186,2025-02-17,,Iceland,Electronics,Laptop,Marie Dubois,15,1226.49,,18397.35
+187,2024-10-03,Africa,Egypt,Software,Antivirus,Szabó Éva,15,46.99,0.20,563.88
+188,2025-08-08,Oceania,New Zealand,,Gift Card,Emily Johnson,15,110.59,,1658.86
+189,2024-09-05,Asia,South Korea,Software,Antivirus,Emily Johnson,5,50.04,0.05,237.69
+190,2024-02-06,South America,Brazil,Office Supplies,Pens,John Smith,3,3.63,0.05,10.34
+191,2025-03-01,Africa,Egypt,Office Supplies,Printer Paper,Nagy Péter,15,8.40,0.05,119.71
+192,2025-11-26,Europe,Germany,Electronics,Headphones,Priya Sharma,19,87.09,0.20,1323.69
+193,2024-01-01,Europe,Hungary,Electronics,Headphones,Hans Müller,14,83.73,0.00,1172.27
+194,2025-07-09,,Iceland,,Gift Card,Yuki Tanaka,3,86.67,,260.00
+195,2024-10-27,Asia,South Korea,Electronics,Headphones,Marie Dubois,18,103.49,0.15,1583.38
+196,2024-07-23,Africa,Egypt,Electronics,Keyboard,Nagy Péter,19,62.82,0.25,895.15
+197,2025-10-08,Asia,China,,Gift Card,Hans Müller,16,109.45,0.30,1225.89
+198,2025-09-07,Africa,South Africa,Electronics,Mouse,Kovács Anna,2,25.61,0.00,51.22
+199,2024-12-25,South America,Argentina,Furniture,Desk Lamp,Marie Dubois,19,41.62,0.15,672.15
+200,2024-03-05,,Singapore,,Shipping,Carlos García,3,13.89,0.30,29.17
+201,2024-11-02,North America,,,,Kovács Anna,,228.47,0.00,
+202,2024-04-01,Asia,China,Office Supplies,Stapler,Carlos García,3,11.42,0.25,25.70
+203,2024-11-23,Europe,France,Office Supplies,Stapler,Emily Johnson,11,13.79,0.25,113.80
+204,2025-05-16,Oceania,Australia,Software,Office Suite,Nagy Péter,9,140.82,0.10,1140.68
+205,2024-06-24,North America,Canada,Software,IDE License,Emily Johnson,18,223.24,0.00,4018.33
+206,2024-03-02,Europe,United Kingdom,Office Supplies,Printer Paper,Kovács Anna,4,7.27,0.20,23.25
+207,2025-07-28,Europe,Hungary,Electronics,Mouse,Carlos García,,26.33,0.00,
+208,2024-07-13,Europe,Poland,Furniture,Office Chair,Carlos García,11,276.74,0.05,2891.93
+209,2025-02-14,South America,Brazil,,Gift Card,Marie Dubois,19,92.88,0.15,1499.94
+210,2024-11-03,Europe,Hungary,Electronics,Keyboard,Emily Johnson,,57.99,0.15,
+211,2024-02-15,Europe,Germany,Electronics,Mouse,Priya Sharma,15,22.88,0.25,257.42
+212,2025-09-25,Europe,Poland,,Gift Card,Yuki Tanaka,14,96.23,0.00,1347.26
+213,2025-03-13,North America,Canada,Electronics,Mouse,Carlos García,15,23.88,0.10,322.44
+214,2025-07-21,South America,,,,Hans Müller,11,256.72,0.20,2259.11
+215,2024-02-03,North America,Canada,Office Supplies,Pens,Szabó Éva,5,3.86,0.00,19.31
+216,2025-01-19,North America,United States,Software,IDE License,Carlos García,2,210.77,0.20,337.23
+217,2024-09-22,Europe,Germany,,Shipping,Yuki Tanaka,1,17.11,0.20,13.69
+218,2024-07-17,South America,Brazil,Software,Antivirus,Hans Müller,14,43.62,0.20,488.54
+219,2024-10-12,,Iceland,Software,Office Suite,Nagy Péter,3,,0.15,
+220,2025-04-12,Oceania,Australia,Furniture,Office Chair,Priya Sharma,19,282.68,0.25,4028.26
+221,2024-01-07,South America,Brazil,,Shipping,Priya Sharma,8,16.23,0.05,123.38
+222,2025-03-20,North America,,,,Szabó Éva,9,534.46,0.20,3848.11
+223,2024-06-18,,Singapore,Furniture,Bookshelf,Emily Johnson,15,153.50,0.15,1957.13
+224,2025-12-09,South America,Brazil,Furniture,Bookshelf,Szabó Éva,3,192.86,,578.57
+225,2024-10-18,Europe,Poland,Office Supplies,Stapler,Marie Dubois,3,12.17,0.25,27.38
+226,2024-09-11,South America,Brazil,,Gift Card,Kovács Anna,17,85.29,0.00,1449.99
+227,2024-10-20,Europe,United Kingdom,Office Supplies,Stapler,Nagy Péter,9,10.65,0.20,76.68
+228,2024-02-25,North America,United States,,Extended Warranty,Hans Müller,17,72.21,0.00,1227.57
+229,2025-03-05,North America,Canada,Office Supplies,Binder,Szabó Éva,13,6.68,,86.89
+230,2024-08-30,North America,United States,Furniture,Office Chair,Szabó Éva,18,228.78,0.30,2882.59
+231,2024-09-21,Europe,France,Electronics,Laptop,Emily Johnson,11,1276.87,0.05,13343.25
+232,2024-02-25,Africa,Egypt,Software,Antivirus,Priya Sharma,5,52.84,0.30,184.96
+233,2024-02-26,Europe,Hungary,Furniture,Desk Lamp,Emily Johnson,6,45.14,0.15,230.21
+234,2025-02-28,Oceania,Australia,Electronics,Mouse,John Smith,15,24.93,0.15,317.85
+235,2024-02-01,Asia,Japan,Software,Office Suite,Nagy Péter,17,158.64,0.00,2696.83
+236,2025-07-03,North America,United States,Electronics,Laptop,John Smith,5,1036.41,0.25,3886.54
+237,2025-06-24,Asia,South Korea,Electronics,Mouse,Kovács Anna,4,27.73,0.10,99.82
+238,2025-10-23,Europe,,,,Kovács Anna,12,165.02,0.20,1584.17
+239,2024-05-26,North America,Canada,Furniture,Desk,Nagy Péter,20,391.06,0.30,5474.84
+240,2024-04-08,South America,Argentina,Software,IDE License,Priya Sharma,4,191.29,0.10,688.64
+241,2025-05-03,Asia,China,Software,Antivirus,Priya Sharma,,47.65,,
+242,2024-02-27,Europe,France,,Shipping,Emily Johnson,20,14.59,0.30,204.26
+243,2025-06-25,Africa,Egypt,Furniture,Desk,Priya Sharma,4,445.33,0.20,1425.05
+244,2025-09-22,Europe,United Kingdom,Electronics,Keyboard,Carlos García,,66.18,0.30,
+245,2024-01-15,Europe,France,Electronics,Laptop,Hans Müller,20,1320.77,0.25,19811.61
+246,2024-04-21,Europe,Poland,Office Supplies,Binder,Marie Dubois,11,6.62,0.25,54.58
+247,2024-02-13,North America,United States,Electronics,Monitor,John Smith,5,298.27,0.05,1416.76
+248,2025-11-22,Oceania,New Zealand,,Gift Card,Szabó Éva,16,90.33,0.10,1300.72
+249,2025-11-04,South America,Argentina,Electronics,Headphones,Hans Müller,12,88.67,0.05,1010.88
+250,2025-07-05,Europe,United Kingdom,Electronics,Laptop,Emily Johnson,,1056.17,0.10,
+251,2025-04-26,North America,Canada,Furniture,Bookshelf,Yuki Tanaka,5,179.53,0.10,807.90
+252,2025-03-25,,Iceland,Furniture,Bookshelf,Kovács Anna,4,201.22,0.25,603.66
+253,2024-07-21,Asia,South Korea,Software,IDE License,John Smith,7,178.53,0.10,1124.76
+254,2025-10-12,,Singapore,,Extended Warranty,Marie Dubois,10,77.57,,775.72
+255,2025-10-23,Europe,France,Electronics,Keyboard,Priya Sharma,1,67.72,,67.72
+256,2024-04-18,Europe,United Kingdom,Electronics,Monitor,Marie Dubois,19,343.90,0.15,5553.96
+257,2025-03-20,Europe,Hungary,Office Supplies,Stapler,,12,11.22,0.30,94.22
+258,2024-10-06,Oceania,New Zealand,Office Supplies,Pens,Kovács Anna,9,3.57,0.30,22.51
+259,2025-06-03,Asia,South Korea,Office Supplies,Printer Paper,Carlos García,19,7.33,0.15,118.44
+260,2025-09-19,Asia,India,Office Supplies,Stapler,Yuki Tanaka,5,12.14,0.05,57.68
+261,2025-05-23,Africa,South Africa,Software,Office Suite,Szabó Éva,19,169.88,0.05,3066.40
+262,2025-04-24,North America,Mexico,Electronics,Mouse,Hans Müller,20,22.86,0.05,434.28
+263,2024-01-26,Europe,Poland,Furniture,Desk,Hans Müller,20,404.03,0.10,7272.52
+264,2025-08-10,Asia,South Korea,Furniture,Office Chair,Marie Dubois,14,234.98,0.20,2631.78
+265,2024-03-16,Europe,Germany,Furniture,Office Chair,Nagy Péter,11,286.37,0.25,2362.56
+266,2025-12-25,Oceania,Australia,Furniture,Desk,John Smith,3,358.84,0.05,1022.68
+267,2024-12-09,South America,,,,Szabó Éva,15,265.25,,3978.76
+268,2024-06-04,Europe,Hungary,Electronics,Mouse,Yuki Tanaka,5,24.46,,122.32
+269,2025-04-05,North America,Canada,,Extended Warranty,Carlos García,17,80.20,0.30,954.33
+270,2025-02-27,Oceania,New Zealand,Software,Office Suite,Kovács Anna,1,132.24,,132.24
+271,2024-08-25,Asia,India,Furniture,,Nagy Péter,3,132.79,0.10,358.52
+272,2025-12-26,Africa,South Africa,Software,Antivirus,Kovács Anna,1,52.14,0.20,41.71
+273,2025-09-21,Oceania,New Zealand,Office Supplies,Pens,Hans Müller,5,3.97,0.15,16.87
+274,2024-03-15,South America,Argentina,Software,Antivirus,Emily Johnson,2,50.04,0.00,100.09
+275,2025-06-03,Europe,United Kingdom,Software,Office Suite,Marie Dubois,18,130.94,0.15,2003.36
+276,2024-05-07,Africa,Egypt,Office Supplies,Binder,Carlos García,13,6.47,0.00,84.14
+277,2025-01-04,Europe,Poland,Office Supplies,Printer Paper,Priya Sharma,8,8.61,0.10,61.96
+278,2025-12-25,Europe,France,Office Supplies,Printer Paper,Carlos García,20,7.04,0.15,119.66
+279,2025-02-26,Europe,Germany,Software,Antivirus,Hans Müller,8,50.29,0.00,402.32
+280,2024-09-01,Europe,France,Office Supplies,Binder,John Smith,14,6.57,0.30,64.41
+281,2024-09-19,Africa,Egypt,,Shipping,Priya Sharma,13,15.81,0.20,164.37
+282,2025-01-12,Europe,Germany,Office Supplies,Printer Paper,Szabó Éva,19,9.09,,172.67
+283,2025-12-28,Asia,China,Office Supplies,Pens,Kovács Anna,18,3.57,0.10,57.77
+284,2025-09-30,Asia,Japan,Furniture,Desk Lamp,Emily Johnson,11,41.80,0.20,367.82
+285,2025-08-10,Europe,Poland,Office Supplies,Printer Paper,John Smith,18,7.05,0.10,114.27
+286,2024-06-28,,Iceland,Electronics,Keyboard,Yuki Tanaka,5,61.75,,308.73
+287,2025-10-18,North America,Mexico,Furniture,Office Chair,Szabó Éva,14,233.35,0.05,3103.56
+288,2025-07-09,North America,Canada,Electronics,Monitor,Nagy Péter,12,337.19,0.25,3034.68
+289,2025-07-27,Oceania,New Zealand,Electronics,Laptop,Emily Johnson,3,1076.88,0.15,2746.03
+290,2025-04-06,,Iceland,Electronics,Monitor,Hans Müller,,297.86,0.05,
+291,2024-04-15,Europe,France,Furniture,Bookshelf,Carlos García,10,180.53,0.25,1353.96
+292,2024-12-12,Europe,Hungary,Electronics,Keyboard,Hans Müller,1,57.53,0.30,40.27
+293,2024-04-11,Asia,India,Office Supplies,Pens,Nagy Péter,8,4.54,0.15,30.90
+294,2025-01-17,Africa,South Africa,Electronics,Laptop,Nagy Péter,18,1252.07,,22537.18
+295,2025-04-07,Asia,Japan,Office Supplies,Stapler,Marie Dubois,,11.62,0.25,
+296,2024-09-25,South America,Brazil,Office Supplies,Stapler,Carlos García,,11.84,,
+297,2024-06-08,Europe,Hungary,,Extended Warranty,Szabó Éva,3,73.81,0.05,210.36
+298,2025-02-25,Europe,Poland,Electronics,Headphones,Szabó Éva,2,98.16,0.10,176.68
+299,2024-07-26,Asia,South Korea,Electronics,Keyboard,Hans Müller,2,63.27,0.20,101.23
+300,2024-12-14,Europe,,,,Szabó Éva,4,274.27,0.10,987.36
+301,2024-09-06,,Singapore,,Shipping,Kovács Anna,11,16.06,0.00,176.64
+302,2025-09-22,Europe,France,Electronics,Laptop,Emily Johnson,3,1035.12,0.20,2484.28
+303,2024-09-21,South America,Argentina,Electronics,Monitor,John Smith,3,350.63,0.30,736.32
+304,2025-05-28,North America,Mexico,Office Supplies,Printer Paper,,10,8.46,0.15,71.88
+305,2024-07-20,North America,United States,Furniture,,Emily Johnson,2,166.13,0.15,282.42
+306,2024-07-25,Europe,Germany,Electronics,Laptop,Yuki Tanaka,11,1132.48,0.05,11834.37
+307,2024-11-15,,Singapore,Office Supplies,Pens,Nagy Péter,4,4.01,0.25,12.03
+308,2024-11-18,Europe,Germany,Software,IDE License,Priya Sharma,18,220.40,0.10,3570.53
+309,2024-11-10,,Singapore,Furniture,Office Chair,Szabó Éva,17,228.04,,3876.69
+310,2024-06-11,,Iceland,Electronics,Monitor,Szabó Éva,1,397.77,0.00,397.77
+311,2024-12-31,Oceania,New Zealand,Office Supplies,,Emily Johnson,12,143.82,,1725.85
+312,2025-08-11,Africa,South Africa,Office Supplies,Stapler,Hans Müller,19,10.40,0.05,187.69
+313,2024-01-22,Africa,South Africa,Furniture,Office Chair,,1,248.80,0.25,186.60
+314,2024-06-07,Oceania,Australia,Furniture,,Kovács Anna,2,159.39,0.00,318.77
+315,2024-12-05,,Iceland,Office Supplies,Pens,Emily Johnson,4,3.76,0.25,11.28
+316,2024-07-11,Oceania,New Zealand,Electronics,Monitor,Yuki Tanaka,7,395.98,0.00,2771.86
+317,2024-05-26,Africa,Egypt,Software,IDE License,Hans Müller,1,176.82,0.00,176.82
+318,2025-02-14,Europe,Poland,Furniture,Bookshelf,Szabó Éva,20,205.26,0.15,3489.50
+319,2025-01-10,Asia,South Korea,Furniture,Desk Lamp,John Smith,18,48.79,0.20,702.62
+320,2025-04-27,Europe,Poland,Electronics,Laptop,Marie Dubois,2,1055.55,0.30,1477.77
+321,2024-12-20,South America,Brazil,Furniture,Desk Lamp,Emily Johnson,15,49.76,0.05,709.02
+322,2025-10-22,Africa,South Africa,Office Supplies,Binder,John Smith,,5.84,0.20,
+323,2025-06-20,Oceania,New Zealand,Furniture,Desk Lamp,Marie Dubois,18,46.00,0.15,703.86
+324,2024-07-22,Europe,,,,John Smith,9,486.59,0.00,4379.32
+325,2024-02-12,Europe,Germany,Furniture,Desk,Marie Dubois,1,378.39,0.05,359.47
+326,2025-01-21,Oceania,New Zealand,Software,IDE License,Yuki Tanaka,18,170.90,,3076.27
+327,2024-12-03,Europe,Poland,Electronics,Monitor,Marie Dubois,4,376.62,0.05,1431.14
+328,2024-04-12,Europe,Germany,Office Supplies,Printer Paper,Marie Dubois,17,8.53,0.10,130.57
+329,2025-02-26,Oceania,New Zealand,,Gift Card,Carlos García,19,85.27,0.00,1620.08
+330,2024-09-09,Asia,South Korea,Electronics,Laptop,,3,1126.65,0.05,3210.94
+331,2025-06-28,Africa,South Africa,Furniture,Bookshelf,Priya Sharma,9,,0.00,
+332,2025-08-30,North America,Canada,Software,Office Suite,Marie Dubois,14,152.19,0.30,1491.50
+333,2025-09-07,Africa,Egypt,Office Supplies,Printer Paper,Marie Dubois,12,7.35,0.15,74.92
+334,2025-11-17,Europe,,,,Marie Dubois,12,373.64,0.15,3811.14
+335,2025-01-30,South America,Argentina,,Shipping,Yuki Tanaka,20,12.77,0.30,178.71
+336,2025-01-06,South America,Brazil,,Gift Card,Nagy Péter,2,101.41,0.00,202.81
+337,2025-05-30,Asia,India,Software,Antivirus,Hans Müller,18,53.25,0.25,718.83
+338,2024-06-22,South America,Argentina,Office Supplies,Binder,Hans Müller,1,5.87,0.30,4.11
+339,2024-08-22,Europe,Poland,Office Supplies,Binder,John Smith,11,6.56,0.15,61.34
+340,2025-10-09,Oceania,Australia,Office Supplies,Stapler,Emily Johnson,5,11.46,0.25,42.99
+341,2025-03-19,,Singapore,Electronics,Monitor,Yuki Tanaka,2,314.80,0.10,566.65
+342,2024-07-31,Oceania,Australia,Office Supplies,Pens,Yuki Tanaka,4,4.28,0.25,12.85
+343,2025-11-11,Europe,Poland,,Extended Warranty,Hans Müller,11,,0.05,
+344,2025-01-08,South America,Brazil,Electronics,Laptop,Priya Sharma,3,1021.71,0.25,2298.85
+345,2025-05-17,Oceania,Australia,Electronics,Mouse,Hans Müller,1,23.35,0.25,17.51
+346,2024-10-13,Asia,India,Furniture,Desk,Yuki Tanaka,15,402.93,,6043.94
+347,2025-06-10,Africa,South Africa,Software,Office Suite,Emily Johnson,8,129.40,,1035.16
+348,2025-03-23,Europe,Hungary,Software,IDE License,Yuki Tanaka,2,178.85,0.05,339.81
+349,2025-09-03,Asia,India,Software,Antivirus,Marie Dubois,13,49.03,0.20,509.92
+350,2025-01-02,North America,Canada,Electronics,Mouse,Hans Müller,5,23.89,0.15,101.55
+351,2024-06-04,Europe,Poland,Furniture,Desk Lamp,Hans Müller,9,48.46,0.10,392.53
+352,2025-07-07,,Iceland,Office Supplies,Stapler,Priya Sharma,5,11.64,0.25,43.65
+353,2024-12-04,Asia,Japan,,Gift Card,Kovács Anna,14,106.36,0.25,1116.80
+354,2024-06-24,Asia,India,,Shipping,Yuki Tanaka,8,16.05,0.00,128.38
+355,2024-07-25,Asia,India,Furniture,Office Chair,Carlos García,20,280.37,0.15,4766.23
+356,2024-03-15,South America,Argentina,Electronics,Laptop,Hans Müller,5,1325.10,0.20,5300.40
+357,2024-06-28,Africa,Egypt,Software,Antivirus,Marie Dubois,13,49.98,0.00,649.73
+358,2024-03-12,Oceania,Australia,Office Supplies,Printer Paper,Hans Müller,1,6.98,0.15,5.93
+359,2025-08-10,,Singapore,Office Supplies,Stapler,Szabó Éva,7,12.15,0.10,76.55
+360,2025-10-08,South America,Argentina,Furniture,Desk,Nagy Péter,1,391.78,0.25,293.83
+361,2025-11-10,Europe,Germany,Electronics,Monitor,Marie Dubois,4,354.04,0.25,1062.13
+362,2025-02-27,Europe,France,Electronics,Monitor,Yuki Tanaka,11,340.95,0.20,3000.34
+363,2024-01-15,Oceania,New Zealand,Electronics,Laptop,Nagy Péter,13,1121.77,0.20,11666.45
+364,2024-06-15,North America,Canada,Electronics,Monitor,Kovács Anna,10,340.53,0.00,3405.30
+365,2025-09-30,Europe,Germany,Electronics,Keyboard,Nagy Péter,1,57.89,0.30,40.52
+366,2025-12-25,Asia,China,Furniture,Office Chair,Emily Johnson,19,247.57,0.00,4703.84
+367,2025-10-18,Europe,France,,Extended Warranty,Carlos García,9,86.89,0.25,586.54
+368,2024-04-27,Asia,Japan,Software,Office Suite,Marie Dubois,4,157.33,0.20,503.46
+369,2025-08-30,Oceania,New Zealand,,Extended Warranty,Szabó Éva,10,75.68,0.20,605.46
+370,2024-07-23,North America,United States,Electronics,Keyboard,Marie Dubois,10,67.95,0.05,645.55
+371,2024-05-20,Europe,Germany,Electronics,Laptop,Marie Dubois,15,1303.93,,19558.93
+372,2024-12-01,Europe,United Kingdom,Electronics,Headphones,Szabó Éva,17,87.33,0.20,1187.67
+373,2024-04-17,South America,Brazil,Furniture,Bookshelf,Hans Müller,13,185.04,0.00,2405.46
+374,2024-11-27,Europe,Germany,Office Supplies,Pens,Hans Müller,11,4.59,,50.49
+375,2024-12-01,North America,United States,Electronics,Headphones,Carlos García,13,82.99,,1078.84
+376,2024-07-25,Asia,South Korea,Furniture,Bookshelf,Kovács Anna,2,186.11,0.05,353.60
+377,2024-07-14,Europe,France,Furniture,Desk,Kovács Anna,9,382.64,0.20,2754.99
+378,2024-04-01,Asia,Japan,Office Supplies,Stapler,Yuki Tanaka,11,12.28,0.20,108.07
+379,2025-02-17,Africa,Egypt,Office Supplies,Binder,Priya Sharma,4,6.27,0.15,21.30
+380,2024-09-23,Europe,France,Office Supplies,Pens,,20,3.93,0.05,74.68
+381,2025-12-04,Oceania,Australia,Furniture,Office Chair,Priya Sharma,1,274.53,,274.53
+382,2024-08-15,Asia,South Korea,Software,Antivirus,Hans Müller,7,44.43,,311.03
+383,2024-07-17,Africa,South Africa,Software,Office Suite,,1,163.67,0.20,130.94
+384,2025-01-10,Africa,South Africa,Furniture,Bookshelf,Emily Johnson,18,183.10,,3295.87
+385,2025-06-02,South America,Argentina,Electronics,Headphones,,19,77.61,0.10,1327.10
+386,2024-09-25,North America,Canada,Electronics,Laptop,Carlos García,1,1379.26,0.20,1103.41
+387,2025-05-16,Europe,Poland,Furniture,Desk,John Smith,8,369.28,,2954.22
+388,2025-10-07,,Iceland,Electronics,Headphones,Hans Müller,12,90.78,0.05,1034.90
+389,2025-06-28,,Singapore,,Extended Warranty,Nagy Péter,3,71.21,0.00,213.62
+390,2024-03-07,Europe,United Kingdom,Office Supplies,Pens,Szabó Éva,3,4.15,0.10,11.21
+391,2025-05-23,North America,,,,Szabó Éva,9,84.60,,761.40
+392,2025-06-27,Asia,China,Electronics,Headphones,John Smith,20,90.44,,1808.77
+393,2025-02-07,Africa,South Africa,Furniture,Office Chair,John Smith,5,245.51,0.25,920.67
+394,2024-05-29,,Iceland,,Shipping,Szabó Éva,18,13.84,0.15,211.72
+395,2025-08-19,Europe,Hungary,Furniture,Desk Lamp,Kovács Anna,14,39.33,0.00,550.61
+396,2024-07-08,Africa,Egypt,,Extended Warranty,Nagy Péter,2,80.89,0.05,153.68
+397,2024-05-18,Oceania,Australia,Furniture,Desk Lamp,Nagy Péter,7,41.28,0.15,245.61
+398,2024-02-25,Oceania,Australia,,Shipping,Hans Müller,16,15.27,0.15,207.61
+399,2024-02-10,Asia,South Korea,Office Supplies,Printer Paper,Yuki Tanaka,9,8.24,,74.20
+400,2025-03-05,Asia,South Korea,Software,Antivirus,Marie Dubois,6,54.45,0.15,277.72
+401,2025-05-31,Oceania,Australia,Electronics,Mouse,Kovács Anna,20,26.53,0.30,371.37
+402,2025-08-06,Asia,Japan,Electronics,Laptop,John Smith,10,1022.56,0.05,9714.28
+403,2025-12-24,North America,Mexico,Electronics,Monitor,Carlos García,4,339.69,0.05,1290.84
+404,2025-04-12,Oceania,Australia,Furniture,Desk,Kovács Anna,19,403.22,0.15,6511.93
+405,2024-06-09,Europe,United Kingdom,Office Supplies,Printer Paper,Priya Sharma,11,7.26,0.20,63.92
+406,2025-12-22,Africa,Egypt,Electronics,Monitor,Priya Sharma,,328.17,0.30,
+407,2025-01-01,Africa,Egypt,Office Supplies,Pens,John Smith,3,4.14,0.00,12.43
+408,2024-03-07,Africa,South Africa,Software,IDE License,Emily Johnson,14,196.69,0.00,2753.72
+409,2024-08-12,South America,Brazil,Office Supplies,Pens,Priya Sharma,8,4.03,0.00,32.21
+410,2024-07-05,Oceania,New Zealand,Furniture,,Szabó Éva,9,172.67,0.20,1243.25
+411,2025-12-24,South America,Argentina,Furniture,,Szabó Éva,19,282.45,,5366.61
+412,2024-08-03,Asia,India,Electronics,Mouse,Nagy Péter,20,27.75,,554.99
+413,2025-10-17,North America,Canada,Electronics,Mouse,Yuki Tanaka,,27.55,0.05,
+414,2024-07-30,North America,,,,Kovács Anna,16,205.91,0.00,3294.51
+415,2024-11-21,North America,Mexico,Furniture,Bookshelf,John Smith,2,202.01,0.25,303.02
+416,2025-09-30,South America,Argentina,Office Supplies,Stapler,Yuki Tanaka,15,13.04,0.20,156.53
+417,2024-05-21,Asia,Japan,Electronics,Laptop,Marie Dubois,6,,0.05,
+418,2025-08-29,South America,Brazil,Furniture,Desk Lamp,Kovács Anna,19,49.42,0.00,939.06
+419,2025-09-09,Europe,United Kingdom,Furniture,Desk,Szabó Éva,5,347.24,0.05,1649.40
+420,2025-11-02,Europe,United Kingdom,,Shipping,Yuki Tanaka,19,13.37,0.05,241.31
+421,2025-10-29,Europe,United Kingdom,Software,Antivirus,Yuki Tanaka,18,53.38,0.00,960.76
+422,2024-03-01,South America,Brazil,Office Supplies,Printer Paper,Marie Dubois,16,7.46,0.05,113.32
+423,2025-01-09,Europe,Germany,Electronics,Keyboard,Carlos García,8,62.97,0.30,352.64
+424,2025-10-01,Europe,Hungary,Electronics,Laptop,Marie Dubois,11,1325.63,0.15,12394.67
+425,2024-12-12,Europe,Poland,Furniture,Bookshelf,Priya Sharma,17,195.93,0.25,2498.10
+426,2024-01-04,Asia,South Korea,,Extended Warranty,Priya Sharma,3,73.61,0.10,198.75
+427,2024-04-08,Europe,Poland,,Gift Card,Marie Dubois,18,99.39,0.15,1520.69
+428,2025-05-07,South America,Argentina,Electronics,Mouse,Priya Sharma,11,,0.10,
+429,2025-09-23,Oceania,New Zealand,,Shipping,Szabó Éva,12,12.93,,155.12
+430,2025-11-23,North America,Canada,Electronics,Laptop,Nagy Péter,10,1102.51,0.30,7717.59
+431,2025-08-03,Oceania,Australia,Software,Office Suite,Szabó Éva,5,161.55,0.00,807.76
+432,2024-08-04,Asia,India,,Shipping,Carlos García,3,17.04,,51.13
+433,2024-12-17,Europe,Germany,Software,Office Suite,Yuki Tanaka,16,146.36,0.30,1639.18
+434,2024-04-11,,Iceland,Software,IDE License,Priya Sharma,16,216.97,,3471.53
+435,2025-12-04,Europe,United Kingdom,Electronics,Keyboard,Marie Dubois,19,,0.25,
+436,2025-10-25,,Singapore,Office Supplies,Binder,Szabó Éva,17,6.24,0.30,74.23
+437,2025-04-29,Asia,China,,Gift Card,Szabó Éva,8,,0.15,
+438,2024-03-13,South America,Brazil,,Extended Warranty,Priya Sharma,19,72.04,0.30,958.12
+439,2025-11-04,Asia,India,Software,IDE License,John Smith,1,206.80,0.05,196.46
+440,2024-06-21,,Singapore,Software,IDE License,Carlos García,2,193.32,,386.65
+441,2024-04-30,,Singapore,Office Supplies,Printer Paper,Yuki Tanaka,12,8.59,0.20,82.49
+442,2024-01-07,Europe,Hungary,Furniture,Bookshelf,Emily Johnson,15,168.81,,2532.09
+443,2025-08-09,Europe,Hungary,Furniture,Desk Lamp,Hans Müller,7,50.04,0.25,262.69
+444,2024-10-17,North America,Canada,Software,,Carlos García,14,200.61,,2808.59
+445,2025-03-10,Oceania,Australia,Furniture,Desk Lamp,Szabó Éva,7,48.19,,337.36
+446,2025-09-26,Europe,Poland,Office Supplies,Printer Paper,Carlos García,4,7.38,0.25,22.13
+447,2024-04-21,Asia,,,,John Smith,19,248.05,0.00,4712.99
+448,2025-01-13,Oceania,New Zealand,Electronics,,Emily Johnson,3,,0.00,
+449,2025-07-19,Europe,Germany,Electronics,Monitor,Nagy Péter,16,,0.25,
+450,2025-08-27,Africa,Egypt,Furniture,Office Chair,Priya Sharma,10,283.56,0.30,1984.89
+451,2024-05-13,Asia,South Korea,Electronics,Monitor,Priya Sharma,15,395.07,0.15,5037.14
+452,2025-02-12,Europe,Germany,Electronics,Headphones,Szabó Éva,9,93.31,,839.76
+453,2025-02-24,Asia,India,Furniture,Desk,John Smith,2,445.57,,891.13
+454,2025-05-10,Europe,Germany,Electronics,Headphones,Kovács Anna,13,86.20,0.25,840.46
+455,2025-02-12,North America,United States,Electronics,Headphones,Yuki Tanaka,2,82.17,0.05,156.13
+456,2025-08-26,Africa,Egypt,,Extended Warranty,Carlos García,14,85.95,0.25,902.45
+457,2024-03-23,South America,Argentina,Software,IDE License,Marie Dubois,17,226.87,0.00,3856.78
+458,2025-10-05,Asia,India,Electronics,Headphones,Hans Müller,14,88.94,0.15,1058.34
+459,2025-08-30,Africa,South Africa,Software,Office Suite,Priya Sharma,2,129.11,0.25,193.66
+460,2025-11-17,North America,United States,Software,Antivirus,Priya Sharma,1,43.35,0.30,30.35
+461,2025-10-22,Oceania,New Zealand,,Extended Warranty,,15,89.42,0.25,1005.96
+462,2025-03-20,Oceania,New Zealand,Software,Office Suite,Hans Müller,8,,0.15,
+463,2024-11-16,Oceania,New Zealand,Furniture,Desk,Priya Sharma,14,374.33,0.10,4716.50
+464,2024-03-21,North America,Mexico,Software,,Emily Johnson,3,211.14,0.30,443.40
+465,2024-04-02,Africa,,,,Carlos García,12,474.28,0.10,5122.22
+466,2024-07-24,Asia,South Korea,,Shipping,Yuki Tanaka,3,,0.20,
+467,2024-09-14,Asia,South Korea,Office Supplies,Pens,John Smith,3,3.75,0.10,10.12
+468,2025-03-05,South America,Brazil,,Gift Card,Emily Johnson,6,102.96,0.20,494.22
+469,2024-02-06,Africa,Egypt,,Gift Card,Hans Müller,19,88.70,,1685.30
+470,2024-03-05,Asia,India,,Shipping,Yuki Tanaka,10,14.79,0.05,140.47
+471,2025-03-22,,Iceland,,Gift Card,Hans Müller,14,99.95,0.00,1399.28
+472,2025-10-29,Africa,South Africa,Furniture,Bookshelf,Kovács Anna,4,172.35,0.30,482.58
+473,2025-03-30,Europe,Hungary,Software,Office Suite,Kovács Anna,8,155.11,0.05,1178.84
+474,2024-08-16,Africa,,,,Szabó Éva,1,64.31,0.25,48.23
+475,2025-05-02,Europe,France,,Shipping,Nagy Péter,,12.99,,
+476,2025-12-17,Europe,Hungary,Office Supplies,Printer Paper,Emily Johnson,8,8.32,0.20,53.24
+477,2024-07-18,Europe,Poland,Furniture,Desk Lamp,Hans Müller,19,50.59,0.00,961.22
+478,2024-05-30,North America,Canada,Furniture,Desk Lamp,Szabó Éva,10,42.73,0.05,405.97
+479,2024-09-30,Europe,Germany,Software,,Szabó Éva,16,203.20,0.15,2763.49
+480,2025-09-10,Europe,France,Furniture,Desk,Emily Johnson,13,362.63,0.00,4714.20
+481,2025-01-03,Asia,South Korea,Software,,Nagy Péter,18,70.13,0.00,1262.36
+482,2024-01-19,Asia,India,Office Supplies,Binder,Marie Dubois,4,5.82,,23.28
+483,2024-06-14,,Singapore,Office Supplies,Binder,John Smith,9,6.63,0.05,56.73
+484,2024-09-28,Asia,South Korea,,Gift Card,Carlos García,3,110.03,0.15,280.57
+485,2025-06-13,Asia,India,Office Supplies,Stapler,Emily Johnson,16,11.32,,181.06
+486,2024-09-11,Asia,Japan,Electronics,Headphones,Priya Sharma,18,,0.20,
+487,2025-04-14,Europe,Hungary,Electronics,Monitor,Carlos García,12,299.65,0.25,2696.85
+488,2024-06-11,Asia,Japan,Electronics,Keyboard,Nagy Péter,14,59.12,0.10,744.86
+489,2024-11-04,Oceania,New Zealand,Furniture,Bookshelf,John Smith,1,158.77,0.15,134.95
+490,2025-01-03,Europe,France,Electronics,Mouse,Marie Dubois,11,24.12,0.30,185.76
+491,2024-11-08,,Iceland,Furniture,Desk Lamp,Priya Sharma,6,40.35,0.05,229.97
+492,2024-07-07,Oceania,Australia,Software,,Yuki Tanaka,12,75.72,0.15,772.39
+493,2025-07-25,North America,Mexico,Electronics,Laptop,Nagy Péter,4,1080.23,0.20,3456.74
+494,2024-09-22,North America,Canada,,Extended Warranty,Kovács Anna,3,71.84,0.15,183.18
+495,2024-05-04,Europe,Poland,Software,IDE License,Kovács Anna,16,223.81,0.00,3580.89
+496,2024-09-14,Asia,Japan,Furniture,,Szabó Éva,2,146.20,0.25,219.31
+497,2025-09-21,South America,Brazil,Furniture,Desk Lamp,Szabó Éva,6,38.54,0.00,231.25
+498,2025-02-12,South America,Argentina,Furniture,Bookshelf,Emily Johnson,9,202.54,0.00,1822.83
+499,2025-03-10,North America,Mexico,Office Supplies,Stapler,John Smith,16,12.90,0.05,196.03
+500,2024-12-22,Europe,Germany,Electronics,Mouse,Carlos García,8,24.78,0.25,148.67
+501,2025-07-14,Asia,Japan,Software,Office Suite,John Smith,10,128.40,0.25,963.02
+502,2025-09-17,Asia,South Korea,Furniture,Bookshelf,Nagy Péter,18,177.79,0.05,3040.13
+503,2024-07-21,South America,Argentina,Software,Office Suite,Szabó Éva,12,153.45,0.05,1749.32
+504,2025-06-15,Asia,India,Electronics,Monitor,Yuki Tanaka,14,301.73,0.00,4224.17
+505,2024-07-06,Europe,Poland,Software,Office Suite,Kovács Anna,12,143.00,0.30,1201.16
+506,2024-01-30,Europe,Hungary,Furniture,Desk Lamp,Hans Müller,4,42.18,0.25,126.53
+507,2024-12-18,Europe,France,Office Supplies,Pens,Nagy Péter,11,3.48,0.05,36.35
+508,2025-07-05,Asia,Japan,,Shipping,Emily Johnson,9,13.09,0.05,111.90
+509,2024-12-24,,Singapore,,Shipping,Marie Dubois,17,14.27,0.20,194.06
+510,2025-05-03,Europe,United Kingdom,Electronics,Headphones,,9,94.28,0.00,848.53
+511,2025-01-11,Europe,Hungary,Office Supplies,Binder,Hans Müller,13,6.68,0.20,69.45
+512,2024-01-15,Asia,China,Furniture,Desk,Priya Sharma,8,340.93,0.15,2318.30
+513,2025-07-08,North America,Mexico,Software,IDE License,Emily Johnson,13,,0.30,
+514,2024-12-17,Oceania,New Zealand,Furniture,Bookshelf,Kovács Anna,18,171.59,0.05,2934.15
+515,2025-01-13,Africa,Egypt,Office Supplies,Stapler,Hans Müller,3,11.30,0.20,27.12
+516,2024-01-14,,Singapore,Office Supplies,Stapler,Priya Sharma,9,10.49,,94.40
+517,2025-12-28,Europe,Germany,Software,Antivirus,Priya Sharma,3,55.62,0.00,166.87
+518,2024-04-13,North America,Canada,Software,IDE License,Kovács Anna,14,189.51,0.05,2520.54
+519,2025-04-24,North America,Mexico,Furniture,Desk Lamp,John Smith,11,49.23,0.30,379.03
+520,2024-11-08,Oceania,New Zealand,Furniture,Desk,Priya Sharma,15,353.78,0.20,4245.41
+521,2024-01-08,North America,Mexico,Furniture,Office Chair,Kovács Anna,12,213.44,0.25,1920.94
+522,2024-05-12,Oceania,Australia,Software,Office Suite,Marie Dubois,19,147.94,0.05,2670.25
+523,2024-11-03,Europe,Germany,Electronics,Mouse,Szabó Éva,2,25.32,0.15,43.05
+524,2025-09-11,Europe,Poland,Office Supplies,Printer Paper,Hans Müller,9,8.42,0.20,60.62
+525,2025-04-23,North America,Canada,Office Supplies,Binder,Hans Müller,9,6.80,0.10,55.09
+526,2024-08-17,,Singapore,Electronics,Headphones,Priya Sharma,10,83.02,,830.24
+527,2024-10-27,North America,Mexico,Electronics,Mouse,Nagy Péter,18,24.01,0.00,432.23
+528,2024-11-06,North America,Canada,Electronics,Mouse,John Smith,7,26.59,0.10,167.54
+529,2024-11-09,,Singapore,Software,Office Suite,Szabó Éva,20,169.79,0.20,2716.64
+530,2025-07-07,Africa,South Africa,Software,Office Suite,Marie Dubois,9,155.47,0.15,1189.32
+531,2025-05-18,Asia,South Korea,Furniture,Desk Lamp,Priya Sharma,19,39.09,0.25,557.05
+532,2025-02-25,North America,,,,,5,148.14,0.20,592.56
+533,2025-11-07,Asia,China,Software,Antivirus,Carlos García,3,46.68,0.00,140.03
+534,2024-08-10,South America,,,,Nagy Péter,11,197.48,0.15,1846.41
+535,2025-10-09,Europe,France,Electronics,,Kovács Anna,2,194.44,,388.87
+536,2024-10-01,North America,United States,Electronics,Laptop,Yuki Tanaka,1,1262.90,0.00,1262.90
+537,2025-01-31,Oceania,New Zealand,Software,Office Suite,Emily Johnson,8,132.51,0.25,795.08
+538,2024-12-30,Oceania,Australia,Office Supplies,Printer Paper,Yuki Tanaka,13,7.78,0.25,75.89
+539,2025-12-23,Europe,Hungary,Software,Antivirus,Marie Dubois,10,46.56,0.20,372.45
+540,2025-09-15,Oceania,New Zealand,Electronics,Monitor,Emily Johnson,8,341.95,0.10,2462.07
+541,2024-03-02,,Singapore,Electronics,Laptop,Szabó Éva,16,1152.60,0.00,18441.60
+542,2024-06-30,North America,Mexico,Furniture,Desk,Hans Müller,17,453.40,0.30,5395.42
+543,2025-01-28,Europe,Poland,Furniture,Desk,Szabó Éva,2,,0.15,
+544,2024-12-03,Europe,Poland,Furniture,Desk Lamp,Nagy Péter,15,43.18,0.00,647.63
+545,2025-10-12,South America,Argentina,Furniture,Office Chair,Hans Müller,13,225.64,0.25,2200.00
+546,2025-05-05,Oceania,New Zealand,Software,IDE License,Carlos García,20,185.71,0.00,3714.18
+547,2025-12-21,South America,Argentina,Office Supplies,Pens,John Smith,14,3.86,0.10,48.63
+548,2025-06-12,North America,Mexico,Software,Antivirus,Priya Sharma,18,46.63,0.05,797.31
+549,2024-10-24,Europe,Germany,,Shipping,Emily Johnson,8,13.02,0.05,98.96
+550,2025-01-24,Asia,China,Furniture,Desk,Priya Sharma,4,342.15,0.20,1094.87
+551,2025-05-27,Asia,China,Electronics,Mouse,Marie Dubois,5,24.38,0.10,109.72
+552,2024-03-29,Oceania,New Zealand,,Gift Card,Kovács Anna,16,112.48,0.25,1349.81
+553,2024-02-08,Oceania,New Zealand,Electronics,Mouse,Priya Sharma,15,27.41,0.00,411.16
+554,2025-03-28,Asia,India,Electronics,Mouse,Hans Müller,7,24.20,0.30,118.60
+555,2024-06-05,Oceania,Australia,Furniture,Desk,Yuki Tanaka,12,353.30,0.10,3815.63
+556,2024-04-27,Asia,South Korea,Electronics,Keyboard,Yuki Tanaka,9,66.94,0.30,421.69
+557,2025-11-17,Europe,United Kingdom,Electronics,Laptop,Kovács Anna,4,1321.86,0.25,3965.58
+558,2024-09-11,North America,Mexico,Electronics,Mouse,Kovács Anna,17,,0.30,
+559,2025-02-15,,Singapore,Electronics,,Carlos García,10,326.02,0.10,2934.14
+560,2025-01-03,Asia,China,Electronics,Mouse,Hans Müller,10,27.23,0.25,204.23
+561,2025-09-20,Oceania,Australia,,Extended Warranty,Carlos García,3,87.20,0.15,222.35
+562,2025-03-21,,Iceland,Electronics,Laptop,Nagy Péter,10,1150.50,0.30,8053.48
+563,2024-08-21,Europe,France,Office Supplies,Stapler,Kovács Anna,3,10.99,0.05,31.31
+564,2025-05-08,Oceania,New Zealand,Furniture,Desk Lamp,Kovács Anna,15,,0.05,
+565,2025-06-06,Asia,Japan,Electronics,Monitor,Hans Müller,15,301.78,0.20,3621.30
+566,2025-01-13,Oceania,New Zealand,Electronics,Headphones,Kovács Anna,19,86.32,0.15,1393.99
+567,2024-10-16,Europe,United Kingdom,Electronics,Keyboard,John Smith,2,59.13,0.15,100.53
+568,2025-04-09,North America,Canada,Office Supplies,Pens,,18,,0.05,
+569,2025-11-28,Asia,South Korea,,Gift Card,Priya Sharma,18,104.54,,1881.66
+570,2025-08-03,Europe,United Kingdom,Furniture,Desk,Hans Müller,13,420.16,0.15,4642.81
+571,2025-05-30,South America,Argentina,Software,Antivirus,John Smith,12,47.12,0.25,424.10
+572,2025-10-24,Europe,Hungary,Electronics,,Emily Johnson,18,262.06,,4717.14
+573,2024-03-23,South America,,,,Hans Müller,6,380.95,0.20,1828.54
+574,2024-04-08,Europe,France,,Shipping,Emily Johnson,9,13.92,0.15,106.50
+575,2024-10-28,Europe,France,Electronics,Laptop,Priya Sharma,6,1186.73,0.05,6764.39
+576,2024-06-06,Asia,China,Office Supplies,Pens,Kovács Anna,20,4.57,0.05,86.74
+577,2024-07-22,Asia,Japan,Furniture,Bookshelf,John Smith,3,,,
+578,2025-06-10,Africa,Egypt,Office Supplies,Binder,John Smith,19,5.79,0.15,93.47
+579,2025-12-08,Africa,Egypt,Electronics,Mouse,Carlos García,18,27.36,0.30,344.72
+580,2025-11-06,Oceania,New Zealand,Electronics,Keyboard,Emily Johnson,8,62.30,0.10,448.55
+581,2024-07-31,Europe,France,,Gift Card,Carlos García,4,113.45,0.20,363.05
+582,2025-04-14,Asia,South Korea,Furniture,Desk Lamp,Priya Sharma,20,,0.00,
+583,2024-05-22,Europe,Hungary,Software,Antivirus,Marie Dubois,4,57.48,,229.93
+584,2025-09-14,Europe,Hungary,Office Supplies,Pens,Emily Johnson,2,4.31,0.15,7.33
+585,2025-07-10,Africa,South Africa,Electronics,Keyboard,John Smith,3,64.17,0.20,154.00
+586,2024-02-18,,Iceland,Electronics,Headphones,Nagy Péter,19,85.54,,1625.20
+587,2024-05-31,Africa,South Africa,Software,Antivirus,Nagy Péter,3,43.02,,129.06
+588,2025-02-17,Asia,India,Furniture,Desk Lamp,Marie Dubois,,50.98,0.05,
+589,2025-01-27,,Iceland,Office Supplies,Stapler,Priya Sharma,17,13.73,0.25,175.11
+590,2025-01-13,Africa,Egypt,Electronics,Mouse,Priya Sharma,14,28.61,0.25,300.42
+591,2025-08-14,Asia,Japan,Furniture,Bookshelf,Nagy Péter,7,181.12,0.00,1267.82
+592,2025-05-05,Europe,Poland,Software,IDE License,Hans Müller,19,225.04,0.15,3634.40
+593,2025-06-02,North America,Mexico,Electronics,Laptop,Nagy Péter,1,1185.47,0.25,889.11
+594,2025-07-25,Asia,India,,Gift Card,Kovács Anna,,113.47,0.30,
+595,2024-07-21,Asia,Japan,Furniture,Bookshelf,Szabó Éva,1,164.08,0.20,131.26
+596,2025-11-09,Asia,South Korea,Office Supplies,Binder,Kovács Anna,19,5.22,0.05,94.25
+597,2025-10-27,Europe,France,Software,Antivirus,Nagy Péter,10,47.29,0.25,354.66
+598,2024-03-29,Asia,South Korea,Software,Office Suite,John Smith,2,150.29,0.15,255.49
+599,2024-02-22,Europe,Germany,,Extended Warranty,Kovács Anna,10,75.58,0.15,642.45
+600,2025-03-14,Asia,India,Furniture,Desk Lamp,Nagy Péter,3,50.32,0.05,143.42
+601,2025-05-09,Oceania,Australia,Electronics,,Kovács Anna,20,76.54,0.10,1377.73
+602,2025-08-24,Africa,,,,Kovács Anna,20,234.42,0.05,4454.02
+603,2025-09-20,North America,Canada,Electronics,Laptop,Kovács Anna,5,1306.89,,6534.46
+604,2025-10-07,Asia,China,Furniture,Desk,Emily Johnson,,411.87,0.05,
+605,2024-11-02,Asia,India,Software,IDE License,Emily Johnson,9,215.74,0.05,1844.56
+606,2024-04-03,Africa,South Africa,Software,Office Suite,Szabó Éva,5,167.15,0.20,668.61
+607,2024-04-02,Asia,Japan,Software,IDE License,Emily Johnson,10,205.71,0.00,2057.14
+608,2024-01-02,South America,Brazil,Electronics,Keyboard,Yuki Tanaka,4,52.00,0.30,145.59
+609,2024-01-15,Oceania,,,,John Smith,7,128.17,0.00,897.18
+610,2024-09-27,Oceania,New Zealand,Electronics,Keyboard,Carlos García,3,58.31,,174.93
+611,2024-12-16,Asia,China,,Shipping,Hans Müller,4,13.44,0.25,40.32
+612,2025-02-24,Asia,India,Software,Office Suite,Emily Johnson,12,152.35,0.25,1371.12
+613,2025-03-29,Oceania,Australia,Electronics,Monitor,Hans Müller,20,306.42,0.15,5209.16
+614,2024-01-19,,Iceland,Office Supplies,Binder,Kovács Anna,1,5.64,0.10,5.08
+615,2024-04-08,Africa,Egypt,Electronics,Mouse,Priya Sharma,3,27.50,0.25,61.88
+616,2025-03-12,North America,United States,Software,Antivirus,Kovács Anna,17,46.02,0.15,664.93
+617,2024-05-22,Asia,South Korea,Electronics,Monitor,Yuki Tanaka,11,304.98,,3354.80
+618,2024-10-08,Asia,Japan,Electronics,Headphones,Hans Müller,17,86.55,0.10,1324.24
+619,2024-03-18,Oceania,Australia,,Shipping,Nagy Péter,20,13.15,0.20,210.45
+620,2024-09-23,Asia,Japan,Office Supplies,Stapler,Yuki Tanaka,18,12.24,0.30,154.23
+621,2024-10-10,North America,Canada,Electronics,Keyboard,John Smith,14,,0.15,
+622,2024-06-15,Africa,South Africa,Furniture,Bookshelf,Priya Sharma,12,196.39,0.20,1885.35
+623,2024-05-21,Asia,China,Office Supplies,Printer Paper,Nagy Péter,12,8.62,0.30,72.37
+624,2024-08-19,Asia,Japan,Furniture,Bookshelf,Marie Dubois,1,154.39,0.30,108.07
+625,2024-02-28,,Singapore,Electronics,Laptop,Carlos García,13,1361.24,0.20,14156.88
+626,2024-09-28,Oceania,Australia,,Gift Card,Priya Sharma,5,108.59,0.30,380.06
+627,2024-12-08,Europe,Hungary,Furniture,Bookshelf,John Smith,2,206.97,0.30,289.76
+628,2025-04-30,Europe,Hungary,Software,Office Suite,Kovács Anna,20,165.58,0.05,3146.10
+629,2025-10-21,Europe,United Kingdom,Software,Office Suite,Nagy Péter,14,,0.05,
+630,2025-02-14,Europe,United Kingdom,,Gift Card,Priya Sharma,14,93.77,0.00,1312.81
+631,2024-02-16,Asia,India,Office Supplies,Printer Paper,Szabó Éva,17,8.12,0.00,138.12
+632,2024-04-09,Africa,Egypt,,Gift Card,Nagy Péter,8,90.46,0.30,506.56
+633,2025-11-14,North America,United States,Electronics,Headphones,,15,102.19,0.10,1379.59
+634,2024-02-26,,Iceland,Electronics,Mouse,Priya Sharma,5,,0.10,
+635,2024-05-13,Africa,South Africa,Furniture,Desk,Yuki Tanaka,7,357.69,0.10,2253.43
+636,2025-03-10,Europe,United Kingdom,,Gift Card,Yuki Tanaka,,92.40,,
+637,2025-01-22,North America,,,,Emily Johnson,9,430.72,,3876.45
+638,2024-04-26,Asia,China,Software,Antivirus,Priya Sharma,14,53.10,0.00,743.37
+639,2025-10-15,Oceania,New Zealand,Software,Office Suite,Marie Dubois,14,146.19,0.25,1534.96
+640,2024-03-03,Oceania,New Zealand,Electronics,Mouse,Priya Sharma,14,21.87,,306.23
+641,2024-09-20,North America,Canada,Electronics,Mouse,Kovács Anna,14,21.64,0.30,212.11
+642,2025-02-04,Oceania,New Zealand,,Extended Warranty,Szabó Éva,6,83.94,0.25,377.72
+643,2025-07-02,Asia,China,Furniture,Desk,Nagy Péter,18,420.41,,7567.33
+644,2024-12-01,South America,Argentina,Furniture,Office Chair,Yuki Tanaka,19,272.07,0.20,4135.49
+645,2025-04-19,Asia,India,Electronics,Laptop,Emily Johnson,8,1256.01,,10048.11
+646,2024-07-20,Africa,Egypt,Software,IDE License,Marie Dubois,11,176.69,0.00,1943.54
+647,2025-03-11,Africa,Egypt,,Extended Warranty,Priya Sharma,18,79.44,0.15,1215.45
+648,2024-06-27,Africa,South Africa,Software,IDE License,Emily Johnson,6,222.11,0.20,1066.14
+649,2025-12-30,,Iceland,Electronics,Mouse,Nagy Péter,10,25.36,0.00,253.58
+650,2025-08-22,Oceania,New Zealand,,Shipping,Carlos García,2,14.27,0.30,19.97
+651,2025-02-06,,Iceland,Furniture,Desk,Nagy Péter,15,345.11,0.10,4658.94
+652,2024-12-21,Asia,China,Software,IDE License,Nagy Péter,8,216.45,0.00,1731.63
+653,2024-10-27,Africa,South Africa,Furniture,Desk Lamp,Yuki Tanaka,12,39.38,0.15,401.71
+654,2024-09-15,,Iceland,Electronics,Laptop,Szabó Éva,16,1280.73,0.00,20491.66
+655,2024-09-22,Asia,China,Electronics,,Carlos García,18,223.39,0.05,3820.00
+656,2024-11-17,North America,Mexico,Electronics,Keyboard,Hans Müller,7,59.69,0.10,376.02
+657,2024-07-15,Asia,India,Electronics,Monitor,John Smith,17,384.07,,6529.22
+658,2025-11-21,North America,Mexico,Office Supplies,Stapler,John Smith,11,11.54,,126.92
+659,2025-12-10,,Singapore,Electronics,Keyboard,Yuki Tanaka,15,64.09,0.20,769.06
+660,2025-06-08,Europe,Hungary,Software,IDE License,Szabó Éva,15,218.73,0.15,2788.76
+661,2025-04-03,,Singapore,,Gift Card,Kovács Anna,9,114.08,0.10,924.06
+662,2024-03-09,Asia,India,Office Supplies,Stapler,,14,11.49,0.10,144.76
+663,2025-10-12,Oceania,New Zealand,,Extended Warranty,John Smith,20,88.61,0.20,1417.83
+664,2025-11-22,Europe,United Kingdom,Furniture,Desk Lamp,Priya Sharma,20,42.28,0.00,845.57
+665,2025-10-28,North America,Canada,Office Supplies,Pens,Priya Sharma,17,4.50,0.05,72.60
+666,2024-04-10,Asia,Japan,Furniture,Bookshelf,Marie Dubois,12,206.66,0.10,2231.89
+667,2024-04-26,Oceania,New Zealand,Electronics,Mouse,Carlos García,4,21.93,0.20,70.18
+668,2025-06-05,Europe,Hungary,Furniture,Bookshelf,Priya Sharma,11,205.63,0.20,1809.50
+669,2025-09-26,Asia,India,Electronics,Laptop,Kovács Anna,4,1258.75,0.05,4783.26
+670,2024-09-09,South America,Brazil,Furniture,Desk,Carlos García,10,341.20,0.10,3070.81
+671,2024-12-14,North America,Canada,Electronics,Mouse,Marie Dubois,2,22.75,0.20,36.40
+672,2025-06-02,North America,United States,Office Supplies,Stapler,Yuki Tanaka,,13.75,0.15,
+673,2024-05-28,South America,Brazil,,Shipping,Kovács Anna,3,14.43,0.25,32.47
+674,2025-09-24,Oceania,New Zealand,Electronics,Laptop,Yuki Tanaka,1,1177.15,0.15,1000.58
+675,2024-12-23,,Singapore,Furniture,Office Chair,Hans Müller,20,246.98,0.30,3457.72
+676,2025-12-31,Oceania,New Zealand,,Extended Warranty,Szabó Éva,9,88.93,,800.33
+677,2024-06-20,Africa,South Africa,Electronics,Monitor,Emily Johnson,12,343.21,0.10,3706.69
+678,2024-12-12,Europe,France,Software,IDE License,Szabó Éva,4,204.19,0.00,816.75
+679,2024-08-24,Europe,France,Electronics,Keyboard,Priya Sharma,9,65.38,,588.46
+680,2024-06-19,North America,United States,Office Supplies,Printer Paper,Marie Dubois,7,8.90,0.30,43.61
+681,2024-10-02,Oceania,Australia,Office Supplies,Pens,Priya Sharma,7,,0.20,
+682,2024-06-30,Asia,South Korea,Office Supplies,Stapler,Hans Müller,8,10.60,,84.83
+683,2025-10-22,North America,United States,Electronics,Headphones,Yuki Tanaka,5,76.69,0.05,364.26
+684,2025-06-02,Europe,France,Office Supplies,Printer Paper,John Smith,2,,,
+685,2024-10-27,South America,Brazil,Electronics,Keyboard,Hans Müller,5,56.93,,284.65
+686,2025-01-14,Asia,India,Office Supplies,Binder,Hans Müller,11,5.35,0.00,58.87
+687,2025-04-10,North America,Mexico,,Gift Card,Emily Johnson,20,111.44,0.05,2117.29
+688,2025-02-22,Oceania,Australia,Electronics,Mouse,Kovács Anna,,26.95,0.15,
+689,2025-01-10,Oceania,Australia,Electronics,Headphones,Yuki Tanaka,4,82.89,0.20,265.23
+690,2024-11-27,,Singapore,Software,,Priya Sharma,6,165.56,0.30,695.35
+691,2025-06-30,South America,Brazil,,Extended Warranty,Kovács Anna,10,75.90,0.15,645.18
+692,2025-06-24,Asia,Japan,Software,Office Suite,Yuki Tanaka,1,154.68,0.20,123.75
+693,2025-01-01,Africa,South Africa,Office Supplies,Pens,Kovács Anna,19,4.31,0.30,57.27
+694,2024-10-03,,Iceland,Electronics,Laptop,Carlos García,15,1142.27,,17134.07
+695,2025-03-14,Africa,Egypt,Office Supplies,,Carlos García,14,66.83,0.20,748.50
+696,2024-07-31,Africa,,,,Emily Johnson,5,76.78,0.05,364.69
+697,2025-04-01,North America,Mexico,Electronics,Laptop,Kovács Anna,5,1349.96,0.15,5737.32
+698,2024-12-21,North America,Canada,Furniture,Desk,Hans Müller,,364.86,0.05,
+699,2025-03-02,Asia,China,,Shipping,Yuki Tanaka,8,13.71,0.00,109.67
+700,2024-03-04,Europe,United Kingdom,Office Supplies,Pens,Emily Johnson,17,3.55,0.20,48.25
+701,2025-06-23,Oceania,New Zealand,Software,Office Suite,Priya Sharma,12,,0.00,
+702,2025-11-21,Asia,China,Furniture,Desk Lamp,Hans Müller,4,43.18,0.15,146.81
+703,2024-03-13,,Iceland,Furniture,Desk Lamp,Hans Müller,12,40.20,0.05,458.23
+704,2024-03-18,,Iceland,Office Supplies,Pens,Szabó Éva,13,4.16,0.05,51.41
+705,2024-05-18,North America,,,,Szabó Éva,20,234.84,0.05,4462.05
+706,2024-05-07,Oceania,Australia,Furniture,Desk Lamp,Carlos García,13,49.07,0.25,478.47
+707,2024-12-13,Africa,Egypt,,Shipping,Hans Müller,7,16.99,0.20,95.15
+708,2024-09-03,Oceania,Australia,Office Supplies,Stapler,Nagy Péter,6,,0.30,
+709,2025-04-14,,Singapore,Furniture,,Szabó Éva,,107.23,0.00,
+710,2024-10-15,North America,Mexico,Office Supplies,Pens,,4,4.50,0.30,12.61
+711,2024-01-12,Europe,Poland,Office Supplies,Pens,Szabó Éva,19,3.56,0.15,57.50
+712,2024-07-25,Asia,India,Office Supplies,Printer Paper,John Smith,8,7.23,0.10,52.04
+713,2025-07-05,North America,Canada,Electronics,Headphones,Nagy Péter,6,87.24,0.20,418.77
+714,2025-02-18,,Iceland,Furniture,,Kovács Anna,18,191.77,0.15,2934.08
+715,2024-01-25,Europe,France,Electronics,Mouse,Szabó Éva,14,22.74,0.20,254.64
+716,2025-06-28,Oceania,Australia,Electronics,Headphones,Nagy Péter,2,97.38,0.20,155.80
+717,2024-09-29,North America,Mexico,Software,Antivirus,John Smith,19,56.49,0.05,1019.61
+718,2024-03-11,North America,,,,Yuki Tanaka,18,157.34,,2832.15
+719,2025-09-25,Africa,Egypt,Furniture,Desk Lamp,Emily Johnson,9,44.94,0.30,283.12
+720,2024-08-11,Asia,Japan,Office Supplies,Binder,Yuki Tanaka,6,5.11,,30.68
+721,2025-11-16,Asia,India,,Shipping,Emily Johnson,12,13.44,0.25,120.97
+722,2024-08-16,Asia,South Korea,Software,Office Suite,Szabó Éva,12,,0.00,
+723,2025-03-10,North America,,,,Szabó Éva,12,124.07,,1488.79
+724,2025-06-25,South America,Brazil,Furniture,Office Chair,Kovács Anna,5,275.90,0.20,1103.59
+725,2024-11-26,Europe,United Kingdom,Office Supplies,Printer Paper,Carlos García,3,7.53,0.25,16.94
+726,2025-04-18,Europe,Germany,Furniture,Desk Lamp,Carlos García,6,41.57,,249.45
+727,2024-12-14,North America,Canada,,Extended Warranty,John Smith,3,73.01,0.25,164.28
+728,2024-07-19,Europe,Germany,Office Supplies,Stapler,Yuki Tanaka,13,12.71,0.15,140.50
+729,2024-02-01,South America,Argentina,,Shipping,Priya Sharma,3,15.99,,47.98
+730,2024-12-28,South America,Brazil,Furniture,Desk,John Smith,14,434.36,0.10,5472.95
+731,2025-10-02,Europe,Hungary,Software,Antivirus,,18,49.47,0.10,801.44
+732,2025-08-23,,Iceland,Furniture,Desk,Kovács Anna,13,394.75,0.00,5131.77
+733,2024-06-01,Asia,India,Furniture,Desk Lamp,,15,39.49,0.30,414.68
+734,2025-03-10,North America,Canada,Electronics,Headphones,Emily Johnson,10,80.27,0.10,722.44
+735,2024-05-05,North America,United States,Furniture,Office Chair,Priya Sharma,18,234.98,0.25,3172.18
+736,2025-10-02,Asia,South Korea,Office Supplies,Stapler,Nagy Péter,11,13.61,0.20,119.81
+737,2025-05-31,North America,Mexico,Electronics,Monitor,Hans Müller,5,345.90,0.25,1297.14
+738,2024-12-30,North America,Mexico,Electronics,Mouse,John Smith,11,23.07,0.10,228.42
+739,2024-12-31,Europe,Poland,Furniture,Bookshelf,Yuki Tanaka,3,191.90,,575.70
+740,2024-11-13,Africa,,,,Kovács Anna,15,409.94,0.05,5841.58
+741,2024-04-22,Africa,Egypt,Furniture,Bookshelf,Carlos García,8,164.73,0.25,988.37
+742,2024-11-17,Asia,South Korea,Electronics,Monitor,John Smith,7,389.98,0.00,2729.87
+743,2025-09-15,Africa,South Africa,Furniture,Bookshelf,Marie Dubois,20,177.16,0.10,3188.97
+744,2025-04-14,Oceania,New Zealand,Electronics,Laptop,Szabó Éva,1,1138.95,0.15,968.10
+745,2024-02-21,Europe,Germany,Office Supplies,Printer Paper,Carlos García,15,7.94,0.25,89.35
+746,2024-05-13,Europe,France,Electronics,Headphones,Nagy Péter,10,90.92,0.05,863.77
+747,2025-10-09,Europe,Poland,Furniture,Desk,Priya Sharma,17,447.51,0.15,6466.48
+748,2025-08-12,Africa,Egypt,,Shipping,Yuki Tanaka,20,15.32,0.05,291.00
+749,2024-09-25,North America,United States,Office Supplies,Stapler,Kovács Anna,4,13.64,,54.58
+750,2024-03-28,South America,Argentina,,Shipping,Kovács Anna,19,16.09,,305.76
+751,2025-11-26,Asia,China,Software,IDE License,Emily Johnson,20,173.97,0.15,2957.52
+752,2024-01-17,Asia,South Korea,Software,Office Suite,Szabó Éva,9,155.73,0.10,1261.41
+753,2025-03-22,South America,Argentina,Software,Office Suite,Priya Sharma,17,137.73,0.10,2107.32
+754,2024-10-06,Asia,India,,Extended Warranty,Hans Müller,17,79.96,0.30,951.58
+755,2025-08-17,Oceania,Australia,,Extended Warranty,Nagy Péter,3,91.56,0.05,260.94
+756,2025-01-12,Asia,Japan,Office Supplies,Printer Paper,Emily Johnson,13,7.46,0.05,92.10
+757,2025-04-20,Africa,Egypt,Software,Office Suite,Nagy Péter,12,139.73,,1676.75
+758,2024-06-10,Africa,Egypt,Office Supplies,Pens,Carlos García,13,3.82,0.30,34.73
+759,2025-02-10,Africa,Egypt,,Shipping,Szabó Éva,10,15.71,0.00,157.12
+760,2025-08-23,North America,Canada,Office Supplies,Binder,Hans Müller,15,6.62,,99.29
+761,2025-04-02,North America,Mexico,,Shipping,Marie Dubois,16,14.16,0.05,215.23
+762,2025-11-21,Oceania,,,,Hans Müller,10,294.75,0.05,2800.08
+763,2024-05-30,Africa,Egypt,Furniture,Desk,Emily Johnson,4,341.16,0.15,1159.95
+764,2024-10-30,Africa,South Africa,Electronics,Laptop,Yuki Tanaka,10,1054.01,0.25,7905.10
+765,2025-06-07,,Iceland,Software,Antivirus,Hans Müller,13,56.82,0.15,627.86
+766,2025-02-16,Asia,India,Furniture,Desk,Yuki Tanaka,15,448.14,0.15,5713.73
+767,2024-05-18,South America,Argentina,Software,Antivirus,Kovács Anna,9,53.01,0.00,477.05
+768,2025-09-19,Europe,Hungary,,Shipping,Emily Johnson,18,16.70,,300.60
+769,2024-03-11,South America,Brazil,Software,Antivirus,John Smith,4,55.54,0.25,166.61
+770,2025-11-26,Asia,China,Furniture,Bookshelf,Priya Sharma,18,,0.00,
+771,2024-03-28,Europe,Hungary,Software,Antivirus,Marie Dubois,16,54.06,0.00,864.94
+772,2024-02-17,North America,Canada,Furniture,Bookshelf,Nagy Péter,6,185.47,0.20,890.27
+773,2024-03-07,South America,Argentina,Office Supplies,Binder,Carlos García,5,5.48,0.30,19.18
+774,2025-10-30,North America,United States,,Extended Warranty,Kovács Anna,18,75.29,0.20,1084.19
+775,2025-02-02,Asia,Japan,Electronics,Keyboard,Nagy Péter,15,61.88,0.20,742.51
+776,2024-04-10,South America,Brazil,Furniture,Office Chair,Hans Müller,14,258.25,0.05,3434.76
+777,2024-10-20,Europe,France,Furniture,Desk Lamp,Marie Dubois,1,49.68,0.15,42.23
+778,2024-08-18,Oceania,,,,Yuki Tanaka,15,484.53,0.25,5450.94
+779,2024-07-22,Africa,South Africa,,Shipping,Emily Johnson,8,14.14,,113.11
+780,2025-11-03,Africa,South Africa,Furniture,Desk Lamp,Priya Sharma,2,50.26,0.15,85.45
+781,2025-11-16,Europe,Poland,Electronics,Laptop,John Smith,20,1105.65,0.05,21007.37
+782,2025-10-16,Asia,Japan,Software,Office Suite,Szabó Éva,4,140.02,0.00,560.09
+783,2024-09-27,Asia,India,,Shipping,Emily Johnson,19,13.37,0.20,203.23
+784,2024-04-18,,Singapore,Electronics,Laptop,Hans Müller,16,1371.52,0.25,16458.28
+785,2025-05-03,Europe,Poland,Furniture,Desk Lamp,Marie Dubois,8,46.36,0.25,278.18
+786,2025-12-02,Europe,Germany,Office Supplies,,,10,224.53,,2245.31
+787,2025-02-09,,Singapore,Furniture,Office Chair,Priya Sharma,2,285.63,0.15,485.57
+788,2025-08-25,South America,Argentina,Software,Antivirus,Yuki Tanaka,14,47.11,0.15,560.66
+789,2024-08-26,Europe,United Kingdom,Furniture,Desk,John Smith,2,416.14,0.05,790.67
+790,2025-05-19,,Singapore,Furniture,Desk,Priya Sharma,1,347.18,0.25,260.39
+791,2024-07-08,,Singapore,Office Supplies,Stapler,Marie Dubois,,10.81,0.30,
+792,2024-11-30,Europe,Poland,,Gift Card,Emily Johnson,1,85.60,0.00,85.60
+793,2025-10-04,Africa,South Africa,,Shipping,John Smith,16,14.20,0.05,215.79
+794,2024-11-20,Oceania,New Zealand,Electronics,Laptop,John Smith,1,1371.63,0.25,1028.73
+795,2024-09-30,Asia,China,Office Supplies,Stapler,Yuki Tanaka,1,11.90,,11.90
+796,2024-09-28,Europe,Hungary,Office Supplies,Pens,Szabó Éva,13,4.15,0.00,53.96
+797,2025-04-01,Asia,South Korea,Furniture,,Priya Sharma,3,284.54,,853.61
+798,2025-02-02,Asia,China,Software,Office Suite,John Smith,20,170.83,0.05,3245.68
+799,2024-03-20,Africa,South Africa,Office Supplies,Stapler,Hans Müller,6,11.54,0.15,58.84
+800,2025-06-07,North America,Mexico,,Extended Warranty,Carlos García,15,85.23,0.25,958.89
+801,2024-08-03,Africa,Egypt,Software,Office Suite,John Smith,9,149.47,0.20,1076.19
+802,2025-04-09,South America,Brazil,Furniture,Desk,Priya Sharma,11,349.78,0.25,2885.64
+803,2025-09-16,Africa,South Africa,Electronics,,Emily Johnson,8,300.98,0.20,1926.27
+804,2024-05-17,Asia,India,Office Supplies,Pens,John Smith,3,4.44,0.25,9.99
+805,2025-12-18,North America,United States,Office Supplies,Pens,Emily Johnson,10,4.35,0.20,34.83
+806,2024-05-07,Oceania,New Zealand,Software,Office Suite,Kovács Anna,19,152.96,,2906.30
+807,2025-12-16,Asia,South Korea,Office Supplies,Binder,Carlos García,10,6.35,0.15,53.97
+808,2025-04-06,Africa,Egypt,Furniture,Desk Lamp,Yuki Tanaka,19,48.06,0.05,867.44
+809,2024-01-01,Europe,Hungary,Office Supplies,Binder,Emily Johnson,7,5.53,0.25,29.05
+810,2025-06-21,Africa,South Africa,,Gift Card,Szabó Éva,9,93.26,0.25,629.47
+811,2024-07-18,,Iceland,,Extended Warranty,,19,81.48,,1548.14
+812,2024-08-24,South America,Brazil,Office Supplies,Stapler,Marie Dubois,20,11.08,0.15,188.39
+813,2024-07-24,Africa,Egypt,Electronics,Mouse,Hans Müller,15,28.65,0.05,408.24
+814,2024-02-13,South America,Brazil,Furniture,Desk Lamp,Nagy Péter,7,43.89,0.20,245.78
+815,2025-11-03,North America,United States,Electronics,,Yuki Tanaka,3,157.77,,473.31
+816,2025-08-20,South America,Brazil,,Extended Warranty,Carlos García,14,,,
+817,2025-02-01,Oceania,Australia,Furniture,Desk,Emily Johnson,11,426.83,0.25,3521.38
+818,2024-07-10,Asia,India,Furniture,Bookshelf,Emily Johnson,5,,0.05,
+819,2025-09-01,Europe,France,,Extended Warranty,Szabó Éva,9,85.84,0.15,656.68
+820,2025-03-30,Oceania,New Zealand,Office Supplies,Pens,Priya Sharma,12,4.41,0.15,45.01
+821,2025-05-12,South America,Brazil,Software,Antivirus,Priya Sharma,9,45.98,,413.81
+822,2024-03-28,Europe,France,Furniture,Bookshelf,Carlos García,1,202.49,0.15,172.12
+823,2024-01-18,,Singapore,,Shipping,John Smith,3,15.30,0.20,36.71
+824,2025-07-26,Europe,Hungary,Software,IDE License,John Smith,15,189.73,0.15,2419.09
+825,2025-12-16,,Iceland,Furniture,Desk Lamp,Kovács Anna,4,46.91,0.10,168.87
+826,2024-06-22,Oceania,Australia,Office Supplies,Binder,Marie Dubois,20,5.28,,105.70
+827,2024-04-22,Europe,United Kingdom,Electronics,Monitor,Nagy Péter,5,364.77,,1823.84
+828,2024-11-02,Africa,,,,Hans Müller,10,430.79,0.05,4092.47
+829,2024-04-04,Asia,South Korea,Furniture,Desk,Hans Müller,8,341.58,0.20,2186.09
+830,2025-10-16,Africa,South Africa,,Gift Card,Priya Sharma,10,86.36,0.25,647.68
+831,2025-10-11,Asia,Japan,Office Supplies,Pens,Carlos García,11,4.01,0.15,37.45
+832,2024-03-12,Oceania,Australia,Office Supplies,Printer Paper,Hans Müller,,7.48,0.10,
+833,2024-04-15,Europe,France,Furniture,Desk,Szabó Éva,,359.75,,
+834,2024-06-18,Europe,Poland,Electronics,Mouse,Nagy Péter,2,22.44,,44.87
+835,2024-11-03,North America,Canada,,Shipping,John Smith,12,14.09,0.00,169.11
+836,2024-08-17,Europe,Germany,Furniture,Desk Lamp,Carlos García,17,50.99,0.30,606.75
+837,2024-08-26,Europe,Hungary,Office Supplies,Pens,Yuki Tanaka,8,4.09,0.15,27.79
+838,2025-08-31,Oceania,Australia,Furniture,Desk Lamp,Carlos García,5,47.65,,238.26
+839,2024-01-17,Asia,India,Software,Office Suite,Hans Müller,16,151.45,0.00,2423.12
+840,2025-03-19,Europe,Hungary,Furniture,,Priya Sharma,4,308.12,0.20,985.99
+841,2024-06-24,,Iceland,Electronics,Monitor,Yuki Tanaka,10,365.15,0.20,2921.21
+842,2025-02-14,Oceania,Australia,Office Supplies,Binder,Carlos García,12,5.99,0.25,53.90
+843,2025-09-05,South America,Argentina,Office Supplies,Pens,Szabó Éva,10,4.23,0.25,31.70
+844,2025-08-17,North America,United States,Electronics,Headphones,Priya Sharma,10,88.42,0.05,840.00
+845,2025-03-24,Europe,France,,Extended Warranty,Marie Dubois,12,84.55,0.20,811.68
+846,2025-12-05,Europe,,,,Nagy Péter,11,86.26,0.20,759.06
+847,2024-01-18,Asia,China,Electronics,Headphones,Marie Dubois,8,94.36,0.05,717.16
+848,2025-02-23,Asia,South Korea,,Extended Warranty,Yuki Tanaka,6,75.26,0.15,383.81
+849,2024-11-01,Oceania,Australia,,Gift Card,Priya Sharma,17,101.75,,1729.74
+850,2024-04-04,,Iceland,Electronics,Headphones,Marie Dubois,18,94.41,0.05,1614.41
+851,2024-07-16,Europe,United Kingdom,Furniture,Office Chair,Szabó Éva,9,253.91,0.20,1828.18
+852,2025-06-21,Asia,Japan,Furniture,Desk,Emily Johnson,14,366.61,0.20,4106.02
+853,2025-09-17,Europe,United Kingdom,Electronics,Monitor,Marie Dubois,9,365.93,0.00,3293.41
+854,2024-02-13,Asia,Japan,Furniture,Bookshelf,,6,180.76,0.05,1030.32
+855,2025-07-19,Asia,India,Office Supplies,Binder,Kovács Anna,15,5.65,0.20,67.82
+856,2024-08-06,Europe,,,,Emily Johnson,8,592.54,0.10,4266.26
+857,2024-07-06,Asia,South Korea,Electronics,Headphones,Emily Johnson,9,85.29,0.10,690.82
+858,2025-07-11,Oceania,Australia,Office Supplies,Pens,Nagy Péter,13,3.44,,44.78
+859,2024-07-23,Africa,,,,Hans Müller,16,258.85,0.15,3520.35
+860,2025-05-17,Europe,Germany,Furniture,Desk Lamp,Kovács Anna,6,38.59,0.05,219.95
+861,2024-12-20,Africa,South Africa,Office Supplies,,Emily Johnson,1,295.36,0.30,206.75
+862,2024-11-21,Europe,United Kingdom,,Extended Warranty,Kovács Anna,9,87.64,0.20,631.01
+863,2024-09-03,Africa,Egypt,Furniture,Desk Lamp,Priya Sharma,12,51.57,0.25,464.11
+864,2025-09-01,Oceania,Australia,Electronics,Keyboard,Emily Johnson,10,56.61,0.25,424.58
+865,2025-08-27,Asia,,,,Nagy Péter,20,300.92,0.20,4814.64
+866,2024-01-08,Asia,South Korea,Furniture,Office Chair,Szabó Éva,20,270.16,0.15,4592.77
+867,2024-12-08,Asia,India,,Shipping,Carlos García,5,16.61,,83.06
+868,2024-07-26,Asia,Japan,Software,Antivirus,Marie Dubois,15,52.49,0.05,747.94
+869,2024-05-26,Asia,China,Office Supplies,Stapler,Hans Müller,10,12.70,0.15,107.93
+870,2024-04-08,South America,Argentina,Furniture,Desk Lamp,Szabó Éva,14,45.35,,634.96
+871,2025-09-02,South America,Argentina,Electronics,Headphones,Emily Johnson,15,99.41,,1491.18
+872,2025-02-21,,Singapore,Office Supplies,Pens,Hans Müller,1,,0.30,
+873,2024-03-28,Oceania,Australia,,Shipping,Yuki Tanaka,,14.79,0.20,
+874,2025-07-30,Europe,United Kingdom,Office Supplies,Printer Paper,Nagy Péter,6,8.90,0.20,42.73
+875,2024-08-19,Europe,Germany,,Shipping,Yuki Tanaka,19,16.53,0.30,219.89
+876,2024-04-19,Europe,Hungary,Office Supplies,Printer Paper,Kovács Anna,2,7.06,0.00,14.12
+877,2025-12-11,Asia,Japan,Electronics,Monitor,Hans Müller,1,400.36,0.30,280.25
+878,2025-04-24,South America,Brazil,Office Supplies,Printer Paper,Kovács Anna,15,9.06,0.00,135.94
+879,2025-04-26,Europe,Hungary,,Gift Card,Emily Johnson,12,93.54,0.15,954.07
+880,2024-07-22,South America,Brazil,Software,IDE License,Priya Sharma,10,187.23,0.05,1778.65
+881,2024-12-17,South America,Argentina,Electronics,Keyboard,Emily Johnson,5,51.79,,258.97
+882,2025-03-08,North America,Mexico,Office Supplies,Stapler,,7,11.24,,78.71
+883,2025-11-26,North America,United States,Office Supplies,Printer Paper,Szabó Éva,18,8.43,0.15,129.02
+884,2024-07-22,South America,Argentina,Electronics,,Priya Sharma,6,214.71,0.30,901.76
+885,2025-09-05,,Iceland,Office Supplies,Binder,Yuki Tanaka,12,,0.25,
+886,2025-09-09,Asia,India,Electronics,Laptop,Yuki Tanaka,14,1238.34,0.30,12135.76
+887,2024-01-06,South America,Brazil,Electronics,,Nagy Péter,5,105.15,0.20,420.58
+888,2025-09-16,North America,United States,Furniture,Bookshelf,Szabó Éva,10,206.06,0.10,1854.58
+889,2024-02-07,Europe,United Kingdom,Furniture,Desk Lamp,Priya Sharma,10,41.91,,419.08
+890,2024-12-22,,Iceland,Electronics,Keyboard,John Smith,6,68.98,0.05,393.16
+891,2025-01-08,,Singapore,Electronics,Monitor,Marie Dubois,13,343.52,0.15,3795.93
+892,2025-11-04,North America,Mexico,Office Supplies,Pens,Marie Dubois,7,3.61,0.20,20.21
+893,2024-03-02,South America,Brazil,Office Supplies,Printer Paper,Szabó Éva,4,7.72,0.20,24.71
+894,2024-12-08,Europe,Hungary,Electronics,Headphones,Kovács Anna,7,92.23,,645.60
+895,2025-10-04,Asia,Japan,Electronics,,Marie Dubois,2,110.89,0.30,155.25
+896,2024-12-03,North America,United States,Furniture,Desk,Kovács Anna,,440.05,0.10,
+897,2024-06-19,North America,,,,Hans Müller,9,460.57,0.15,3523.34
+898,2024-08-27,,Singapore,Office Supplies,Binder,Kovács Anna,8,5.84,0.10,42.03
+899,2025-11-09,North America,Mexico,Office Supplies,Stapler,Kovács Anna,17,12.82,0.10,196.13
+900,2024-08-09,Asia,South Korea,Office Supplies,Stapler,Kovács Anna,2,13.31,,26.63
+901,2025-01-11,North America,Mexico,Office Supplies,Stapler,Yuki Tanaka,17,10.30,0.00,175.09
+902,2024-05-27,Oceania,Australia,Software,Office Suite,Marie Dubois,11,135.11,0.10,1337.58
+903,2024-08-08,North America,United States,Furniture,Desk Lamp,Kovács Anna,7,50.59,0.30,247.88
+904,2024-09-17,North America,United States,Software,IDE License,Nagy Péter,4,220.98,,883.90
+905,2024-03-21,Europe,United Kingdom,Electronics,Mouse,Marie Dubois,19,24.55,0.05,443.11
+906,2024-08-25,Europe,Germany,Software,,Priya Sharma,3,279.23,0.05,795.80
+907,2024-10-27,Asia,India,Electronics,Headphones,Szabó Éva,9,99.34,0.25,670.55
+908,2024-10-28,Asia,South Korea,Office Supplies,Binder,Emily Johnson,12,5.88,0.30,49.41
+909,2024-02-09,South America,Argentina,Electronics,Mouse,Hans Müller,19,27.82,0.15,449.36
+910,2025-01-22,Europe,,,,Szabó Éva,17,76.74,0.30,913.17
+911,2025-03-07,South America,Argentina,Software,Antivirus,Kovács Anna,17,48.16,0.30,573.06
+912,2024-11-14,Europe,France,,Gift Card,Priya Sharma,10,89.12,0.20,712.98
+913,2024-09-17,North America,Canada,Electronics,Monitor,Szabó Éva,19,329.16,0.25,4690.59
+914,2024-06-03,,Iceland,Electronics,Laptop,Kovács Anna,12,1164.68,,13976.16
+915,2025-07-19,South America,Brazil,Electronics,Mouse,Szabó Éva,9,22.35,,201.16
+916,2025-03-07,Africa,Egypt,,Extended Warranty,Hans Müller,6,79.25,,475.52
+917,2024-01-24,Asia,South Korea,Electronics,Mouse,John Smith,2,23.38,0.25,35.07
+918,2024-08-15,Europe,Germany,,Shipping,Marie Dubois,10,16.59,0.30,116.13
+919,2025-11-04,Asia,India,Electronics,Mouse,Nagy Péter,17,25.47,,432.98
+920,2024-12-19,Europe,France,Office Supplies,Binder,Marie Dubois,16,5.38,0.25,64.55
+921,2025-02-18,North America,Canada,Furniture,,Priya Sharma,10,159.64,0.25,1197.29
+922,2025-06-26,Europe,Poland,Furniture,Desk Lamp,John Smith,20,43.27,0.25,649.05
+923,2025-11-18,,Singapore,Electronics,Monitor,Szabó Éva,7,377.30,0.10,2376.97
+924,2024-11-23,Africa,Egypt,Electronics,Mouse,Kovács Anna,2,21.39,0.20,34.23
+925,2024-10-02,South America,Brazil,Furniture,Bookshelf,Marie Dubois,11,167.59,0.20,1474.79
+926,2025-01-26,North America,Canada,Office Supplies,Printer Paper,Yuki Tanaka,3,9.11,0.00,27.32
+927,2024-05-02,North America,Canada,Electronics,Headphones,Szabó Éva,6,80.74,0.25,363.33
+928,2025-10-31,Europe,Hungary,Furniture,Desk Lamp,Priya Sharma,2,42.32,0.25,63.48
+929,2024-05-14,North America,Canada,Software,,Yuki Tanaka,20,199.39,0.10,3589.05
+930,2024-10-29,Asia,China,,Gift Card,,5,94.03,0.00,470.15
+931,2025-12-29,North America,United States,,Gift Card,Nagy Péter,20,105.22,0.25,1578.30
+932,2024-06-03,Asia,India,,Gift Card,Szabó Éva,20,96.08,0.20,1537.22
+933,2025-05-23,Europe,Germany,Software,Antivirus,Yuki Tanaka,20,42.92,0.00,858.37
+934,2025-07-29,,Iceland,Office Supplies,Printer Paper,Emily Johnson,16,8.77,0.05,133.25
+935,2024-07-11,North America,United States,Electronics,Keyboard,Szabó Éva,8,53.23,0.05,404.53
+936,2024-07-23,Asia,South Korea,,Gift Card,Marie Dubois,16,93.16,0.30,1043.41
+937,2025-03-01,,Singapore,,Gift Card,John Smith,6,97.20,0.05,554.07
+938,2024-04-24,North America,Mexico,Electronics,Mouse,Emily Johnson,9,23.73,0.15,181.55
+939,2025-12-17,North America,United States,Office Supplies,Stapler,Carlos García,10,11.49,0.10,103.41
+940,2025-04-06,Oceania,New Zealand,Furniture,Desk,,,376.98,0.25,
+941,2024-07-29,South America,,,,Nagy Péter,4,392.25,0.20,1255.19
+942,2024-11-17,Asia,South Korea,Electronics,Mouse,Kovács Anna,7,22.19,0.20,124.27
+943,2025-10-09,Africa,South Africa,Electronics,Headphones,Szabó Éva,4,100.54,0.00,402.15
+944,2025-01-01,South America,Brazil,Electronics,Monitor,Szabó Éva,6,313.23,,1879.38
+945,2025-04-01,Europe,Germany,Software,Office Suite,Nagy Péter,15,130.50,0.10,1761.73
+946,2025-03-04,,Iceland,Office Supplies,Printer Paper,Hans Müller,,7.46,0.15,
+947,2025-06-11,Africa,South Africa,Software,IDE License,Priya Sharma,17,219.68,0.00,3734.53
+948,2025-04-03,South America,Argentina,Software,Office Suite,Emily Johnson,8,154.10,0.25,924.59
+949,2025-10-23,Asia,China,Furniture,Desk Lamp,Marie Dubois,1,43.75,,43.75
+950,2025-11-11,South America,Argentina,Software,Office Suite,Emily Johnson,19,142.65,0.20,2168.26
+951,2025-07-29,Asia,India,Office Supplies,Binder,Szabó Éva,19,5.22,0.10,89.28
+952,2025-04-23,Oceania,New Zealand,Furniture,Desk Lamp,Szabó Éva,,47.49,0.10,
+953,2025-03-02,Asia,India,Software,Antivirus,Carlos García,15,53.75,0.15,685.36
+954,2024-05-10,,Singapore,Office Supplies,Pens,Carlos García,1,3.42,,3.42
+955,2024-07-27,,Iceland,Electronics,Keyboard,Emily Johnson,8,62.73,0.25,376.40
+956,2024-01-27,,Singapore,Office Supplies,Binder,Marie Dubois,4,5.71,0.15,19.41
+957,2024-06-10,South America,Argentina,Office Supplies,Printer Paper,Hans Müller,15,8.61,0.05,122.64
+958,2024-06-21,North America,Mexico,Electronics,Monitor,Kovács Anna,6,383.56,,2301.36
+959,2025-06-14,South America,Brazil,Software,IDE License,Marie Dubois,16,170.79,0.25,2049.44
+960,2025-09-10,Oceania,New Zealand,Office Supplies,,Marie Dubois,,28.20,0.15,
+961,2024-11-29,Asia,India,,Shipping,Szabó Éva,13,15.20,,197.59
+962,2025-09-15,Oceania,Australia,Electronics,Laptop,Yuki Tanaka,8,1314.35,,10514.84
+963,2025-08-23,South America,Brazil,Electronics,Monitor,Marie Dubois,15,305.11,0.20,3661.37
+964,2025-05-16,Oceania,New Zealand,,Gift Card,Priya Sharma,15,99.20,0.00,1487.93
+965,2025-08-29,Oceania,Australia,Furniture,Desk Lamp,Marie Dubois,16,48.14,0.15,654.71
+966,2025-04-30,Africa,Egypt,Electronics,Keyboard,Marie Dubois,4,65.15,0.10,234.52
+967,2024-06-10,Oceania,Australia,Office Supplies,Stapler,Emily Johnson,13,13.34,0.00,173.48
+968,2025-11-19,Africa,South Africa,Electronics,Laptop,Yuki Tanaka,1,1133.00,0.15,963.05
+969,2025-08-07,North America,Canada,Software,Office Suite,Priya Sharma,,142.55,,
+970,2025-07-15,Asia,South Korea,Electronics,Headphones,Nagy Péter,3,78.72,,236.16
+971,2024-07-31,Europe,,,,Yuki Tanaka,4,500.32,0.20,1601.02
+972,2025-05-31,Europe,France,Furniture,Desk Lamp,Hans Müller,,49.09,,
+973,2024-06-09,Europe,Germany,Software,,,18,280.85,0.10,4549.73
+974,2025-10-17,Asia,South Korea,Office Supplies,Stapler,Marie Dubois,,11.85,0.00,
+975,2024-07-22,Asia,China,Software,IDE License,Kovács Anna,2,,0.05,
+976,2025-12-13,,Singapore,Software,IDE License,Carlos García,17,216.18,0.25,2756.28
+977,2025-12-05,Europe,Germany,Electronics,Keyboard,Emily Johnson,5,58.35,0.10,262.55
+978,2025-06-10,,Iceland,Furniture,Desk Lamp,John Smith,11,44.98,0.15,420.52
+979,2024-02-09,Africa,Egypt,Furniture,Office Chair,,3,230.21,0.15,587.03
+980,2024-01-07,Asia,India,,Gift Card,Marie Dubois,2,89.00,,178.01
+981,2025-01-29,North America,Mexico,Software,Office Suite,Szabó Éva,17,143.73,0.05,2321.25
+982,2024-10-10,,Singapore,Furniture,Office Chair,Yuki Tanaka,11,222.52,,2447.70
+983,2025-08-12,North America,Mexico,,Extended Warranty,Priya Sharma,2,87.53,,175.06
+984,2025-03-23,North America,United States,Electronics,Keyboard,,14,,,
+985,2025-07-28,,Singapore,Electronics,Headphones,Hans Müller,7,77.10,0.15,458.72
+986,2024-04-10,Asia,Japan,Electronics,Mouse,Nagy Péter,1,25.00,0.00,25.00
+987,2025-08-03,Oceania,New Zealand,Office Supplies,Printer Paper,Carlos García,12,8.01,0.30,67.25
+988,2025-09-04,Asia,South Korea,Office Supplies,Pens,Szabó Éva,20,3.54,0.30,49.60
+989,2025-11-21,North America,Mexico,Electronics,Laptop,Marie Dubois,18,1293.81,0.30,16301.96
+990,2024-12-02,Oceania,New Zealand,Furniture,,Hans Müller,15,35.23,,528.44
+991,2024-11-13,Oceania,New Zealand,Furniture,Desk,Priya Sharma,18,387.50,,6974.91
+992,2025-04-19,Europe,Poland,Furniture,Office Chair,Kovács Anna,4,231.50,0.15,787.10
+993,2024-12-09,North America,Mexico,,Gift Card,Kovács Anna,1,86.98,0.20,69.58
+994,2024-08-11,Africa,South Africa,Office Supplies,Printer Paper,Marie Dubois,6,8.42,0.15,42.94
+995,2024-10-28,Europe,Hungary,Furniture,Bookshelf,,15,166.95,0.25,1878.13
+996,2024-01-25,Africa,Egypt,Office Supplies,Binder,Marie Dubois,3,5.82,,17.47
+997,2024-08-11,North America,United States,,Gift Card,Szabó Éva,12,97.68,0.25,879.10
+998,2025-08-01,Africa,South Africa,Electronics,Headphones,Nagy Péter,14,93.98,0.05,1249.96
+999,2024-12-31,Africa,South Africa,,Shipping,Hans Müller,,12.95,0.15,
+1000,2025-06-14,Europe,Germany,Electronics,,Kovács Anna,18,102.56,0.20,1476.85
