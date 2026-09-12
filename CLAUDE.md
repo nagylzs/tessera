@@ -157,7 +157,11 @@ Paths below are relative to the package (`lib/src/...` means
   clamps to `CubeTheme.min/maxColumnWidth` (72/320) and
   `min/maxRowHeaderWidth` (100/400); equal min and max = fixed widths.
   Cached per (layout, aggregate, strings, theme text bits, text scaler…),
-  so it reruns only on toggle/spec change. Rows stay fixed-height. Test
+  so it reruns only on toggle/spec change. `CubeView.keepColumnWidths`
+  (default true): a column never shrinks while the state lives —
+  remembered by `HeaderEntry.path` (data) / dimension id (row headers),
+  memory dropped when anything but the layout changes. Rows stay
+  fixed-height. Test
   font renders every glyph 1 em wide, so widths in widget tests are large
   (tests set `tester.view.physicalSize` where that matters).
 - The library must NOT depend on `intl`. Localization is split: the

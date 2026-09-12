@@ -45,7 +45,8 @@ typedef ExpansionConfirmation = Future<bool> Function(
 ///
 /// Column widths follow the content: the widest text of each column (its
 /// values, labels and titles) is measured up front and the width clamped to
-/// the [CubeTheme]'s bounds. Rows have a fixed height.
+/// the [CubeTheme]'s bounds. Once widened, a column keeps its width for the
+/// life of the view (see [keepColumnWidths]). Rows have a fixed height.
 ///
 /// v1 shows a single [aggregate] per cell. Needs a [Material] ancestor.
 class CubeView extends StatelessWidget {
@@ -64,6 +65,7 @@ class CubeView extends StatelessWidget {
     this.confirmExpansion,
     this.onCellTap,
     this.measuredRows = 1000,
+    this.keepColumnWidths = true,
   });
 
   final CubeController controller;
@@ -108,6 +110,14 @@ class CubeView extends StatelessWidget {
   /// formatting every cell of a huge cube on each rebuild — a longer value
   /// further down is shown with an ellipsis.
   final int measuredRows;
+
+  /// Whether a column keeps the widest width it has had while this view is
+  /// alive, so collapsing the group that held its widest value does not
+  /// make it (and everything right of it) jump. Columns are remembered by
+  /// their [HeaderEntry.path] (row-header columns by dimension); the memory
+  /// is dropped when the aggregate, the formatting or the theme changes.
+  /// `false` resizes both ways on every change.
+  final bool keepColumnWidths;
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -182,13 +192,18 @@ class _CubeGridState extends State<_CubeGrid> {
   List<double>? _widths;
   Object? _widthsKey;
 
+  /// Widest width seen per row-header column (by dimension id) and per data
+  /// column (by path) under [_memoryKey]; see [CubeView.keepColumnWidths].
+  final _rememberedHeader = <String, double>{};
+  final _rememberedData = <DimensionPath, double>{};
+  Object? _memoryKey;
+
   /// One width per grid column, measured from the content of [layout] and
   /// recomputed only when something that affects it changes.
   List<double> _columnWidths(BuildContext context) {
     final textScaler = MediaQuery.textScalerOf(context);
     final textDirection = Directionality.of(context);
-    final key = (
-      layout,
+    final memoryKey = (
       shown,
       strings,
       view.formatCell,
@@ -206,10 +221,11 @@ class _CubeGridState extends State<_CubeGrid> {
       textScaler,
       textDirection,
     );
+    final key = (layout, memoryKey);
     if (_widths != null && _widthsKey == key) return _widths!;
     final aggregate = shown;
     _widthsKey = key;
-    return _widths =
+    final widths =
         ColumnWidthMeasurer(
           cellStyle: theme.cellTextStyle,
           headerStyle: theme.headerTextStyle,
@@ -235,6 +251,29 @@ class _CubeGridState extends State<_CubeGrid> {
           minRowHeaderWidth: theme.minRowHeaderWidth,
           maxRowHeaderWidth: theme.maxRowHeaderWidth,
         );
+    if (view.keepColumnWidths) _keepWidest(widths, memoryKey);
+    return _widths = widths;
+  }
+
+  /// Raises each width to the widest remembered for that column and
+  /// remembers the result.
+  void _keepWidest(List<double> widths, Object memoryKey) {
+    if (_memoryKey != memoryKey) {
+      _rememberedHeader.clear();
+      _rememberedData.clear();
+      _memoryKey = memoryKey;
+    }
+    for (var c = 0; c < headerColumns; c++) {
+      final id = c < rowDepth ? spec.rows.dimensions[c].dimension.id : '';
+      widths[c] = math.max(widths[c], _rememberedHeader[id] ?? 0);
+      _rememberedHeader[id] = widths[c];
+    }
+    final columns = layout.columns.entries;
+    for (var j = 0; j < columns.length; j++) {
+      final path = columns[j].path;
+      final w = math.max(widths[headerColumns + j], _rememberedData[path] ?? 0);
+      widths[headerColumns + j] = _rememberedData[path] = w;
+    }
   }
 
   @override

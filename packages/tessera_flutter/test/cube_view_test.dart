@@ -480,5 +480,72 @@ void main() {
       expect(cellWidth(tester, '28'), 200);
       expect(cellWidth(tester, 'sum of qty'), 200);
     });
+
+    group('keepColumnWidths', () {
+      late FactTable nested;
+      setUpAll(() async {
+        final source = ListDataSource(
+          columns: ['region', 'country', 'amount'],
+          rows: const [
+            ['Europe', 'A rather long country name', 1],
+            ['Asia', 'Japan', 2],
+          ],
+          declaredSchema: Schema([
+            const ColumnSpec(name: 'region', type: ColumnType.text),
+            const ColumnSpec(name: 'country', type: ColumnType.text),
+            const ColumnSpec(name: 'amount', type: ColumnType.integer),
+          ]),
+        );
+        nested = (await loadFacts(source)).facts;
+      });
+
+      /// Expands Europe (the long country name appears in the country
+      /// column), collapses it again and returns the country column's
+      /// width before, during and after.
+      Future<(double, double, double)> run(
+        WidgetTester tester, {
+        required bool keep,
+      }) async {
+        final controller = CubeController(
+          Cube(
+            facts: nested,
+            spec: CubeSpec(
+              rows: CubeAxis.of([region, country]),
+              aggregates: [sumAmount],
+            ),
+          ),
+        );
+        await tester.pumpWidget(
+          host(
+            CubeView(
+              controller: controller,
+              aggregate: sumAmount,
+              keepColumnWidths: keep,
+            ),
+          ),
+        );
+        final before = cellWidth(tester, 'country');
+        controller.toggleRow(europe);
+        await tester.pump();
+        expect(find.text('A rather long country name'), findsOneWidget);
+        final during = cellWidth(tester, 'country');
+        controller.toggleRow(europe);
+        await tester.pump();
+        expect(find.text('A rather long country name'), findsNothing);
+        return (before, during, cellWidth(tester, 'country'));
+      }
+
+      testWidgets('a column keeps its widest width by default', (tester) async {
+        final (before, during, after) = await run(tester, keep: true);
+        expect(during, greaterThan(before));
+        expect(after, during);
+      });
+
+      testWidgets('keepColumnWidths: false shrinks again', (tester) async {
+        final (before, during, after) = await run(tester, keep: false);
+        expect(during, greaterThan(before));
+        expect(after, before);
+      });
+    });
   });
 }
