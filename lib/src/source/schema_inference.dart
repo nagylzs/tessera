@@ -9,12 +9,7 @@ final class InferenceOptions {
   const InferenceOptions({
     this.sampleRows = 1000,
     this.nullValues = ColumnSpec.defaultNullValues,
-    this.dateFormats = const [
-      'yyyy-MM-dd',
-      'yyyy-MM-ddTHH:mm:ss',
-      'yyyy-MM-dd HH:mm:ss',
-      'yyyy-MM-dd HH:mm',
-    ],
+    this.dateFormats = defaultDateFormats,
     this.numberSyntax = NumberSyntax.standard,
   });
 

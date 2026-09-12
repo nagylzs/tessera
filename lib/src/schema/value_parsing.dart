@@ -84,6 +84,15 @@ bool? parseBoolean(String raw) => switch (raw.trim().toLowerCase()) {
   _ => null,
 };
 
+/// Date patterns tried by default, in order, when a schema has no explicit
+/// [ColumnSpec.format].
+const defaultDateFormats = [
+  'yyyy-MM-dd',
+  'yyyy-MM-ddTHH:mm:ss',
+  'yyyy-MM-dd HH:mm:ss',
+  'yyyy-MM-dd HH:mm',
+];
+
 /// A compiled date/time pattern such as `yyyy-MM-dd` or `dd.MM.yyyy HH:mm`.
 ///
 /// Supported tokens: `yyyy`, `yy` (→ 20yy), `MM`/`M`, `dd`/`d`, `HH`/`H`,

@@ -22,9 +22,13 @@ cd example && dart run tool/gen_sales_csv.dart   # regenerate assets/sales.csv (
   `inferSchema`, and the shared value parsers in `schema/value_parsing.dart`
   (`NumberSyntax`, `parseBoolean`, `DatePattern`) that the importer must
   reuse so import and inference agree.
-- Still `UnimplementedError`: `FactTableImporter.import`, all
-  `Accumulator`s, `Cube._computeLayout`, `expand*ToDepth`, `CubeView.build`,
-  ISO week in `DatePartDimension`.
+- Implemented: `FactTableImporter` + `FactTableImpl`
+  (`facts/fact_table_impl.dart`, internal, not exported): numbers/dates in
+  `Float64List` (NaN = null, ints exact to 2^53, dates as UTC millis), text
+  dictionary-encoded (`Int32List` codes, -1 = null), booleans `Uint8List`.
+  `loadFacts(source)` works end to end on `sales.csv`.
+- Still `UnimplementedError`: all `Accumulator`s, `Cube._computeLayout`,
+  `expand*ToDepth`, `CubeView.build`, ISO week in `DatePartDimension`.
 - `example/` is the untouched `flutter create` app plus `assets/sales.csv`.
 - README describes the target API. `pubspec.yaml` `description` is set;
   `CHANGELOG.md` is the template.
