@@ -6,6 +6,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import '../cube/aggregate.dart';
 import '../cube/cube_layout.dart';
 import '../cube/cube_spec.dart';
+import '../l10n/tessera_localizations.dart';
 import 'axis_geometry.dart';
 import 'cube_controller.dart';
 import 'cube_theme.dart';
@@ -53,9 +54,9 @@ class CubeView extends StatelessWidget {
     this.theme = const CubeTheme(),
     this.formatCell,
     this.styleCell,
-    this.emptyGroupLabel = '(empty)',
-    this.rowSummaryLabel = 'Total',
-    this.columnSummaryLabel = 'Total',
+    this.emptyGroupLabel,
+    this.rowSummaryLabel,
+    this.columnSummaryLabel,
     this.sortable = true,
     this.expansionLimit = 200,
     this.confirmExpansion,
@@ -71,21 +72,22 @@ class CubeView extends StatelessWidget {
 
   final CubeTheme theme;
 
-  /// Defaults to integers as-is and other numbers with two decimals.
+  /// Defaults to [TesseraLocalizations.formatNumber].
   final CellFormatter? formatCell;
 
   /// Defaults to a muted colour for zero and the error colour for negative
   /// numbers.
   final CellStyler? styleCell;
 
-  /// Header text for the group of facts lacking a value.
-  final String emptyGroupLabel;
+  /// Header text for the group of facts lacking a value. Defaults to the
+  /// localized text (see [TesseraLocalizations]).
+  final String? emptyGroupLabel;
 
-  /// Header text of the summary row.
-  final String rowSummaryLabel;
+  /// Header text of the summary row. Defaults to the localized text.
+  final String? rowSummaryLabel;
 
-  /// Header text of the summary column.
-  final String columnSummaryLabel;
+  /// Header text of the summary column. Defaults to the localized text.
+  final String? columnSummaryLabel;
 
   /// Whether tapping headers changes the sort order.
   final bool sortable;
@@ -101,19 +103,23 @@ class CubeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
-    builder: (context, _) =>
-        _CubeGrid(view: this, theme: theme.resolve(context)),
+    builder: (context, _) => _CubeGrid(
+      view: this,
+      theme: theme.resolve(context),
+      strings: TesseraLocalizations.of(context),
+    ),
   );
 }
 
 class _CubeGrid extends StatelessWidget {
-  _CubeGrid({required this.view, required this.theme})
+  _CubeGrid({required this.view, required this.theme, required this.strings})
     : layout = view.controller.cube.layout,
       rowGeometry = AxisGeometry(view.controller.cube.layout.rows),
       columnGeometry = AxisGeometry(view.controller.cube.layout.columns);
 
   final CubeView view;
   final ResolvedCubeTheme theme;
+  final TesseraLocalizations strings;
   final CubeLayout layout;
   final AxisGeometry rowGeometry;
   final AxisGeometry columnGeometry;
@@ -182,7 +188,7 @@ class _CubeGrid extends StatelessWidget {
               ? () => _sortByValue(isRow: false, level: r)
               : null,
           child: _titleText(
-            level.dimension.labelFor(layout.facts),
+            strings.dimensionLabel(level.dimension, layout.facts),
             level.sort,
             trailingIcon: true,
           ),
@@ -201,7 +207,7 @@ class _CubeGrid extends StatelessWidget {
         alignment: Alignment.centerLeft,
         onTap: view.sortable ? () => _sortByValue(isRow: true, level: c) : null,
         child: _titleText(
-          level.dimension.labelFor(layout.facts),
+          strings.dimensionLabel(level.dimension, layout.facts),
           level.sort,
           trailingIcon: true,
         ),
@@ -250,7 +256,9 @@ class _CubeGrid extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  shown?.labelFor(layout.facts) ?? '',
+                  shown == null
+                      ? ''
+                      : strings.aggregateLabel(shown!, layout.facts),
                   style: theme.headerTextStyle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -271,7 +279,7 @@ class _CubeGrid extends StatelessWidget {
             context,
             entry,
             isRow: false,
-            summaryLabel: view.columnSummaryLabel,
+            summaryLabel: view.columnSummaryLabel ?? strings.total,
           ),
         ),
       );
@@ -293,7 +301,7 @@ class _CubeGrid extends StatelessWidget {
                 context,
                 owner,
                 isRow: false,
-                summaryLabel: view.columnSummaryLabel,
+                summaryLabel: view.columnSummaryLabel ?? strings.total,
               )
             : const SizedBox(),
       ),
@@ -313,7 +321,7 @@ class _CubeGrid extends StatelessWidget {
             context,
             entry,
             isRow: true,
-            summaryLabel: view.rowSummaryLabel,
+            summaryLabel: view.rowSummaryLabel ?? strings.total,
           ),
         ),
       );
@@ -333,7 +341,7 @@ class _CubeGrid extends StatelessWidget {
                 context,
                 owner,
                 isRow: true,
-                summaryLabel: view.rowSummaryLabel,
+                summaryLabel: view.rowSummaryLabel ?? strings.total,
               )
             : const SizedBox(),
       ),
@@ -349,8 +357,8 @@ class _CubeGrid extends StatelessWidget {
     final text = entry.isSummary
         ? summaryLabel
         : entry.value == null
-        ? view.emptyGroupLabel
-        : entry.label;
+        ? view.emptyGroupLabel ?? strings.emptyGroup
+        : strings.formatValue(entry.dimension, entry.value);
     final style = entry.isSummary
         ? theme.headerTextStyle.copyWith(fontWeight: FontWeight.bold)
         : theme.headerTextStyle;
@@ -424,12 +432,9 @@ class _CubeGrid extends StatelessWidget {
     );
   }
 
-  static String _defaultFormat(CubeCell cell, Object? value) => switch (value) {
+  String _defaultFormat(CubeCell cell, Object? value) => switch (value) {
     null => '',
-    int v => v.toString(),
-    double v when v == v.truncateToDouble() && v.abs() < 1e15 =>
-      v.toInt().toString(),
-    double v => v.toStringAsFixed(2),
+    num v => strings.formatNumber(v),
     _ => value.toString(),
   };
 
@@ -486,22 +491,30 @@ class _CubeGrid extends StatelessWidget {
     HeaderEntry entry, {
     required bool isRow,
   }) async {
-    final what = isRow ? 'rows' : 'columns';
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Large expansion'),
+        title: Text(strings.largeExpansionTitle),
         content: Text(
-          'Expanding "${entry.label}" adds ${entry.childCount} $what. Continue?',
+          strings.largeExpansion(
+            entry.isSummary
+                ? (isRow ? view.rowSummaryLabel : view.columnSummaryLabel) ??
+                      strings.total
+                : entry.value == null
+                ? view.emptyGroupLabel ?? strings.emptyGroup
+                : strings.formatValue(entry.dimension, entry.value),
+            entry.childCount,
+            isRow: isRow,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Expand'),
+            child: Text(strings.expand),
           ),
         ],
       ),

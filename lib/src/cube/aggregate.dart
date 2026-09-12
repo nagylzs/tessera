@@ -9,10 +9,10 @@ import '../facts/measure.dart';
 /// parent cells are obtained by [merge]-ing their children instead of
 /// rescanning. That is why `average` carries sum + count rather than a
 /// running mean.
-abstract class Accumulator<R> {
+abstract class AggregateAccumulator<R> {
   void add(FactTable facts, int row);
 
-  void merge(covariant Accumulator<R> other);
+  void merge(covariant AggregateAccumulator<R> other);
 
   /// `null` when nothing meaningful was accumulated (no facts, or only
   /// missing measure values).
@@ -36,7 +36,7 @@ abstract class Aggregate<R> {
   /// column labels of the table (see [Measure.labelFor]).
   String labelFor(FactTable facts) => label;
 
-  Accumulator<R> createAccumulator();
+  AggregateAccumulator<R> createAccumulator();
 
   static SumAggregate sum(Measure measure) => SumAggregate(measure);
   static AverageAggregate average(Measure measure) => AverageAggregate(measure);
@@ -90,7 +90,7 @@ final class SumAggregate extends MeasureAggregate<double> {
   String get function => 'sum';
 
   @override
-  Accumulator<double> createAccumulator() => _SumAccumulator(measure);
+  AggregateAccumulator<double> createAccumulator() => _SumAccumulator(measure);
 }
 
 /// Mean of non-null values. `null` if every value was missing.
@@ -101,7 +101,8 @@ final class AverageAggregate extends MeasureAggregate<double> {
   String get function => 'avg';
 
   @override
-  Accumulator<double> createAccumulator() => _AverageAccumulator(measure);
+  AggregateAccumulator<double> createAccumulator() =>
+      _AverageAccumulator(measure);
 }
 
 final class MinAggregate extends MeasureAggregate<double> {
@@ -111,7 +112,7 @@ final class MinAggregate extends MeasureAggregate<double> {
   String get function => 'min';
 
   @override
-  Accumulator<double> createAccumulator() =>
+  AggregateAccumulator<double> createAccumulator() =>
       _ExtremumAccumulator(measure, min: true);
 }
 
@@ -122,7 +123,7 @@ final class MaxAggregate extends MeasureAggregate<double> {
   String get function => 'max';
 
   @override
-  Accumulator<double> createAccumulator() =>
+  AggregateAccumulator<double> createAccumulator() =>
       _ExtremumAccumulator(measure, min: false);
 }
 
@@ -133,7 +134,8 @@ final class CountNonNullAggregate extends MeasureAggregate<int> {
   String get function => 'count';
 
   @override
-  Accumulator<int> createAccumulator() => _CountNonNullAccumulator(measure);
+  AggregateAccumulator<int> createAccumulator() =>
+      _CountNonNullAccumulator(measure);
 }
 
 /// Number of facts. Never `null`; `0` for an empty cell.
@@ -147,7 +149,7 @@ final class CountAggregate extends Aggregate<int> {
   String get label => 'count';
 
   @override
-  Accumulator<int> createAccumulator() => _CountAccumulator();
+  AggregateAccumulator<int> createAccumulator() => _CountAccumulator();
 }
 
 /// Number of distinct non-null values of a dimension (like SQL
@@ -168,10 +170,11 @@ final class DistinctCountAggregate extends Aggregate<int> {
   String labelFor(FactTable facts) => 'distinct ${dimension.labelFor(facts)}';
 
   @override
-  Accumulator<int> createAccumulator() => _DistinctCountAccumulator(dimension);
+  AggregateAccumulator<int> createAccumulator() =>
+      _DistinctCountAccumulator(dimension);
 }
 
-final class _SumAccumulator extends Accumulator<double> {
+final class _SumAccumulator extends AggregateAccumulator<double> {
   _SumAccumulator(this.measure);
   final Measure measure;
   double sum = 0;
@@ -196,7 +199,7 @@ final class _SumAccumulator extends Accumulator<double> {
   double? get result => hasValue ? sum : null;
 }
 
-final class _AverageAccumulator extends Accumulator<double> {
+final class _AverageAccumulator extends AggregateAccumulator<double> {
   _AverageAccumulator(this.measure);
   final Measure measure;
   double sum = 0;
@@ -221,7 +224,7 @@ final class _AverageAccumulator extends Accumulator<double> {
   double? get result => count == 0 ? null : sum / count;
 }
 
-final class _ExtremumAccumulator extends Accumulator<double> {
+final class _ExtremumAccumulator extends AggregateAccumulator<double> {
   _ExtremumAccumulator(this.measure, {required this.min});
   final Measure measure;
   final bool min;
@@ -248,7 +251,7 @@ final class _ExtremumAccumulator extends Accumulator<double> {
   double? get result => value;
 }
 
-final class _CountNonNullAccumulator extends Accumulator<int> {
+final class _CountNonNullAccumulator extends AggregateAccumulator<int> {
   _CountNonNullAccumulator(this.measure);
   final Measure measure;
   int count = 0;
@@ -265,7 +268,7 @@ final class _CountNonNullAccumulator extends Accumulator<int> {
   int get result => count;
 }
 
-final class _CountAccumulator extends Accumulator<int> {
+final class _CountAccumulator extends AggregateAccumulator<int> {
   int count = 0;
 
   @override
@@ -278,7 +281,7 @@ final class _CountAccumulator extends Accumulator<int> {
   int get result => count;
 }
 
-final class _DistinctCountAccumulator extends Accumulator<int> {
+final class _DistinctCountAccumulator extends AggregateAccumulator<int> {
   _DistinctCountAccumulator(this.dimension);
   final Dimension dimension;
   final values = <Object?>{};

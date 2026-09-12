@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../facts/dimension.dart';
+import '../l10n/tessera_localizations.dart';
 
 /// Shows a searchable list of [dimensions] and returns the one picked, or
 /// `null` if dismissed. Dimensions in [used] are listed but disabled, with
-/// [usedHint] as their subtitle.
+/// [usedHint] as their subtitle. Texts default to the [TesseraLocalizations]
+/// of [context]; [labelOf] overrides how a dimension is named (default:
+/// [Dimension.label]).
 Future<Dimension?> showDimensionPicker(
   BuildContext context, {
   required List<Dimension> dimensions,
   Set<Dimension> used = const {},
-  String title = 'Add dimension',
-  String searchHint = 'Search',
-  String usedHint = 'already in use',
+  String? title,
+  String? searchHint,
+  String? usedHint,
+  String Function(Dimension)? labelOf,
 }) => showDialog<Dimension>(
   context: context,
   builder: (context) => DimensionPickerDialog(
@@ -20,6 +24,7 @@ Future<Dimension?> showDimensionPicker(
     title: title,
     searchHint: searchHint,
     usedHint: usedHint,
+    labelOf: labelOf,
   ),
 );
 
@@ -30,16 +35,18 @@ class DimensionPickerDialog extends StatefulWidget {
     super.key,
     required this.dimensions,
     this.used = const {},
-    this.title = 'Add dimension',
-    this.searchHint = 'Search',
-    this.usedHint = 'already in use',
+    this.title,
+    this.searchHint,
+    this.usedHint,
+    this.labelOf,
   });
 
   final List<Dimension> dimensions;
   final Set<Dimension> used;
-  final String title;
-  final String searchHint;
-  final String usedHint;
+  final String? title;
+  final String? searchHint;
+  final String? usedHint;
+  final String Function(Dimension)? labelOf;
 
   @override
   State<DimensionPickerDialog> createState() => _DimensionPickerDialogState();
@@ -50,16 +57,18 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = TesseraLocalizations.of(context);
+    final labelOf = widget.labelOf ?? (Dimension d) => d.label;
     final q = _query.trim().toLowerCase();
     final shown = [
       for (final d in widget.dimensions)
         if (q.isEmpty ||
-            d.label.toLowerCase().contains(q) ||
+            labelOf(d).toLowerCase().contains(q) ||
             d.id.toLowerCase().contains(q))
           d,
     ];
     return AlertDialog(
-      title: Text(widget.title),
+      title: Text(widget.title ?? strings.addDimension),
       contentPadding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
       content: SizedBox(
         width: 360,
@@ -71,7 +80,7 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
               child: TextField(
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: widget.searchHint,
+                  hintText: widget.searchHint ?? strings.search,
                   prefixIcon: const Icon(Icons.search),
                   isDense: true,
                 ),
@@ -88,8 +97,10 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
                   return ListTile(
                     dense: true,
                     enabled: !used,
-                    title: Text(d.label),
-                    subtitle: Text(used ? widget.usedHint : d.id),
+                    title: Text(labelOf(d)),
+                    subtitle: Text(
+                      used ? widget.usedHint ?? strings.alreadyInUse : d.id,
+                    ),
                     onTap: used ? null : () => Navigator.pop(context, d),
                   );
                 },

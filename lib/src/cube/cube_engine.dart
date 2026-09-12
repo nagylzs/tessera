@@ -92,7 +92,7 @@ final class CellData {
   CellData(List<Aggregate> aggregates)
     : accumulators = [for (final a in aggregates) a.createAccumulator()];
 
-  final List<Accumulator> accumulators;
+  final List<AggregateAccumulator> accumulators;
   int count = 0;
 
   void add(FactTable facts, int row) {

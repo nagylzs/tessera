@@ -65,7 +65,7 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
 - Example app (`example/lib/main.dart`) loads `assets/sales.csv` via
   `rootBundle`, infers the schema, imports, shows rows `[region, country]`
   × columns `[date.year, date.quarter]`, axis + aggregate editors,
-  expand/collapse buttons, `intl` `hu` number formatting. AppBar "Schema…"
+  expand/collapse buttons, language menu (TesseraLocalizations + flutter_localizations). AppBar "Schema…"
   opens `example/lib/schema_page.dart` (include switch, type, label, date
   format / number syntax per column, sample raw values, reset) and
   re-imports on "Import"; `_prune` drops spec dimensions/aggregates whose
@@ -96,8 +96,22 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
 - Grid geometry: `levelRows = max(columnDepth, 1)` header rows for group
   labels + 1 aggregate row; `headerColumns = max(rowDepth, 1)`. Pinned
   rows/columns = those. Cells draw their own right/bottom borders.
-- The library must NOT depend on `intl`; the example app uses it for
-  locale formatting (`hu`: decimal comma).
+- The library must NOT depend on `intl`. Localization lives in
+  `lib/src/l10n/`: abstract `TesseraLocalizations` (every member abstract
+  so built-in locales are compiler-checked for completeness; concrete
+  helpers `aggregateLabel`, `dimensionLabel`, `formatValue`,
+  `formatNumber`, `aggregateKindLabel`), `delegate` (matches on language
+  code, `SynchronousFuture`), `TesseraLocalizationsScope` (InheritedWidget
+  override, checked first by `of(context)`), English fallback. Fourteen
+  built-in locales in `l10n_xx.dart`, registry `locales.dart`
+  (`builtInLocalizations`). Label composition is a method per locale
+  (inflected languages use "suma: X"); `Dimension.explicitLabel` tells the
+  localization whether to compose. Core keeps English `label`/`labelFor`
+  for plain-Dart use; widgets never call them for built-in types.
+  `standardDimensions` sets no explicit labels on purpose. Widget string
+  params are nullable overrides. `Accumulator` was renamed
+  `AggregateAccumulator` (clashed with Flutter's). The example uses
+  `flutter_localizations` (not intl any more) and has a language menu.
 - `example/` is the untouched `flutter create` app plus `assets/sales.csv`.
 - README describes the target API. `pubspec.yaml` `description` is set;
   `CHANGELOG.md` is the template.

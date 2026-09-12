@@ -22,7 +22,7 @@ void main() {
       await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
     });
     expect(find.text('Europe'), findsOneWidget);
-    expect(find.text('Total (all countries)'), findsOneWidget);
+    expect(find.text('Total'), findsNWidgets(2));
     expect(find.widgetWithText(InputChip, 'sum of total'), findsOneWidget);
   });
 

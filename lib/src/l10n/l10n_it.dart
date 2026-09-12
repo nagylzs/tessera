@@ -1,0 +1,152 @@
+import '../facts/dimension.dart';
+import 'tessera_localizations.dart';
+
+/// it texts. Native review welcome.
+final class TesseraLocalizationsIt extends TesseraLocalizations {
+  const TesseraLocalizationsIt();
+
+  @override
+  String get languageCode => 'it';
+
+  @override
+  String sumOf(String t) => 'somma di $t';
+
+  @override
+  String averageOf(String t) => 'media di $t';
+
+  @override
+  String minimumOf(String t) => 'minimo di $t';
+
+  @override
+  String maximumOf(String t) => 'massimo di $t';
+
+  @override
+  String countOf(String t) => 'conteggio di $t';
+
+  @override
+  String distinctCountOf(String t) => 'valori distinti di $t';
+
+  @override
+  String get countLabel => 'conteggio';
+
+  @override
+  String get countOfFacts => 'Conteggio righe';
+
+  @override
+  String get sum => 'Somma';
+
+  @override
+  String get average => 'Media';
+
+  @override
+  String get minimum => 'Minimo';
+
+  @override
+  String get maximum => 'Massimo';
+
+  @override
+  String get countOfValues => 'Conteggio valori';
+
+  @override
+  String get distinctCount => 'Conteggio valori distinti';
+
+  @override
+  String datePartName(DatePart part) => switch (part) {
+    DatePart.year => 'anno',
+    DatePart.quarter => 'trimestre',
+    DatePart.month => 'mese',
+    DatePart.week => 'settimana',
+    DatePart.day => 'giorno',
+    DatePart.weekday => 'giorno della settimana',
+    DatePart.hour => 'ora',
+  };
+
+  @override
+  String datePartLabel(String column, DatePart part) {
+    final p = datePartName(part);
+    return '$column $p';
+  }
+
+  static const _months = [
+    'gennaio',
+    'febbraio',
+    'marzo',
+    'aprile',
+    'maggio',
+    'giugno',
+    'luglio',
+    'agosto',
+    'settembre',
+    'ottobre',
+    'novembre',
+    'dicembre',
+  ];
+
+  static const _weekdays = [
+    'lunedì',
+    'martedì',
+    'mercoledì',
+    'giovedì',
+    'venerdì',
+    'sabato',
+    'domenica',
+  ];
+
+  @override
+  String monthName(int month) => _months[month - 1];
+
+  @override
+  String weekdayName(int weekday) => _weekdays[weekday - 1];
+
+  @override
+  String quarter(int q) => 'T$q';
+
+  @override
+  String get decimalSeparator => ',';
+
+  @override
+  String get groupSeparator => '.';
+
+  @override
+  String get rows => 'Righe';
+
+  @override
+  String get columns => 'Colonne';
+
+  @override
+  String get values => 'Valori';
+
+  @override
+  String get emptyGroup => '(vuoto)';
+
+  @override
+  String get total => 'Totale';
+
+  @override
+  String get dropDimensionsHere => 'Trascina qui le dimensioni';
+
+  @override
+  String get addDimension => 'Aggiungi dimensione';
+
+  @override
+  String get addAggregate => 'Aggiungi aggregato';
+
+  @override
+  String get search => 'Cerca';
+
+  @override
+  String get alreadyInUse => 'già in uso';
+
+  @override
+  String get function => 'Funzione';
+
+  @override
+  String get expand => 'Espandi';
+
+  @override
+  String get largeExpansionTitle => 'Espansione ampia';
+
+  @override
+  String largeExpansion(String label, int added, {required bool isRow}) =>
+      'Espandere "$label" aggiunge $added ${isRow ? 'righe' : 'colonne'}. Continuare?';
+}

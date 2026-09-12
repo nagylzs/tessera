@@ -14,14 +14,18 @@
 ///    exposes the visible header entries and a [CubeCell] per intersection.
 /// 4. **Widgets** — [CubeView] renders a cube driven by a [CubeController];
 ///    [AxisEditor], [AggregateEditor] and the picker dialogs let the user
-///    configure the axes and aggregates.
+///    configure the axes and aggregates. All their texts come from
+///    [TesseraLocalizations] (fourteen languages built in).
 ///
 /// Layers 1–3 do not import Flutter; `package:tessera/core.dart` exports
 /// just those.
 library;
 
 export 'core.dart';
+export 'src/l10n/locales.dart';
+export 'src/l10n/tessera_localizations.dart';
 export 'src/widgets/aggregate_editor.dart';
+export 'src/widgets/aggregate_kind.dart';
 export 'src/widgets/aggregate_picker.dart';
 export 'src/widgets/axis_editor.dart';
 export 'src/widgets/cube_controller.dart';

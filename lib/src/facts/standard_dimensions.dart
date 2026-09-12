@@ -9,16 +9,14 @@ import 'fact_table.dart';
 /// dateTime only).
 ///
 /// Order follows the columns; parts follow their column, coarse to fine.
+/// No explicit labels are set, so the widgets show the column labels of
+/// the fact table and localized date-part names.
 List<Dimension> standardDimensions(FactTable facts) => [
   for (final column in facts.columns) ...[
-    ColumnDimension(column.name, label: column.label),
+    ColumnDimension(column.name),
     if (column.type == ColumnType.date || column.type == ColumnType.dateTime)
       for (final part in DatePart.values)
         if (part != DatePart.hour || column.type == ColumnType.dateTime)
-          DatePartDimension(
-            column.name,
-            part,
-            label: '${column.label} ${part.name}',
-          ),
+          DatePartDimension(column.name, part),
   ],
 ];

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../cube/cube_spec.dart';
 import '../facts/dimension.dart';
 import '../facts/standard_dimensions.dart';
+import '../l10n/tessera_localizations.dart';
 import 'cube_controller.dart';
 import 'dimension_picker.dart';
 
@@ -40,8 +41,8 @@ class AxisEditor extends StatelessWidget {
     required this.side,
     this.available,
     this.label,
-    this.emptyHint = 'Drop dimensions here',
-    this.addTooltip = 'Add dimension',
+    this.emptyHint,
+    this.addTooltip,
   });
 
   final CubeController controller;
@@ -50,11 +51,13 @@ class AxisEditor extends StatelessWidget {
   /// Dimensions offered by the picker.
   final List<Dimension>? available;
 
-  /// Caption in front of the chips; defaults to "Rows" / "Columns".
+  /// Caption in front of the chips; defaults to the localized
+  /// "Rows" / "Columns".
   final String? label;
 
-  final String emptyHint;
-  final String addTooltip;
+  /// Defaults to the localized texts.
+  final String? emptyHint;
+  final String? addTooltip;
 
   CubeAxis _axisOf(CubeSpec spec, AxisSide s) =>
       s == AxisSide.rows ? spec.rows : spec.columns;
@@ -63,9 +66,11 @@ class AxisEditor extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
     builder: (context, _) {
-      final spec = controller.cube.spec;
+      final cube = controller.cube;
+      final spec = cube.spec;
       final dims = _axisOf(spec, side).dimensions;
       final theme = Theme.of(context);
+      final strings = TesseraLocalizations.of(context);
       return DragTarget<DimensionDrag>(
         onWillAcceptWithDetails: (d) => true,
         onAcceptWithDetails: (d) => _move(d.data),
@@ -86,25 +91,37 @@ class AxisEditor extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Text(
-                  label ?? (side == AxisSide.rows ? 'Rows' : 'Columns'),
+                  label ??
+                      (side == AxisSide.rows ? strings.rows : strings.columns),
                   style: theme.textTheme.labelLarge,
                 ),
               ),
               Expanded(
                 child: dims.isEmpty
-                    ? Text(emptyHint, style: theme.textTheme.bodySmall)
+                    ? Text(
+                        emptyHint ?? strings.dropDimensionsHere,
+                        style: theme.textTheme.bodySmall,
+                      )
                     : Wrap(
                         spacing: 6,
                         runSpacing: 4,
                         children: [
                           for (var i = 0; i < dims.length; i++)
-                            _chip(context, dims[i].dimension, i),
+                            _chip(
+                              context,
+                              dims[i].dimension,
+                              i,
+                              strings.dimensionLabel(
+                                dims[i].dimension,
+                                cube.facts,
+                              ),
+                            ),
                         ],
                       ),
               ),
               IconButton(
                 icon: const Icon(Icons.add),
-                tooltip: addTooltip,
+                tooltip: addTooltip ?? strings.addDimension,
                 onPressed: () => _pick(context),
               ),
             ],
@@ -114,8 +131,12 @@ class AxisEditor extends StatelessWidget {
     },
   );
 
-  Widget _chip(BuildContext context, Dimension dimension, int index) {
-    final label = dimension.labelFor(controller.cube.facts);
+  Widget _chip(
+    BuildContext context,
+    Dimension dimension,
+    int index,
+    String label,
+  ) {
     final chip = InputChip(
       label: Text(label),
       onDeleted: () => _remove(dimension),
@@ -153,15 +174,18 @@ class AxisEditor extends StatelessWidget {
   }
 
   Future<void> _pick(BuildContext context) async {
-    final spec = controller.cube.spec;
+    final cube = controller.cube;
+    final spec = cube.spec;
+    final strings = TesseraLocalizations.of(context);
     final used = {
       for (final d in spec.rows.dimensions) d.dimension,
       for (final d in spec.columns.dimensions) d.dimension,
     };
     final picked = await showDimensionPicker(
       context,
-      dimensions: available ?? standardDimensions(controller.cube.facts),
+      dimensions: available ?? standardDimensions(cube.facts),
       used: used,
+      labelOf: (d) => strings.dimensionLabel(d, cube.facts),
     );
     if (picked != null) _move(DimensionDrag(picked));
   }

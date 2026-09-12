@@ -37,7 +37,8 @@ dependencies:
 
   tessera:
     path: ../
-  intl: ^0.20.3
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:intl/intl.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:tessera/tessera.dart';
 
 import 'schema_page.dart';
 
 void main() => runApp(const TesseraExampleApp());
 
+/// The app's locale, switchable from the AppBar; `null` follows the system.
+final appLocale = ValueNotifier<Locale?>(null);
+
 class TesseraExampleApp extends StatelessWidget {
   const TesseraExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'Tessera example',
-    theme: ThemeData(colorSchemeSeed: Colors.teal),
-    darkTheme: ThemeData(
-      colorSchemeSeed: Colors.teal,
-      brightness: Brightness.dark,
+  Widget build(BuildContext context) => ValueListenableBuilder(
+    valueListenable: appLocale,
+    builder: (context, locale, _) => MaterialApp(
+      title: 'Tessera example',
+      theme: ThemeData(colorSchemeSeed: Colors.teal),
+      darkTheme: ThemeData(
+        colorSchemeSeed: Colors.teal,
+        brightness: Brightness.dark,
+      ),
+      locale: locale,
+      localizationsDelegates: const [
+        TesseraLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: TesseraLocalizations.supportedLocales,
+      home: const SalesPage(),
     ),
-    home: const SalesPage(),
   );
 }
 
@@ -38,11 +52,6 @@ class _SalesPageState extends State<SalesPage> {
   static const quarter = DatePartDimension('date', DatePart.quarter);
   static final sumTotal = Aggregate.sum(const Measure('total'));
   static final avgPrice = Aggregate.average(const Measure('unit_price'));
-
-  final _numbers = NumberFormat.decimalPatternDigits(
-    locale: 'hu',
-    decimalDigits: 2,
-  );
 
   late final Future<void> _ready = _load();
   late final CsvDataSource _source;
@@ -224,14 +233,21 @@ class _SalesPageState extends State<SalesPage> {
     super.dispose();
   }
 
-  String _format(CubeCell cell, Object? value) =>
-      value is num ? _numbers.format(value) : value?.toString() ?? '';
-
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: const Text('Tessera — sales.csv'),
       actions: [
+        PopupMenuButton<Locale>(
+          icon: const Icon(Icons.language),
+          tooltip: 'Language',
+          initialValue: Localizations.localeOf(context),
+          onSelected: (l) => appLocale.value = l,
+          itemBuilder: (context) => [
+            for (final l in TesseraLocalizations.supportedLocales)
+              PopupMenuItem(value: l, child: Text(l.languageCode)),
+          ],
+        ),
         IconButton(
           icon: const Icon(Icons.table_chart_outlined),
           tooltip: 'Schema…',
@@ -336,10 +352,7 @@ class _SalesPageState extends State<SalesPage> {
               child: CubeView(
                 controller: controller,
                 aggregate: _shown,
-                formatCell: _format,
                 theme: const CubeTheme(columnWidth: 130, rowHeaderWidth: 170),
-                rowSummaryLabel: 'Total (all countries)',
-                columnSummaryLabel: 'Total (all dates)',
               ),
             ),
           ],

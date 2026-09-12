@@ -39,6 +39,11 @@ sealed class Dimension {
   /// Human readable name, without reference to any fact table.
   String get label;
 
+  /// The label given explicitly at construction, or `null` when [label] is
+  /// derived (from the column name, date part, …). Localizations use this
+  /// to decide whether to compose a translated label.
+  String? get explicitLabel;
+
   /// Human readable name for use with [facts]: an explicitly given label,
   /// otherwise derived from the column's label in the table (which may
   /// have been set in the [Schema]). Falls back to [label] if the column
@@ -81,6 +86,9 @@ final class ColumnDimension extends Dimension {
   String get id => sourceColumn;
 
   @override
+  String? get explicitLabel => _label;
+
+  @override
   String get label => _label ?? sourceColumn;
 
   @override
@@ -109,6 +117,9 @@ final class DatePartDimension extends Dimension {
 
   @override
   String get id => '$sourceColumn.${part.name}';
+
+  @override
+  String? get explicitLabel => _label;
 
   @override
   String get label =>
@@ -191,6 +202,9 @@ final class MappedDimension extends Dimension {
   final Object? Function(Object?) _map;
   final int Function(Object?, Object?)? _compare;
   final String Function(Object?)? _format;
+
+  @override
+  String? get explicitLabel => _label;
 
   @override
   String get label => _label ?? id;

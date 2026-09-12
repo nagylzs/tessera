@@ -4,6 +4,7 @@ import '../cube/aggregate.dart';
 import '../cube/cube_spec.dart';
 import '../facts/dimension.dart';
 import '../facts/measure.dart';
+import '../l10n/tessera_localizations.dart';
 import 'aggregate_picker.dart';
 import 'cube_controller.dart';
 
@@ -25,8 +26,8 @@ class AggregateEditor extends StatelessWidget {
     this.onSelected,
     this.measures,
     this.dimensions,
-    this.label = 'Values',
-    this.addTooltip = 'Add aggregate',
+    this.label,
+    this.addTooltip,
   });
 
   final CubeController controller;
@@ -43,8 +44,11 @@ class AggregateEditor extends StatelessWidget {
   /// [standardDimensions].
   final List<Dimension>? dimensions;
 
-  final String label;
-  final String addTooltip;
+  /// Defaults to the localized "Values".
+  final String? label;
+
+  /// Defaults to the localized text.
+  final String? addTooltip;
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -53,6 +57,7 @@ class AggregateEditor extends StatelessWidget {
       final cube = controller.cube;
       final aggregates = cube.spec.aggregates;
       final theme = Theme.of(context);
+      final strings = TesseraLocalizations.of(context);
       return Container(
         constraints: const BoxConstraints(minHeight: 48),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -64,7 +69,10 @@ class AggregateEditor extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: Text(label, style: theme.textTheme.labelLarge),
+              child: Text(
+                label ?? strings.values,
+                style: theme.textTheme.labelLarge,
+              ),
             ),
             Expanded(
               child: Wrap(
@@ -73,7 +81,7 @@ class AggregateEditor extends StatelessWidget {
                 children: [
                   for (final a in aggregates)
                     InputChip(
-                      label: Text(a.labelFor(cube.facts)),
+                      label: Text(strings.aggregateLabel(a, cube.facts)),
                       selected: a == selected,
                       onSelected: onSelected == null
                           ? null
@@ -88,7 +96,7 @@ class AggregateEditor extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.add),
-              tooltip: addTooltip,
+              tooltip: addTooltip ?? strings.addAggregate,
               onPressed: () => _pick(context),
             ),
           ],
