@@ -26,6 +26,7 @@ final class NumberSyntax {
 
   /// Parses a whole number, or `null` if [raw] is not one.
   int? parseInteger(String raw) {
+    if (_plainInteger(raw)) return int.parse(raw);
     final s = _normalize(raw);
     if (s == null || !_digits.hasMatch(s)) return null;
     return int.tryParse(s);
@@ -34,10 +35,57 @@ final class NumberSyntax {
   /// Parses a real number, or `null` if [raw] is not one. Infinity and NaN
   /// are rejected.
   double? parseNumber(String raw) {
+    if (_plainNumber(raw)) {
+      final t = decimalSeparator == '.'
+          ? raw
+          : raw.replaceAll(decimalSeparator, '.');
+      final v = double.tryParse(t);
+      if (v != null) return v.isFinite ? v : null;
+      // Malformed in a way only the full check can tell (e.g. `1e`).
+    }
     final s = _normalize(raw);
     if (s == null || !_decimal.hasMatch(s)) return null;
     final v = double.tryParse(s);
     return v != null && v.isFinite ? v : null;
+  }
+
+  /// Fast path: an optional sign followed by 1–18 digits and nothing else.
+  /// Anything with whitespace or separators takes the full path.
+  static bool _plainInteger(String s) {
+    final n = s.length;
+    if (n == 0 || n > 19) return false;
+    var i = 0;
+    final first = s.codeUnitAt(0);
+    if (first == 0x2B || first == 0x2D) {
+      if (n == 1 || n > 19) return false;
+      i = 1;
+    }
+    if (n - i > 18) return false;
+    for (; i < n; i++) {
+      final c = s.codeUnitAt(i);
+      if (c < 0x30 || c > 0x39) return false;
+    }
+    return true;
+  }
+
+  /// Fast path: only digits, signs, exponent letters and the decimal
+  /// separator, at least one digit. `double.tryParse` does the rest.
+  bool _plainNumber(String s) {
+    final n = s.length;
+    if (n == 0 || decimalSeparator.length != 1) return false;
+    final dec = decimalSeparator.codeUnitAt(0);
+    var digits = 0;
+    for (var i = 0; i < n; i++) {
+      final c = s.codeUnitAt(i);
+      if (c >= 0x30 && c <= 0x39) {
+        digits++;
+      } else if (c == dec || c == 0x2B || c == 0x2D || c == 0x65 || c == 0x45) {
+        continue;
+      } else {
+        return false;
+      }
+    }
+    return digits > 0;
   }
 
   /// Strips grouping separators and converts the decimal separator to `.`.

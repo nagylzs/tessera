@@ -29,6 +29,34 @@ void main() {
       expect(s.parseNumber('abc'), isNull);
     });
 
+    test('fast and full paths agree on edge cases', () {
+      const std = NumberSyntax.standard;
+      const eu = NumberSyntax.european;
+      expect(std.parseInteger('+5'), 5);
+      expect(std.parseInteger('-'), isNull);
+      expect(std.parseInteger('+'), isNull);
+      expect(std.parseInteger('007'), 7);
+      expect(std.parseInteger('123456789012345678'), 123456789012345678);
+      expect(std.parseInteger('9223372036854775807'), 9223372036854775807);
+      expect(std.parseInteger('1_000'), isNull);
+      expect(std.parseNumber('5.'), 5);
+      expect(std.parseNumber('-.5'), -0.5);
+      expect(std.parseNumber('1e'), isNull);
+      expect(std.parseNumber('e5'), isNull);
+      expect(std.parseNumber('1e-3'), 0.001);
+      expect(std.parseNumber('1E+3'), 1000);
+      expect(std.parseNumber('--1'), isNull);
+      expect(std.parseNumber('1-'), isNull);
+      expect(std.parseNumber('1.2.3'), isNull);
+      expect(std.parseNumber('+'), isNull);
+      expect(std.parseNumber('.'), isNull);
+      expect(eu.parseNumber('1,5e2'), 150);
+      expect(eu.parseNumber('1.5'), isNull);
+      expect(eu.parseNumber('-0,5'), -0.5);
+      expect(eu.parseInteger('12'), 12);
+      expect(std.parseNumber('1e400'), isNull);
+    });
+
     test('european syntax', () {
       const s = NumberSyntax.european;
       expect(s.parseNumber('1.234,56'), 1234.56);

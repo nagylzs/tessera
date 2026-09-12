@@ -246,12 +246,13 @@ final class TextColumnBuilder extends ColumnBuilder {
       return;
     }
     final s = value as String;
-    _codes.add(
-      _index.putIfAbsent(s, () {
-        _dict.add(s);
-        return _dict.length - 1;
-      }),
-    );
+    var code = _index[s];
+    if (code == null) {
+      code = _dict.length;
+      _dict.add(s);
+      _index[s] = code;
+    }
+    _codes.add(code);
   }
 
   @override

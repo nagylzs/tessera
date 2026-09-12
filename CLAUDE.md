@@ -159,9 +159,16 @@ Layers 1–3 must not import Flutter.
   `Cell` — use `CubeAxis`, `HeaderEntry`, `CubeCell`, etc.
 - Web support matters: no `dart:io` in the library; sources are byte/stream
   based.
-- **Large data.** Measured (2 M rows / 172 MB, desktop): parse 3.3 s,
-  import 10–11 s (~5 µs/row), first cube 1.2–1.7 s, toggle 0.3–0.4 s,
-  ~225 MB RSS. `example/tool/bench.dart` reproduces it. Hence:
+- **Large data.** Measured (2 M rows / 172 MB, desktop, JIT ≈ AOT):
+  parse 2.7 s, import 5.9 s (~3 µs/row; was 10 s before the fast paths),
+  first cube 1.2–1.7 s, toggle 0.3–0.4 s, ~220 MB RSS.
+  `example/tool/bench.dart` reproduces it. Parse breakdown: decode 0.35 s,
+  bare char loop 0.28 s, +substrings 0.9 s, stream delivery ~0.5 s, the
+  rest is the state machine. Fast paths in place: `NumberSyntax` digit
+  scan before regex/normalize, parser hot loop only tests the 4 special
+  chars (BOM/skip-lines/pending-CR handled at chunk starts), unquoted
+  fields are a single `substring`, text dictionary without closure
+  allocation. Hence:
   `DataSource.estimatedRowCount()` (exact for lists; CSV = length /
   average of the first 200 records, needs `length:` for `fromBytes`),
   `FactTableImporter.import(onProgress:)` with `ImportProgress`
