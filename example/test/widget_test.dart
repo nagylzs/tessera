@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tessera/tessera.dart';
 import 'package:tessera_example/main.dart';
-import 'package:tessera_example/schema_page.dart';
+import 'package:tessera_example/simple/sales_page.dart';
+import 'package:tessera_example/simple/schema_page.dart';
 
 /// Pumps until [finder] matches (asset loading is real I/O, so this runs
 /// under [WidgetTester.runAsync]).
@@ -18,6 +19,11 @@ void main() {
   testWidgets('loads sales.csv and shows the cube', (tester) async {
     await tester.runAsync(() async {
       await tester.pumpWidget(const TesseraExampleApp());
+      expect(find.text('Tessera examples'), findsOneWidget);
+      await tester.tap(find.text('Simple pivot'));
+      // Not pumpAndSettle: the page shows a spinner while loading.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Tessera — sales.csv'), findsOneWidget);
       await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
     });
@@ -35,6 +41,9 @@ void main() {
       addTearDown(tester.view.reset);
       await tester.runAsync(() async {
         await tester.pumpWidget(const TesseraExampleApp());
+        await tester.tap(find.text('Simple pivot'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
         await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
         await tester.tap(find.byTooltip('Schema…'));
         await tester.pumpAndSettle();

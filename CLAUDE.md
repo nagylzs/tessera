@@ -62,7 +62,12 @@ cd example && flutter run -d linux               # run the example (X11: xdotool
   `AggregateKind` / `standardMeasures` (`widgets/aggregate_picker.dart`).
   `CubeView` falls back to the spec's first aggregate when its `aggregate`
   is not in the spec. Example uses the editor instead of a dropdown.
-- Example app (`example/lib/main.dart`) loads `assets/sales.csv` via
+- Example app: `example/lib/main.dart` is a launcher (`LauncherPage`)
+  listing the entries of `example/lib/examples.dart`; each example lives in
+  its own folder under `example/lib/` (kept as one project so pub.dev's
+  Example tab and `flutter run` cover everything). Shared bits:
+  `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`).
+- "Simple pivot" (`example/lib/simple/`) loads `assets/sales.csv` via
   `rootBundle`, infers the schema, imports, shows rows `[region, country]`
   × columns `[date.year, date.quarter]`, axis + aggregate editors,
   expand/collapse buttons, language menu (TesseraLocalizations + flutter_localizations). AppBar "Schema…"

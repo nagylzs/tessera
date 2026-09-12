@@ -127,12 +127,14 @@ default to the ambient Material theme.
 
 ## Example app
 
-`example/` contains a Flutter app that loads `example/assets/sales.csv`
-(1 000 generated sales rows with deliberately missing values, hierarchical
-dimensions and orphan values — see `example/tool/gen_sales_csv.dart`) and
-lets you configure everything interactively: the inferred schema (include,
-type, label, date format, number syntax per column — `lib/schema_page.dart`),
-the axes (drag-and-drop), the aggregates, and the cube itself.
+`example/` is one Flutter app with a launcher page listing several
+examples (`example/lib/examples.dart`). *Simple pivot* (`example/lib/simple/`)
+loads `example/assets/sales.csv` (1 000 generated sales rows with deliberately
+missing values, hierarchical dimensions and orphan values — see
+`example/tool/gen_sales_csv.dart`) and lets you configure everything
+interactively: the inferred schema (include, type, label, date format,
+number syntax per column), the axes (drag-and-drop), the aggregates, the
+language, and the cube itself.
 
 ```bash
 cd example && flutter run
