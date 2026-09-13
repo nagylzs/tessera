@@ -2,6 +2,8 @@
 
 # tessera
 
+![CubeView: regions and countries against years and quarters, with a group and a year expanded](packages/tessera_flutter/doc/cube_view.png)
+
 Analyze, group and aggregate tabular data in Dart and Flutter: a pivot-table
 engine with expandable row/column hierarchies, and widgets to display and
 edit the result.

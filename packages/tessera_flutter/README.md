@@ -1,5 +1,7 @@
 # tessera_flutter
 
+![CubeView: regions and countries against years and quarters, with a group and a year expanded](https://raw.githubusercontent.com/nagylzs/tessera/main/packages/tessera_flutter/doc/cube_view.png)
+
 Flutter widgets for the [`tessera`](https://pub.dev/packages/tessera)
 pivot-table engine: an expandable cube grid, drag-and-drop axis and
 aggregate editors, picker dialogs, and localizations for fourteen

@@ -531,6 +531,12 @@ consistent otherwise.
   `flutter_launcher_icons` (config in its pubspec) writes every
   platform's icons: `dart run flutter_launcher_icons`. Re-rasterize
   with `rsvg-convert -w 1024 -h 1024` after editing an SVG.
+- Screenshot: `packages/tessera_flutter/doc/cube_view.png` (2620×950, the
+  Simple pivot in English with Europe and 2024 expanded and Germany × Q2
+  selected; cropped from an `import -window` capture at the 2× desktop
+  scale) is in the flutter pubspec's `screenshots:` and both READMEs —
+  the flutter one via a raw.githubusercontent.com URL because pub.dev
+  shows the README as is.
 - Doc comments on every public type; keep the library-level docs in
   `packages/tessera/lib/tessera.dart` and
   `packages/tessera_flutter/lib/tessera_flutter.dart` in sync with the

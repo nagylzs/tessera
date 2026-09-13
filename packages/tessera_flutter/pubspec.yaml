@@ -3,6 +3,9 @@ description: "Flutter widgets for the tessera pivot-table engine: an expandable 
 version: 0.1.0
 repository: https://github.com/nagylzs/tessera/tree/main/packages/tessera_flutter
 issue_tracker: https://github.com/nagylzs/tessera/issues
+screenshots:
+  - description: CubeView showing sales by region and country against year and quarter, with Europe and 2024 expanded and a selected cell.
+    path: doc/cube_view.png
 topics:
   - pivot-table
   - olap

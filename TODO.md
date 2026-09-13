@@ -25,10 +25,10 @@ through these in order, then publish.
       constraints `tessera: ^0.1.0` etc.).
 - [x] `topics:` in every pubspec (pivot-table, olap, aggregation, csv,
       xlsx, ods, html, svg, pdf, export as they apply).
-- [ ] A screenshot of `CubeView` in the `tessera_flutter` README (pub.dev
+- [x] A screenshot of `CubeView` in the `tessera_flutter` README (pub.dev
       resolves relative image links against `repository`) and
       `screenshots:` in its pubspec.
-- [ ] Root README: one screenshot, the icon is already there.
+- [x] Root README: one screenshot, the icon is already there.
 
 ## Repository and publishing
 
