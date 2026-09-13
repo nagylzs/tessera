@@ -147,6 +147,18 @@ final class TesseraStringsDe extends TesseraStrings {
   String get largeExpansionTitle => 'Große Erweiterung';
 
   @override
+  String get sortAscending => 'Aufsteigend sortieren';
+
+  @override
+  String get sortDescending => 'Absteigend sortieren';
+
+  @override
+  String get expandAll => 'Alle ausklappen';
+
+  @override
+  String get collapseAll => 'Alle einklappen';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Das Ausklappen von „$label“ fügt $added ${isRow ? 'Zeilen' : 'Spalten'} hinzu. Fortfahren?';
 }

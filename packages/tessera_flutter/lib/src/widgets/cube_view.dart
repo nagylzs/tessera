@@ -25,6 +25,16 @@ typedef ExpansionConfirmation = Future<bool> Function(
   required bool isRow,
 });
 
+/// Asked before "expand all" on [dimension] (a menu item of its title) when
+/// it would add more than [CubeView.expansionLimit] rows or columns.
+/// Return `false` to cancel.
+typedef LevelExpansionConfirmation = Future<bool> Function(
+  BuildContext context,
+  Dimension dimension,
+  int added, {
+  required bool isRow,
+});
+
 /// Displays a [Cube] as a pivot grid: a hierarchical column header band, a
 /// hierarchical row header, and one aggregate value per cell.
 ///
@@ -40,8 +50,10 @@ typedef ExpansionConfirmation = Future<bool> Function(
 /// Interaction: `+`/`−` on a group toggles it via the [controller]; tapping
 /// a dimension name sorts that level by value (tap again to flip); tapping
 /// the aggregate name under a column sorts every row level by that column's
-/// values (tap again to flip). Cells are built lazily, so large cubes stay
-/// cheap to scroll.
+/// values (tap again to flip). Each dimension name also has a menu — the
+/// `▾` button, a long press or a secondary click — with the sort direction
+/// and "expand all" / "collapse all" for that level. Cells are built lazily,
+/// so large cubes stay cheap to scroll.
 ///
 /// Column widths follow the content: the widest text of each column (its
 /// values, labels and titles) is measured up front and the width clamped to
@@ -63,6 +75,7 @@ class CubeView extends StatelessWidget {
     this.sortable = true,
     this.expansionLimit = 200,
     this.confirmExpansion,
+    this.confirmLevelExpansion,
     this.onCellTap,
     this.measuredRows = 1000,
     this.keepColumnWidths = true,
@@ -102,6 +115,9 @@ class CubeView extends StatelessWidget {
   final int expansionLimit;
 
   final ExpansionConfirmation? confirmExpansion;
+
+  /// Same for "expand all" from a dimension's menu (default: a dialog).
+  final LevelExpansionConfirmation? confirmLevelExpansion;
 
   final void Function(CubeCell cell)? onCellTap;
 
@@ -314,22 +330,10 @@ class _CubeGridState extends State<_CubeGrid> {
           child: _box(color: theme.headerColor, child: const SizedBox()),
         );
       }
-      final level = spec.columns.dimensions[r];
       return TableViewCell(
         columnMergeStart: headerColumns > 1 ? 0 : null,
         columnMergeSpan: headerColumns > 1 ? headerColumns : null,
-        child: _box(
-          color: theme.headerColor,
-          alignment: Alignment.centerRight,
-          onTap: view.sortable
-              ? () => _sortByValue(isRow: false, level: r)
-              : null,
-          child: _titleText(
-            strings.dimensionLabel(level.dimension, layout.facts),
-            level.sort,
-            trailingIcon: true,
-          ),
-        ),
+        child: _titleCell(context, isRow: false, level: r),
       );
     }
     if (rowDepth == 0) {
@@ -337,37 +341,102 @@ class _CubeGridState extends State<_CubeGrid> {
         child: _box(color: theme.headerColor, child: const SizedBox()),
       );
     }
-    final level = spec.rows.dimensions[c];
-    return TableViewCell(
-      child: _box(
-        color: theme.headerColor,
-        alignment: Alignment.centerLeft,
-        onTap: view.sortable ? () => _sortByValue(isRow: true, level: c) : null,
-        child: _titleText(
-          strings.dimensionLabel(level.dimension, layout.facts),
-          level.sort,
-          trailingIcon: true,
+    return TableViewCell(child: _titleCell(context, isRow: true, level: c));
+  }
+
+  /// A dimension's title: tap sorts by value, the `▾` button, a long press
+  /// or a secondary click open the level menu (see [_titleMenu]).
+  Widget _titleCell(
+    BuildContext context, {
+    required bool isRow,
+    required int level,
+  }) {
+    final axis = isRow ? spec.rows : spec.columns;
+    final dimension = axis.dimensions[level];
+    final sort = dimension.sort;
+    return MenuAnchor(
+      menuChildren: _titleMenu(context, isRow: isRow, level: level),
+      builder: (context, menu, _) => InkWell(
+        onTap: view.sortable
+            ? () => _sortByValue(isRow: isRow, level: level)
+            : null,
+        onLongPress: menu.open,
+        onSecondaryTapUp: (details) =>
+            menu.open(position: details.localPosition),
+        child: _box(
+          color: theme.headerColor,
+          alignment: isRow ? Alignment.centerLeft : Alignment.centerRight,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  strings.dimensionLabel(dimension.dimension, layout.facts),
+                  style: theme.headerTextStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (sort.by == SortBy.value) _sortIcon(sort.direction),
+              InkWell(
+                onTap: () => menu.isOpen ? menu.close() : menu.open(),
+                child: const Icon(Icons.arrow_drop_down, size: 16),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _titleText(String text, AxisSort sort, {required bool trailingIcon}) {
-    final icon = sort.by == SortBy.value ? _sortIcon(sort.direction) : null;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          child: Text(
-            text,
-            style: theme.headerTextStyle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        ?icon,
-      ],
+  /// Sort direction (when [CubeView.sortable]) and expand/collapse all for
+  /// one level of an axis.
+  List<Widget> _titleMenu(
+    BuildContext context, {
+    required bool isRow,
+    required int level,
+  }) {
+    final axis = isRow ? spec.rows : spec.columns;
+    final sort = axis.dimensions[level].sort;
+    final entries = isRow ? layout.rows.entries : layout.columns.entries;
+    final anyExpanded = entries.any(
+      (e) => e.depth == level + 1 && e.isExpanded,
     );
+    Widget check(bool on) => on ? const Icon(Icons.check) : const Icon(null);
+    return [
+      if (view.sortable) ...[
+        for (final direction in SortDirection.values)
+          MenuItemButton(
+            leadingIcon: check(
+              sort.by == SortBy.value && sort.direction == direction,
+            ),
+            onPressed: () =>
+                _sortByValue(isRow: isRow, level: level, direction: direction),
+            child: Text(
+              direction == SortDirection.ascending
+                  ? strings.sortAscending
+                  : strings.sortDescending,
+            ),
+          ),
+        const Divider(height: 1),
+      ],
+      MenuItemButton(
+        leadingIcon: const Icon(Icons.unfold_more),
+        onPressed: level < axis.depth - 1
+            ? () => _expandLevel(context, isRow: isRow, level: level)
+            : null,
+        child: Text(strings.expandAll),
+      ),
+      MenuItemButton(
+        leadingIcon: const Icon(Icons.unfold_less),
+        onPressed: anyExpanded
+            ? () => isRow
+                  ? view.controller.collapseRowLevel(level)
+                  : view.controller.collapseColumnLevel(level)
+            : null,
+        child: Text(strings.collapseAll),
+      ),
+    ];
   }
 
   Widget _sortIcon(SortDirection direction) => Icon(
@@ -611,18 +680,21 @@ class _CubeGridState extends State<_CubeGrid> {
     BuildContext context,
     HeaderEntry entry, {
     required bool isRow,
-  }) async {
+  }) => _confirmDialog(
+    context,
+    strings.largeExpansion(
+      _entryText(entry, isRow: isRow),
+      entry.childCount,
+      isRow: isRow,
+    ),
+  );
+
+  Future<bool> _confirmDialog(BuildContext context, String message) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(strings.largeExpansionTitle),
-        content: Text(
-          strings.largeExpansion(
-            _entryText(entry, isRow: isRow),
-            entry.childCount,
-            isRow: isRow,
-          ),
-        ),
+        content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -638,6 +710,43 @@ class _CubeGridState extends State<_CubeGrid> {
     return result ?? false;
   }
 
+  Future<void> _expandLevel(
+    BuildContext context, {
+    required bool isRow,
+    required int level,
+  }) async {
+    final controller = view.controller;
+    final cube = controller.cube;
+    final added = isRow
+        ? cube.rowsAddedByExpandingLevel(level)
+        : cube.columnsAddedByExpandingLevel(level);
+    if (added > view.expansionLimit) {
+      final dimension =
+          (isRow ? spec.rows : spec.columns).dimensions[level].dimension;
+      final confirm = view.confirmLevelExpansion ?? _defaultConfirmLevel;
+      if (!await confirm(context, dimension, added, isRow: isRow)) return;
+    }
+    if (isRow) {
+      controller.expandRowLevel(level);
+    } else {
+      controller.expandColumnLevel(level);
+    }
+  }
+
+  Future<bool> _defaultConfirmLevel(
+    BuildContext context,
+    Dimension dimension,
+    int added, {
+    required bool isRow,
+  }) => _confirmDialog(
+    context,
+    strings.largeExpansion(
+      strings.dimensionLabel(dimension, layout.facts),
+      added,
+      isRow: isRow,
+    ),
+  );
+
   bool _isSortKeyColumn(HeaderEntry column) => spec.rows.dimensions.any((d) {
     final s = d.sort;
     if (s.by != SortBy.aggregate || s.aggregate != shown) return false;
@@ -650,10 +759,16 @@ class _CubeGridState extends State<_CubeGrid> {
       .firstWhere((s) => s.by == SortBy.aggregate, orElse: AxisSort.new)
       .direction;
 
-  void _sortByValue({required bool isRow, required int level}) {
+  /// Sorts [level] by value in [direction]; without one, ascending unless
+  /// it already is (the tap toggle).
+  void _sortByValue({
+    required bool isRow,
+    required int level,
+    SortDirection? direction,
+  }) {
     final axis = isRow ? spec.rows : spec.columns;
     final current = axis.dimensions[level].sort;
-    final direction =
+    direction ??=
         current.by == SortBy.value &&
             current.direction == SortDirection.ascending
         ? SortDirection.descending

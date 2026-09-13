@@ -139,6 +139,18 @@ final class TesseraStringsZh extends TesseraStrings {
   String get largeExpansionTitle => '大量展开';
 
   @override
+  String get sortAscending => '升序排序';
+
+  @override
+  String get sortDescending => '降序排序';
+
+  @override
+  String get expandAll => '全部展开';
+
+  @override
+  String get collapseAll => '全部折叠';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       '展开“$label”将添加 $added ${isRow ? '行' : '列'}。是否继续？';
 }

@@ -44,7 +44,7 @@ blank instead of showing `0`.
 | **Dimension** | Something you can group by. Derived from a column: the column value itself, a date part (`date.month`), or any mapping function. |
 | **Measure** | A numeric column you aggregate over. Any column can be a dimension; numeric ones can also be measures. |
 | **CubeSpec** | Row axis, column axis (each an ordered list of dimensions), the aggregates to compute, and an optional filter. |
-| **ExpansionState** | Which groups are expanded on an axis. The summary is the root; the first level is visible when the root is expanded. |
+| **ExpansionState** | Which groups are expanded on an axis. The summary is the root; the first level is visible when the root is expanded. `Cube.expandRowLevel` / `collapseRowLevel` (and the column twins) open or close a whole level. |
 | **CubeLayout** | The visible rows, columns and cells derived from facts + spec + expansion state. |
 | **AxisGeometry** | The merged header cells of an axis, for renderers (grids, exporters). |
 | **TesseraStrings** | Localized texts and label/number formatting rules; fourteen languages built in. |

@@ -139,6 +139,18 @@ final class TesseraStringsJa extends TesseraStrings {
   String get largeExpansionTitle => '大規模な展開';
 
   @override
+  String get sortAscending => '昇順で並べ替え';
+
+  @override
+  String get sortDescending => '降順で並べ替え';
+
+  @override
+  String get expandAll => 'すべて展開';
+
+  @override
+  String get collapseAll => 'すべて折りたたむ';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       '「$label」を展開すると $added ${isRow ? '行' : '列'}が追加されます。続行しますか？';
 }

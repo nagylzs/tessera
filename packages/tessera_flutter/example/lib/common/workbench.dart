@@ -230,18 +230,6 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
           tooltip: 'Schema…',
           onPressed: _schema == null ? null : _editSchema,
         ),
-        IconButton(
-          icon: const Icon(Icons.unfold_more),
-          tooltip: 'Expand all rows',
-          onPressed: () =>
-              _controller?.cube = _controller!.cube.expandRowsToDepth(2),
-        ),
-        IconButton(
-          icon: const Icon(Icons.unfold_less),
-          tooltip: 'Collapse rows',
-          onPressed: () =>
-              _controller?.cube = _controller!.cube.expandRowsToDepth(1),
-        ),
       ],
     ),
     body: FutureBuilder(

@@ -147,6 +147,18 @@ final class TesseraStringsFr extends TesseraStrings {
   String get largeExpansionTitle => 'Développement important';
 
   @override
+  String get sortAscending => 'Trier par ordre croissant';
+
+  @override
+  String get sortDescending => 'Trier par ordre décroissant';
+
+  @override
+  String get expandAll => 'Tout développer';
+
+  @override
+  String get collapseAll => 'Tout réduire';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Développer « $label » ajoute $added ${isRow ? 'lignes' : 'colonnes'}. Continuer ?';
 }

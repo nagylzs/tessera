@@ -115,7 +115,7 @@ Paths below are relative to the package (`lib/src/...` means
 - "Simple pivot" (`example/lib/simple/`) loads `assets/sales.csv` via
   `rootBundle`, infers the schema, imports, shows rows `[region, country]`
   × columns `[date.year, date.quarter]`, axis + aggregate editors,
-  expand/collapse buttons, language menu (TesseraLocalizations + flutter_localizations). AppBar "Schema…"
+  language menu (TesseraLocalizations + flutter_localizations). AppBar "Schema…"
   opens `example/lib/schema_page.dart` (include switch, type, label, date
   format / number syntax per column, sample raw values, reset) and
   re-imports on "Import"; `_prune` drops spec dimensions/aggregates whose
@@ -142,7 +142,14 @@ Paths below are relative to the package (`lib/src/...` means
   tapping a dimension title toggles value sort on that level; tapping the
   aggregate name under a column sets aggregate sort with that `keyPath`
   on ALL row levels (tap again flips direction). Sort-key column is
-  tinted with `sortKeyColor`.
+  tinted with `sortKeyColor`. Every dimension title also carries a
+  `MenuAnchor` (`▾` button always shown, long press, secondary click):
+  sort ascending/descending (checked), expand all / collapse all for that
+  level (`Cube.expandRowLevel` keeps deeper expansions, unlike
+  `expandRowsToDepth`; `collapseRowLevel`; column twins). "Expand all"
+  goes through `expansionLimit` with `confirmLevelExpansion` (dimension +
+  `rowsAddedByExpandingLevel`, one count-only pass); the default dialog
+  reuses `largeExpansion`. Titles reserve 2 × icon width.
 - Grid geometry: `levelRows = max(columnDepth, 1)` header rows for group
   labels + 1 aggregate row; `headerColumns = max(rowDepth, 1)`. Pinned
   rows/columns = those. Cells draw their own right/bottom borders.

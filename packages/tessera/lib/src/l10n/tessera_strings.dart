@@ -91,6 +91,12 @@ abstract class TesseraStrings {
   String get function;
   String get expand;
   String get largeExpansionTitle;
+
+  /// Items of the dimension-title menu of the grid.
+  String get sortAscending;
+  String get sortDescending;
+  String get expandAll;
+  String get collapseAll;
   String largeExpansion(String label, int added, {required bool isRow});
 
   // ------------------------------------------------ derived, concrete

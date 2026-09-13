@@ -4,7 +4,8 @@
 /// gives you the engine and the widgets:
 ///
 /// * [CubeView] renders a cube driven by a [CubeController], with pinned,
-///   merged group headers and expand/collapse and sort gestures.
+///   merged group headers, expand/collapse and sort gestures and a menu
+///   per dimension (sort direction, expand/collapse all).
 /// * [AxisEditor] and [AggregateEditor] edit the axes and aggregates of the
 ///   controller's spec with drag-and-drop chips; [showDimensionPicker] and
 ///   [showAggregatePicker] open the dialogs behind their `+` buttons.

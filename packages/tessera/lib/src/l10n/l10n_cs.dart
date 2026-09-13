@@ -147,6 +147,18 @@ final class TesseraStringsCs extends TesseraStrings {
   String get largeExpansionTitle => 'Velké rozbalení';
 
   @override
+  String get sortAscending => 'Seřadit vzestupně';
+
+  @override
+  String get sortDescending => 'Seřadit sestupně';
+
+  @override
+  String get expandAll => 'Rozbalit vše';
+
+  @override
+  String get collapseAll => 'Sbalit vše';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Rozbalení „$label“ přidá $added ${isRow ? 'řádků' : 'sloupců'}. Pokračovat?';
 }

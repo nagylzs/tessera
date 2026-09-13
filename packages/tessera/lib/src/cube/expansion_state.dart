@@ -59,6 +59,16 @@ final class ExpansionState {
   ExpansionState toggle(DimensionPath path) =>
       isExpanded(path) ? collapse(path) : expand(path);
 
+  /// Collapses every group on [level] (`0` = the first dimension of the
+  /// axis): drops the paths longer than [level], so the levels below stay
+  /// hidden while the groups on [level] remain visible. `collapseLevel(0)`
+  /// leaves only the root expanded. The counterpart of `Cube.expandRowLevel`
+  /// / `Cube.expandColumnLevel`, which need the facts to know the groups.
+  ExpansionState collapseLevel(int level) => ExpansionState._({
+    for (final p in _expanded)
+      if (p.length <= level) p,
+  });
+
   /// Keeps only the paths for which [keep] returns true (and re-closes the
   /// set under parents, so dropping a path drops its subtree).
   ExpansionState retainWhere(bool Function(DimensionPath path) keep) {

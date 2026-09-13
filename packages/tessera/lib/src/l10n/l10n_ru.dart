@@ -147,6 +147,18 @@ final class TesseraStringsRu extends TesseraStrings {
   String get largeExpansionTitle => 'Большое разворачивание';
 
   @override
+  String get sortAscending => 'Сортировать по возрастанию';
+
+  @override
+  String get sortDescending => 'Сортировать по убыванию';
+
+  @override
+  String get expandAll => 'Развернуть всё';
+
+  @override
+  String get collapseAll => 'Свернуть всё';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Разворачивание «$label» добавит $added ${isRow ? 'строк' : 'столбцов'}. Продолжить?';
 }

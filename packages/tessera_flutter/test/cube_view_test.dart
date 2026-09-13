@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
@@ -39,6 +40,15 @@ final europe = DimensionPath([const DimensionValue(region, 'Europe')]);
 Widget host(CubeView view) => MaterialApp(
   home: Scaffold(body: SizedBox(width: 1000, height: 700, child: view)),
 );
+
+/// The `▾` menu button of the dimension title [label].
+Finder menuButtonOf(String label) => find.descendant(
+  of: find.ancestor(of: find.text(label), matching: find.byType(InkWell)),
+  matching: find.byIcon(Icons.arrow_drop_down),
+);
+
+MenuItemButton menuItem(WidgetTester tester, String label) =>
+    tester.widget(find.widgetWithText(MenuItemButton, label));
 
 /// The expand/collapse icon on the row whose label is [label].
 Finder toggleIconOf(String label) => find.descendant(
@@ -279,6 +289,10 @@ void main() {
     testWidgets('tapping the aggregate under a column sorts rows by it', (
       tester,
     ) async {
+      // the summary column lies beyond the default 800 px test surface
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         host(CubeView(controller: controller, aggregate: sumQty)),
       );
@@ -325,6 +339,133 @@ void main() {
         controller.cube.spec.rows.dimensions[0].sort.direction,
         SortDirection.ascending,
       );
+    });
+
+    testWidgets('the title menu expands and collapses a whole level', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregate: sumQty)),
+      );
+      // long press opens the menu
+      await tester.longPress(find.text('region'));
+      await tester.pumpAndSettle();
+      expect(find.text('Expand all'), findsOneWidget);
+      expect(menuItem(tester, 'Collapse all').enabled, isFalse);
+      await tester.tap(find.text('Expand all'));
+      await tester.pumpAndSettle();
+      expect(find.text('Expand all'), findsNothing);
+      for (final label in ['Germany', 'Hungary', 'Japan', 'Iceland']) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      expect(controller.cube.layout.rows.length, 10);
+      // the ▾ button opens it too; now the level can be collapsed
+      await tester.tap(menuButtonOf('region'));
+      await tester.pumpAndSettle();
+      expect(menuItem(tester, 'Collapse all').enabled, isTrue);
+      await tester.tap(find.text('Collapse all'));
+      await tester.pumpAndSettle();
+      expect(find.text('Germany'), findsNothing);
+      expect(controller.cube.rowExpansion, ExpansionState.initial());
+      // the last level has nothing to expand
+      await tester.longPress(find.text('country'));
+      await tester.pumpAndSettle();
+      expect(menuItem(tester, 'Expand all').enabled, isFalse);
+    });
+
+    testWidgets('the title menu sets the sort direction', (tester) async {
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregate: sumQty)),
+      );
+      // secondary click opens the menu
+      await tester.tap(find.text('region'), buttons: kSecondaryButton);
+      await tester.pumpAndSettle();
+      expect(find.text('Sort ascending'), findsOneWidget);
+      await tester.tap(find.text('Sort descending'));
+      await tester.pumpAndSettle();
+      AxisSort sort() => controller.cube.spec.rows.dimensions[0].sort;
+      expect(sort().direction, SortDirection.descending);
+      // choosing it again keeps it, unlike the tap toggle
+      await tester.tap(menuButtonOf('region'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sort descending'));
+      await tester.pumpAndSettle();
+      expect(sort().direction, SortDirection.descending);
+      // columns too
+      await tester.tap(menuButtonOf('category'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sort descending'));
+      await tester.pumpAndSettle();
+      expect(
+        controller.cube.spec.columns.dimensions[0].sort.direction,
+        SortDirection.descending,
+      );
+    });
+
+    testWidgets('sortable: false leaves only expand/collapse in the menu', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(
+          CubeView(controller: controller, aggregate: sumQty, sortable: false),
+        ),
+      );
+      await tester.tap(menuButtonOf('region'));
+      await tester.pumpAndSettle();
+      expect(find.text('Sort ascending'), findsNothing);
+      expect(find.text('Expand all'), findsOneWidget);
+    });
+
+    testWidgets('large level expansions ask for confirmation', (tester) async {
+      var answer = false;
+      final asked = <String>[];
+      await tester.pumpWidget(
+        host(
+          CubeView(
+            controller: controller,
+            aggregate: sumQty,
+            expansionLimit: 2,
+            confirmLevelExpansion:
+                (context, dimension, added, {required isRow}) async {
+                  asked.add('${dimension.id}:$added:$isRow');
+                  return answer;
+                },
+          ),
+        ),
+      );
+      await tester.tap(menuButtonOf('region'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Expand all'));
+      await tester.pumpAndSettle();
+      expect(asked, ['region:6:true']);
+      expect(find.text('Germany'), findsNothing);
+      answer = true;
+      await tester.tap(menuButtonOf('region'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Expand all'));
+      await tester.pumpAndSettle();
+      expect(find.text('Germany'), findsOneWidget);
+      // the default dialog names the dimension
+      await tester.pumpWidget(
+        host(
+          CubeView(
+            controller: CubeController(controller.cube.collapseRowLevel(0)),
+            aggregate: sumQty,
+            expansionLimit: 2,
+          ),
+        ),
+      );
+      await tester.tap(menuButtonOf('region'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Expand all'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Expanding "region" adds 6 rows. Continue?'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Expand'));
+      await tester.pumpAndSettle();
+      expect(find.text('Germany'), findsOneWidget);
     });
 
     testWidgets('cell taps report the cell', (tester) async {

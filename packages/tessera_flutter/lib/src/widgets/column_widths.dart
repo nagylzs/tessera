@@ -38,7 +38,8 @@ final class ColumnWidthMeasurer {
   /// [formatCell] formats a cell's value for [aggregate], whose header text
   /// is [aggregateLabel]; [rowLabel] / [columnLabel] render a header
   /// entry's text and [titleLabel] a dimension's title.
-  /// [iconWidth] is the room for the expand/sort icons next to a text.
+  /// [iconWidth] is the room for the expand/sort icons next to a text;
+  /// titles get twice that, for the sort icon and the menu button.
   /// Only the first [measuredRows] rows plus summary rows are visited.
   List<double> measure({
     required CubeLayout layout,
@@ -68,7 +69,7 @@ final class ColumnWidthMeasurer {
         titleLabel(spec.rows.dimensions[c].dimension),
         header: true,
         bold: false,
-        extra: iconWidth,
+        extra: 2 * iconWidth,
       );
     }
     if (headerColumns == 1) {
@@ -79,7 +80,7 @@ final class ColumnWidthMeasurer {
           titleLabel(d.dimension),
           header: true,
           bold: false,
-          extra: iconWidth,
+          extra: 2 * iconWidth,
         );
       }
     }

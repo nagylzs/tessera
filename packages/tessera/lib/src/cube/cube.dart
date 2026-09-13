@@ -92,4 +92,57 @@ final class Cube {
       cache: _cache,
     ),
   );
+
+  /// Expands every row group on [level] (`0` = the first row dimension),
+  /// and the levels above it, so that the whole of level [level] + 1 is
+  /// visible. Unlike [expandRowsToDepth] this keeps what is already
+  /// expanded further down. A no-op on the last level.
+  Cube expandRowLevel(int level) =>
+      copyWith(rowExpansion: _expandLevel(spec.rows, rowExpansion, level));
+
+  /// Collapses every row group on [level]; see [ExpansionState.collapseLevel].
+  Cube collapseRowLevel(int level) =>
+      copyWith(rowExpansion: rowExpansion.collapseLevel(level));
+
+  /// Column-axis counterpart of [expandRowLevel].
+  Cube expandColumnLevel(int level) => copyWith(
+    columnExpansion: _expandLevel(spec.columns, columnExpansion, level),
+  );
+
+  /// Column-axis counterpart of [collapseRowLevel].
+  Cube collapseColumnLevel(int level) =>
+      copyWith(columnExpansion: columnExpansion.collapseLevel(level));
+
+  /// Number of rows [expandRowLevel] would add — what a widget checks
+  /// against its expansion limit before asking for confirmation. Costs one
+  /// pass over the facts (no cells are computed); `0` when nothing changes.
+  int rowsAddedByExpandingLevel(int level) =>
+      _addedBy(spec.rows, rowExpansion, level, layout.rows.length);
+
+  /// Column-axis counterpart of [rowsAddedByExpandingLevel].
+  int columnsAddedByExpandingLevel(int level) =>
+      _addedBy(spec.columns, columnExpansion, level, layout.columns.length);
+
+  ExpansionState _expandLevel(CubeAxis axis, ExpansionState state, int level) =>
+      expansionWithLevel(
+        facts: facts,
+        axis: axis,
+        filter: spec.filter,
+        level: level,
+        state: state,
+        cache: _cache,
+      );
+
+  int _addedBy(CubeAxis axis, ExpansionState state, int level, int current) {
+    final next = _expandLevel(axis, state, level);
+    if (next == state) return 0;
+    final after = countEntries(
+      facts: facts,
+      axis: axis,
+      filter: spec.filter,
+      state: next,
+      cache: _cache,
+    );
+    return after - current;
+  }
 }

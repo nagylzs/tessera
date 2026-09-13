@@ -147,6 +147,18 @@ final class TesseraStringsHu extends TesseraStrings {
   String get largeExpansionTitle => 'Nagy kibontás';
 
   @override
+  String get sortAscending => 'Növekvő rendezés';
+
+  @override
+  String get sortDescending => 'Csökkenő rendezés';
+
+  @override
+  String get expandAll => 'Összes kibontása';
+
+  @override
+  String get collapseAll => 'Összes összecsukása';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'A(z) „$label” kibontása $added ${isRow ? 'sort' : 'oszlopot'} ad hozzá. Folytatod?';
 }

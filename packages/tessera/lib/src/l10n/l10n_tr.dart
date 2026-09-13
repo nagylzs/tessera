@@ -147,6 +147,18 @@ final class TesseraStringsTr extends TesseraStrings {
   String get largeExpansionTitle => 'Büyük genişletme';
 
   @override
+  String get sortAscending => 'Artan sırala';
+
+  @override
+  String get sortDescending => 'Azalan sırala';
+
+  @override
+  String get expandAll => 'Tümünü genişlet';
+
+  @override
+  String get collapseAll => 'Tümünü daralt';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       '"$label" genişletildiğinde $added ${isRow ? 'satır' : 'sütun'} eklenir. Devam edilsin mi?';
 }

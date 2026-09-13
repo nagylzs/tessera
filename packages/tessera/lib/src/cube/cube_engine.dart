@@ -421,6 +421,52 @@ ExpansionState expansionToDepth({
   return ExpansionState.of([for (final n in tree.nodes) tree.pathOf(n)]);
 }
 
+/// [state] plus every group on [level] (`0` = the first dimension) that
+/// has facts after [filter], together with the groups above it: what
+/// "expand all" on a dimension title gives. Groups the state already had
+/// expanded further down stay expanded. On the last level of [axis] (which
+/// cannot be expanded) the state is returned unchanged.
+ExpansionState expansionWithLevel({
+  required FactTable facts,
+  required CubeAxis axis,
+  required FactFilter? filter,
+  required int level,
+  required ExpansionState state,
+  required CubeCache cache,
+}) {
+  if (level < 0 || level >= axis.depth - 1) return state;
+  final all = expansionToDepth(
+    facts: facts,
+    axis: axis,
+    filter: filter,
+    depth: level + 2,
+    cache: cache,
+  );
+  return ExpansionState.of([...state.expanded, ...all.expanded]);
+}
+
+/// Number of entries [axis] shows under [state]: what `AxisLayout.length`
+/// would be, without computing the cells.
+int countEntries({
+  required FactTable facts,
+  required CubeAxis axis,
+  required FactFilter? filter,
+  required ExpansionState state,
+  required CubeCache cache,
+}) {
+  final tree = AxisTree(axis, [
+    for (final d in axis.dimensions) cache.codesFor(facts, d.dimension),
+  ])..applyExpansion(state);
+  for (final r in cache.filteredRows(facts, filter)) {
+    tree.walk(r);
+  }
+  var count = axis.summaryPosition == SummaryPosition.hidden ? 0 : 1;
+  for (final n in tree.nodes) {
+    if (n.depth > 0 && n.factCount > 0) count++;
+  }
+  return count;
+}
+
 final class HeaderEntryImpl implements HeaderEntry {
   HeaderEntryImpl(this.tree, this.node, this._rows);
 

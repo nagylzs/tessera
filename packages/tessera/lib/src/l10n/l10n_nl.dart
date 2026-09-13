@@ -147,6 +147,18 @@ final class TesseraStringsNl extends TesseraStrings {
   String get largeExpansionTitle => 'Grote uitbreiding';
 
   @override
+  String get sortAscending => 'Oplopend sorteren';
+
+  @override
+  String get sortDescending => 'Aflopend sorteren';
+
+  @override
+  String get expandAll => 'Alles uitklappen';
+
+  @override
+  String get collapseAll => 'Alles inklappen';
+
+  @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Het uitklappen van "$label" voegt $added ${isRow ? 'rijen' : 'kolommen'} toe. Doorgaan?';
 }

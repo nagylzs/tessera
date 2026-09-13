@@ -23,4 +23,17 @@ class CubeController extends ChangeNotifier {
   void toggleColumn(DimensionPath path) => cube = _cube.toggleColumn(path);
 
   void updateSpec(CubeSpec spec) => cube = _cube.copyWith(spec: spec);
+
+  /// See [Cube.expandRowLevel].
+  void expandRowLevel(int level) => cube = _cube.expandRowLevel(level);
+
+  /// See [Cube.collapseRowLevel].
+  void collapseRowLevel(int level) => cube = _cube.collapseRowLevel(level);
+
+  /// See [Cube.expandColumnLevel].
+  void expandColumnLevel(int level) => cube = _cube.expandColumnLevel(level);
+
+  /// See [Cube.collapseColumnLevel].
+  void collapseColumnLevel(int level) =>
+      cube = _cube.collapseColumnLevel(level);
 }

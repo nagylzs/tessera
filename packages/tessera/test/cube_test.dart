@@ -398,6 +398,109 @@ void main() {
       );
     });
 
+    test('expandRowLevel opens a whole level and keeps deeper state', () {
+      final europe = p([const DimensionValue(region, 'Europe')]);
+      final germany = europe.child(const DimensionValue(country, 'Germany'));
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(rows: CubeAxis.of([region, country, category])),
+      );
+      // from the initial state: same as depth 2
+      expect(
+        cube.expandRowLevel(0).rowExpansion,
+        cube.expandRowsToDepth(2).rowExpansion,
+      );
+      // level 1 opens the countries of every region as well
+      expect(
+        cube.expandRowLevel(1).rowExpansion,
+        cube.expandRowsToDepth(3).rowExpansion,
+      );
+      // a group expanded further down survives, unlike with expandRowsToDepth
+      final drilled = cube.toggleRow(europe).toggleRow(germany);
+      final all = drilled.expandRowLevel(0);
+      expect(all.rowExpansion.isExpanded(germany), isTrue);
+      expect(labels(all.layout.rows), [
+        '∅',
+        '∅',
+        'Iceland',
+        'Asia',
+        'Japan',
+        'Europe',
+        '∅',
+        'Germany',
+        'A',
+        'B',
+        'Hungary',
+        'Σ',
+      ]);
+      expect(
+        drilled.expandRowsToDepth(2).rowExpansion.isExpanded(germany),
+        isFalse,
+      );
+      // the last level cannot be expanded
+      expect(cube.expandRowLevel(2).rowExpansion, cube.rowExpansion);
+      expect(cube.expandRowLevel(-1).rowExpansion, cube.rowExpansion);
+    });
+
+    test('collapseRowLevel closes a whole level', () {
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(rows: CubeAxis.of([region, country, category])),
+      ).expandRowLevel(1);
+      expect(cube.layout.rows.length, 18);
+      final countries = cube.collapseRowLevel(1);
+      expect(countries.rowExpansion, cube.expandRowsToDepth(2).rowExpansion);
+      expect(
+        countries.collapseRowLevel(0).rowExpansion,
+        ExpansionState.initial(),
+      );
+      expect(
+        countries.collapseRowLevel(0).collapseRowLevel(0).rowExpansion,
+        ExpansionState.initial(),
+      );
+    });
+
+    test('rowsAddedByExpandingLevel counts without computing cells', () {
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(rows: CubeAxis.of([region, country])),
+      );
+      expect(cube.layout.rows.length, 4);
+      expect(cube.rowsAddedByExpandingLevel(0), 6);
+      expect(cube.expandRowLevel(0).layout.rows.length, 10);
+      expect(cube.expandRowLevel(0).rowsAddedByExpandingLevel(0), 0);
+      expect(cube.rowsAddedByExpandingLevel(1), 0);
+      // a partly expanded axis only counts what is still closed
+      final europe = p([const DimensionValue(region, 'Europe')]);
+      expect(cube.toggleRow(europe).rowsAddedByExpandingLevel(0), 3);
+      // hidden summary is not counted
+      final hidden = Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: CubeAxis.of([
+            region,
+            country,
+          ], summaryPosition: SummaryPosition.hidden),
+        ),
+      );
+      expect(hidden.layout.rows.length, 3);
+      expect(hidden.rowsAddedByExpandingLevel(0), 6);
+    });
+
+    test('column level operations mirror the row ones', () {
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(columns: CubeAxis.of([region, country])),
+      );
+      expect(cube.columnsAddedByExpandingLevel(0), 6);
+      final all = cube.expandColumnLevel(0);
+      expect(all.layout.columns.length, 10);
+      expect(
+        all.collapseColumnLevel(0).columnExpansion,
+        ExpansionState.initial(),
+      );
+    });
+
     test('changing the spec keeps the expansion where it still applies', () {
       final europe = p([const DimensionValue(region, 'Europe')]);
       final cube = Cube(
