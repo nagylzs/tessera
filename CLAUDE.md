@@ -123,7 +123,37 @@ the root, ignored; members carry `resolution: workspace`):
   (engine; html delegates to it). Tests parse with `package:xml` and
   render with `rsvg-convert` when installed. `example/main.dart` +
   `example/sales.csv` as in html.
-- Planned: further exporters (`tessera_pdf`, …) the same way.
+- `packages/tessera_pdf` — pure Dart, depends on `tessera` and
+  `package:pdf` (accepted for TrueType embedding + subsetting and real
+  glyph metrics; the built-in Helvetica is WinAnsi only, so Hungarian
+  ő/ű need a TTF). `pdf` pins `archive <4.1.0`, hence tessera_xlsx/ods
+  declare `archive: ">=4.0.7 <5.0.0"` (their API use is identical in
+  4.0.9 and 4.2). `PdfCubeExporter` (`export` is async → `Uint8List`;
+  `plan` returns `PdfPlan` = scale + `GridPagination` without
+  rendering): geometry from `GridMetrics` with a `TextMeasurer` from the
+  embedded fonts (`stringMetrics().advanceWidth × font px`), page cuts
+  from the engine's `GridPagination` (`export/grid_pagination.dart`:
+  frozen header rows/columns repeat on every page, greedy whole-row /
+  whole-column bands, a too-large row still gets a page, order down then
+  across). Scaling: `fitToWidth` (default) down to `minScale` (0.6),
+  then tiling. Drawing on the low-level `PdfGraphics` in points with
+  `k = 0.75 × scale` (px→pt); origin cells found through covered cells
+  in the page's visible rows × columns, visible sub-rectangle per merged
+  area, text on the first visible row (so a label crossing a break is
+  repeated); text ellipsized with `…` to the cell (exact metrics, so no
+  clipping); baseline = row centre − (ascent+descent)/2 × size. Options:
+  `PageSetup` (mm; `PageSize` a3/a4/a5/letter/legal/custom,
+  `PageOrientation`, margins; default A4 landscape 15 mm), `PdfFonts`
+  (regular/bold/italic/boldItalic TTF bytes, `builtIn()`; fallbacks
+  bold→regular etc.; `ExportFont.family` ignored), `PdfPageText`
+  header/footer (left/center/right, `{title}` `{page}` `{pages}`
+  `{date}`; defaults title top-left, `{page} / {pages}` bottom-right;
+  a band of `pageTextSize × 1.8` pt is reserved only when non-empty).
+  Tests use poppler (`pdfinfo`, `pdftotext -f/-l`, `pdffonts`), `qpdf
+  --check` and ghostscript when installed, Noto Sans from
+  `/usr/share/fonts/noto` when present. `example/main.dart` takes an
+  optional font directory.
+- Planned: further exporters the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a
 package that depends on Flutter cannot be used with the standalone Dart
@@ -140,6 +170,7 @@ dart analyze                                   # at the root: all packages, must
 (cd packages/tessera_ods && dart test)         # ods package (pure Dart)
 (cd packages/tessera_html && dart test)        # html package (pure Dart)
 (cd packages/tessera_svg && dart test)         # svg package (pure Dart; rsvg-convert optional)
+(cd packages/tessera_pdf && dart test)         # pdf package (poppler/qpdf/gs optional)
 (cd packages/tessera_flutter && flutter test)  # widget tests
 (cd packages/tessera_flutter/example && flutter test)
 dart format packages                           # run before committing
@@ -220,7 +251,12 @@ Paths below are relative to the package (`lib/src/...` means
   `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`). The
   workbench's "Export…" menu writes the cube (all aggregates) as .xlsx
   (`XlsxCubeExporter`), .ods (`OdsCubeExporter`), .html
-  (`HtmlCubeExporter`), .svg (`SvgCubeExporter`) or CSV
+  (`HtmlCubeExporter`), .svg (`SvgCubeExporter`), .pdf
+  (`PdfCubeExporter` with Noto Sans Regular/Bold from `assets/fonts/`,
+  OFL licence alongside; the files are ~90 KB subsets — Latin, Latin-1,
+  Extended-A/B, punctuation, currency — made by `tool/subset_fonts.sh`
+  with fonttools' `pyftsubset` from the full fonts, because the example
+  is published inside `tessera_flutter`) or CSV
   (`CsvCubeExporter`, BOM) — `ExportFormat` — through
   `file_picker`'s `FilePicker.saveFile(bytes:)`, which writes the file
   itself — needed on Android/iOS (document Uri, no path;

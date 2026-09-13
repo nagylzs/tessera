@@ -23,7 +23,8 @@
 /// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
 /// as CSV, `tessera_xlsx` as a workbook. [CubeExportTheme] is the
 /// format-neutral look every exporter takes, [GridMetrics] the pixel
-/// geometry for renderers that lay cells out themselves (SVG, PDF); [HueLevels] colours nesting
+/// geometry for renderers that lay cells out themselves (SVG, PDF) and
+/// [GridPagination] cuts it into pages with repeated headers; [HueLevels] colours nesting
 /// levels by hue alone (computed in OKLCH, see [Oklch]).
 ///
 /// Every user-facing text and the locale-specific label and number
@@ -46,6 +47,7 @@ export 'src/export/csv_cube_exporter.dart';
 export 'src/export/cube_export_theme.dart';
 export 'src/export/cube_grid.dart';
 export 'src/export/grid_metrics.dart';
+export 'src/export/grid_pagination.dart';
 export 'src/facts/dimension.dart';
 export 'src/facts/fact_table.dart';
 export 'src/facts/importer.dart';

@@ -9,7 +9,7 @@ environment:
   sdk: ^3.13.3
 
 dependencies:
-  archive: ^4.2.0
+  archive: ">=4.0.7 <5.0.0"
   tessera: ^0.0.1
   xml: ^7.0.1
 

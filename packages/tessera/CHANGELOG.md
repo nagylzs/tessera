@@ -30,7 +30,8 @@
 * `GridMetrics`: pixel geometry of a `CubeGrid` (content-sized column
   widths from an estimate or a `TextMeasurer`, row heights from the
   fonts, offsets) for renderers that lay cells out themselves;
-  `NumberFormat.format(value, strings)`.
+  `GridPagination` cuts it into pages with repeated header rows and
+  columns; `NumberFormat.format(value, strings)`.
 * `CsvCubeExporter` (`CsvExportOptions`: delimiter, quote, line ending,
   decimal separator, BOM, group labels at the origin or repeated).
 * `FactTable.withLabels` relabels columns without a re-import (data is

@@ -15,9 +15,10 @@ with two packages:
 | [`packages/tessera_ods`](packages/tessera_ods) | `tessera`, `archive`, `xml` | `OdsDataSource` and `OdsCubeExporter`: the same for OpenDocument spreadsheets (LibreOffice Calc). Pure Dart. |
 | [`packages/tessera_html`](packages/tessera_html) | `tessera` | `HtmlCubeExporter`: a cube as an HTML table with merged headers and a stylesheet from `CubeExportTheme`. Pure Dart. |
 | [`packages/tessera_svg`](packages/tessera_svg) | `tessera` | `SvgCubeExporter`: a cube as a scalable image, content-sized columns, themed with `CubeExportTheme`. Pure Dart. |
+| [`packages/tessera_pdf`](packages/tessera_pdf) | `tessera`, `pdf` | `PdfCubeExporter`: paginated pages with repeated headers, fit to width or tiling, embedded fonts, page header/footer. Pure Dart. |
 
-Further exporters (pdf, …) are planned as packages the same way,
-rendering a `CubeLayout` without Flutter.
+Every exporter renders a `CubeLayout` without Flutter; further formats
+can be added the same way.
 
 > **Status: early development.** Nothing is published to pub.dev yet.
 

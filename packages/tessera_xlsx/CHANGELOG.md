@@ -14,3 +14,4 @@
   export is a flat table of leaf rows.
 * The exporter renders from the engine's `CubeGrid`.
 * `example/main.dart`: command-line round trip on `example/sales.xlsx`.
+* `archive` constraint widened to `>=4.0.7 <5.0.0` so the package resolves next to `package:pdf`.

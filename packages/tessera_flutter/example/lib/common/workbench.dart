@@ -1,11 +1,12 @@
 import 'dart:convert' show utf8;
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
 import 'package:tessera_html/tessera_html.dart';
+import 'package:tessera_pdf/tessera_pdf.dart';
 import 'package:tessera_svg/tessera_svg.dart';
 import 'package:tessera_ods/tessera_ods.dart';
 import 'package:tessera_xlsx/tessera_xlsx.dart';
@@ -285,6 +286,21 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             ).export(layout, title: base),
           ),
         );
+      case ExportFormat.pdf:
+        // Noto Sans from the assets: embedded, so accents survive
+        final regular = await rootBundle.load(
+          'assets/fonts/NotoSans-Regular.ttf',
+        );
+        final bold = await rootBundle.load('assets/fonts/NotoSans-Bold.ttf');
+        bytes = await PdfCubeExporter(
+          strings: strings,
+          theme: widget.exportTheme,
+          fonts: PdfFonts(
+            regular: regular.buffer.asUint8List(),
+            bold: bold.buffer.asUint8List(),
+          ),
+          footer: const PdfPageText(left: '{date}', right: '{page} / {pages}'),
+        ).export(layout, title: base);
       case ExportFormat.csv:
         bytes = Uint8List.fromList(
           utf8.encode(
@@ -511,6 +527,7 @@ enum ExportFormat {
   ),
   html('Web page', 'html', 'text/html'),
   svg('SVG image', 'svg', 'image/svg+xml'),
+  pdf('PDF document', 'pdf', 'application/pdf'),
   csv('CSV', 'csv', 'text/csv');
 
   const ExportFormat(this.label, this.extension, this.mimeType);
