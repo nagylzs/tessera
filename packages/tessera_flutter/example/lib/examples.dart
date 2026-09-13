@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'datasets/datasets_page.dart';
 import 'simple/sales_page.dart';
+import 'theming/theming_page.dart';
 
 /// One entry of the launcher page.
 final class Example {
@@ -30,6 +31,14 @@ const examples = [
     build: _simple,
   ),
   Example(
+    title: 'Theming',
+    description:
+        'The sales cube under different CubeThemes and app colour schemes: '
+        'level colours, borders, sizes, selection and sort tints.',
+    icon: Icons.palette_outlined,
+    build: _theming,
+  ),
+  Example(
     title: 'Public datasets',
     description:
         'Download real-world CSV files (60 KB to 70 MB) through a custom '
@@ -40,4 +49,5 @@ const examples = [
 ];
 
 Widget _simple(BuildContext context) => const SalesPage();
+Widget _theming(BuildContext context) => const ThemingPage();
 Widget _datasets(BuildContext context) => const DatasetsPage();

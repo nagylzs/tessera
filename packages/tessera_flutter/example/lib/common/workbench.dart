@@ -16,6 +16,8 @@ class CubeWorkbench extends StatefulWidget {
     this.dimensions,
     this.adjustSchema,
     this.progressEvery = 5000,
+    this.theme = const CubeTheme(),
+    this.actions = const [],
   });
 
   final DataSource source;
@@ -32,6 +34,12 @@ class CubeWorkbench extends StatefulWidget {
   final Schema Function(Schema inferred)? adjustSchema;
 
   final int progressEvery;
+
+  /// Theme of the [CubeView].
+  final CubeTheme theme;
+
+  /// Extra AppBar actions, placed before the built-in ones.
+  final List<Widget> actions;
 
   @override
   State<CubeWorkbench> createState() => _CubeWorkbenchState();
@@ -224,6 +232,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
     appBar: AppBar(
       title: Text(widget.title),
       actions: [
+        ...widget.actions,
         const LanguageMenu(),
         IconButton(
           icon: const Icon(Icons.table_chart_outlined),
@@ -316,7 +325,11 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: CubeView(controller: controller, aggregate: shown),
+              child: CubeView(
+                controller: controller,
+                aggregate: shown,
+                theme: widget.theme,
+              ),
             ),
             // the current cell: what an app would chart or drill into
             ListenableBuilder(

@@ -107,6 +107,13 @@ Paths below are relative to the package (`lib/src/...` means
   reads, disk cache after one full pass, HEAD Content-Length →
   `estimatedRowCount`; sendable to the import isolate; dart:io so not web);
   `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`).
+- "Theming" (`example/lib/theming/`): the sales cube with an AppBar
+  palette menu — `ThemePreset`s in `presets.dart` (`themePresets`:
+  Material/default, Spreadsheet, Gradient, High contrast, Compact),
+  seed colours and light/dark, applied by wrapping the workbench in a
+  local `Theme`. `CubeWorkbench` gained `theme` and `actions` for it.
+  This is the place to demonstrate new `CubeTheme` features; each
+  preset must resolve in light and dark (`test/theming_test.dart`).
 - "Public datasets" (`example/lib/datasets/`): six real CSVs (GitHub raw
   with Content-Length; data.wa.gov chunked without) listed in
   `publicDatasets`, cached under `systemTemp/tessera_examples/`; "Clear
