@@ -21,13 +21,17 @@
 ///
 /// [CubeGrid] lays a [CubeLayout] out as a rectangular grid (the way the
 /// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
-/// as CSV, `tessera_xlsx` as a workbook.
+/// as CSV, `tessera_xlsx` as a workbook. [CubeExportTheme] is the
+/// format-neutral look every exporter takes; [HueLevels] colours nesting
+/// levels by hue alone (computed in OKLCH, see [Oklch]).
 ///
 /// Every user-facing text and the locale-specific label and number
 /// formatting rules live in [TesseraStrings] (fourteen languages built in),
 /// so renderers agree on how a cube is labelled.
 library;
 
+export 'src/color/hue_levels.dart';
+export 'src/color/oklch.dart';
 export 'src/cube/aggregate.dart';
 export 'src/cube/aggregate_kind.dart';
 export 'src/cube/axis_geometry.dart';

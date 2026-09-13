@@ -46,6 +46,8 @@ final class GridCell {
     this.isSummary = false,
     this.isLeg = false,
     this.level = -1,
+    this.rowLevel = -1,
+    this.columnLevel = -1,
     this.rowSpan = 1,
     this.columnSpan = 1,
     this.originRow,
@@ -69,7 +71,20 @@ final class GridCell {
   final bool isLeg;
 
   /// Data cells: row depth + column depth, from `0`; `-1` otherwise.
+  /// See [rowLevel] and [columnLevel] for the two parts.
   final int level;
+
+  /// The row level (index of the row dimension, from `0`) a cell belongs
+  /// to: the row group's depth for data cells and row labels, the column
+  /// position for row titles; `-1` on summary rows and for cells of the
+  /// column header band.
+  final int rowLevel;
+
+  /// The column level the cell belongs to, likewise: the column group's
+  /// depth for data cells, column labels and aggregate labels, the row
+  /// position for column titles; `-1` on the summary column and in the
+  /// row header.
+  final int columnLevel;
 
   final int rowSpan;
   final int columnSpan;
@@ -224,6 +239,8 @@ final class _Builder {
       isSummary: origin.isSummary,
       isLeg: origin.isLeg,
       level: origin.level,
+      rowLevel: origin.rowLevel,
+      columnLevel: origin.columnLevel,
       rowSpan: rowSpan,
       columnSpan: columnSpan,
       alignRight: origin.alignRight,
@@ -238,6 +255,8 @@ final class _Builder {
           isSummary: origin.isSummary,
           isLeg: origin.isLeg,
           level: origin.level,
+          rowLevel: origin.rowLevel,
+          columnLevel: origin.columnLevel,
           originRow: row,
           originColumn: column,
           alignRight: origin.alignRight,
@@ -260,6 +279,7 @@ final class _Builder {
             layout.spec.columns.dimensions[r].dimension,
             layout.facts,
           ),
+          columnLevel: r,
           alignRight: true,
         ),
       );
@@ -273,6 +293,7 @@ final class _Builder {
                 layout.spec.rows.dimensions[c].dimension,
                 layout.facts,
               ),
+              rowLevel: c,
             );
     }
   }
@@ -289,6 +310,7 @@ final class _Builder {
               : strings.aggregateLabel(aggregates[a], layout.facts),
           path: entry.path,
           isSummary: entry.isSummary,
+          columnLevel: entry.depth - 1,
           alignRight: true,
         );
       }
@@ -322,6 +344,7 @@ final class _Builder {
             path: area.path,
             isSummary: owner.isSummary,
             isLeg: !area.isLabel,
+            columnLevel: owner.depth - 1,
           ),
         );
       }
@@ -356,6 +379,7 @@ final class _Builder {
             path: area.path,
             isSummary: owner.isSummary,
             isLeg: !area.isLabel,
+            rowLevel: owner.depth - 1,
           ),
         );
       }
@@ -377,6 +401,8 @@ final class _Builder {
             value: value,
             isSummary: summary,
             level: summary ? -1 : level,
+            rowLevel: rows[i].depth - 1,
+            columnLevel: columns[j].depth - 1,
             alignRight: true,
           );
         }

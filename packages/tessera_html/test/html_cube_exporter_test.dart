@@ -108,7 +108,7 @@ void main() {
     expect(html, contains('class="tessera-data tessera-level-1 tessera-num"'));
     expect(html, contains('class="tessera-data tessera-summary tessera-num"'));
     expect(html, contains('class="tessera-header tessera-summary"'));
-    expect(html, contains('class="tessera-leg"'));
+    expect(html, contains('class="tessera-leg tessera-row-level-0"'));
     expect(html, contains('scope="row"'));
     expect(html, contains('scope="col"'));
   });

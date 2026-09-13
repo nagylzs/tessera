@@ -443,7 +443,7 @@ class _CubeGridState extends State<_CubeGrid> {
         onSecondaryTapUp: (details) =>
             menu.open(position: details.localPosition),
         child: _box(
-          color: theme.headerColor,
+          color: theme.headerLevelColor(_headerLevel(isRow, level)),
           alignment: isRow ? Alignment.centerLeft : Alignment.centerRight,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -556,7 +556,9 @@ class _CubeGridState extends State<_CubeGrid> {
       final isKey = _isSortKeyColumn(entry);
       return TableViewCell(
         child: _box(
-          color: entry.isSummary ? theme.summaryColor : theme.headerColor,
+          color: entry.isSummary
+              ? theme.summaryColor
+              : theme.headerLevelColor(_headerLevel(false, entry.depth - 1)),
           alignment: Alignment.centerRight,
           onTap: view.sortable ? () => _sortRowsByColumn(entry) : null,
           child: Row(
@@ -600,6 +602,7 @@ class _CubeGridState extends State<_CubeGrid> {
         // the label and, when expanded, its leg: the whole rotated L
         color: _headerColor(
           owner,
+          isRow: false,
           selected: area.entryIndex == _selectedColumn,
         ),
         alignment: Alignment.topLeft,
@@ -638,7 +641,11 @@ class _CubeGridState extends State<_CubeGrid> {
       rowMergeStart: area.entrySpan > 1 ? headerRows + area.entryStart : null,
       rowMergeSpan: area.entrySpan > 1 ? area.entrySpan : null,
       child: _box(
-        color: _headerColor(owner, selected: area.entryIndex == _selectedRow),
+        color: _headerColor(
+          owner,
+          isRow: true,
+          selected: area.entryIndex == _selectedRow,
+        ),
         alignment: Alignment.topLeft,
         // an expanded group's label and the leg beside it form one area
         rightBorderFrom: _legAt(area) == 0 ? theme.rowHeight : 0,
@@ -669,10 +676,24 @@ class _CubeGridState extends State<_CubeGrid> {
     return w;
   }
 
-  /// Header background: summary or header colour, tinted with the selection
-  /// colour for the current cell's row/column label.
-  Color _headerColor(HeaderEntry entry, {required bool selected}) {
-    final base = entry.isSummary ? theme.summaryColor : theme.headerColor;
+  HeaderLevel _headerLevel(bool isRow, int level) => HeaderLevel(
+    isRow: isRow,
+    level: level,
+    rowLevels: rowDepth,
+    columnLevels: columnDepth,
+  );
+
+  /// Header background: the summary colour or the level's header colour,
+  /// tinted with the selection colour for the current cell's row/column
+  /// label.
+  Color _headerColor(
+    HeaderEntry entry, {
+    required bool isRow,
+    required bool selected,
+  }) {
+    final base = entry.isSummary
+        ? theme.summaryColor
+        : theme.headerLevelColor(_headerLevel(isRow, entry.depth - 1));
     return selected
         ? Color.alphaBlend(theme.selectionColor.withValues(alpha: 0.15), base)
         : base;
@@ -729,13 +750,16 @@ class _CubeGridState extends State<_CubeGrid> {
     final colEntry = layout.columns.entries[j];
     final cell = layout.cellAt(i, j);
     final summary = rowEntry.isSummary || colEntry.isSummary;
-    // A cell's level is the number of dimension values pinning it, i.e.
-    // the row and column depths added; non-summary cells have both >= 1.
+    // Non-summary cells have both depths >= 1; levels count from 0.
     var color = summary
         ? theme.summaryColor
         : theme.levelColor(
-            rowEntry.depth + colEntry.depth - 2,
-            rowDepth + columnDepth - 2,
+            CellLevel(
+              row: rowEntry.depth - 1,
+              column: colEntry.depth - 1,
+              rowLevels: rowDepth,
+              columnLevels: columnDepth,
+            ),
           );
     if (_isSortKeyColumn(colEntry)) {
       color = Color.alphaBlend(theme.sortKeyColor, color);

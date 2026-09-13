@@ -141,21 +141,12 @@ final class _Export {
     return writer.build();
   }
 
-  /// Header cells on the header fill in the header font, data cells on
-  /// their level's fill in the cell font; anything on a summary row or
-  /// column takes the summary fill and font.
-  int _styleOf(GridCell cell) {
-    if (cell.kind == GridCellKind.data) {
-      return writer.style(
-        theme.levelFill(cell.level, summary: cell.isSummary),
-        font: cell.isSummary ? theme.summaryFont : theme.cellFont,
-        right: true,
-      );
-    }
-    return writer.style(
-      cell.isSummary ? theme.summaryFill : theme.headerFill,
-      font: cell.isSummary ? theme.summaryFont : theme.headerFont,
-      right: cell.alignRight,
-    );
-  }
+  /// Fill and font from the theme ([CubeExportTheme.fillOf] /
+  /// [CubeExportTheme.fontOf]): headers per level, data cells per level,
+  /// summaries on the summary fill and font.
+  int _styleOf(GridCell cell) => writer.style(
+    theme.fillOf(cell),
+    font: theme.fontOf(cell),
+    right: cell.alignRight,
+  );
 }

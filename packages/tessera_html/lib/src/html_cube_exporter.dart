@@ -22,7 +22,8 @@ enum HtmlStyling {
 /// group's own row. Every cell carries classes for its kind and level so a
 /// page can restyle it: `tessera-title`, `tessera-header`, `tessera-leg`,
 /// `tessera-aggregate`, `tessera-data`, `tessera-summary`,
-/// `tessera-level-N`, `tessera-num`.
+/// `tessera-level-N`, `tessera-row-level-N` / `tessera-col-level-N` (the
+/// level a header cell belongs to), `tessera-num`.
 final class HtmlCubeExporter {
   const HtmlCubeExporter({
     this.strings = const TesseraStringsEn(),
@@ -113,6 +114,16 @@ final class HtmlCubeExporter {
         'table.$p td.$p-level-$i { background: ${_rgb(theme.levelFills[i])}; }',
       );
     }
+    for (var i = 0; i < theme.rowHeaderFills.length; i++) {
+      b.writeln(
+        'table.$p th.$p-row-level-$i { background: ${_rgb(theme.rowHeaderFills[i])}; }',
+      );
+    }
+    for (var i = 0; i < theme.columnHeaderFills.length; i++) {
+      b.writeln(
+        'table.$p th.$p-col-level-$i { background: ${_rgb(theme.columnHeaderFills[i])}; }',
+      );
+    }
     b.writeln(
       'table.$p .$p-summary { background: ${_rgb(theme.summaryFill)}; ${_font(theme.summaryFont)} }',
     );
@@ -171,24 +182,28 @@ final class HtmlCubeExporter {
       },
       if (cell.isSummary) '$p-summary',
       if (cell.kind == GridCellKind.data && !cell.isSummary)
-        '$p-level-${cell.level.clamp(0, theme.levelFills.length - 1)}',
+        '$p-level-${_clampTo(theme.levelOf(cell), theme.levelFills)}',
+      if (!cell.isSummary &&
+          cell.kind != GridCellKind.data &&
+          cell.rowLevel >= 0)
+        '$p-row-level-${_clampTo(cell.rowLevel, theme.rowHeaderFills)}',
+      if (!cell.isSummary &&
+          cell.kind != GridCellKind.data &&
+          cell.columnLevel >= 0)
+        '$p-col-level-${_clampTo(cell.columnLevel, theme.columnHeaderFills)}',
       if (cell.alignRight) '$p-num',
     ];
     return out.join(' ');
   }
 
+  /// [level] limited to the indices of [fills] (as the theme repeats the
+  /// last fill), or itself when there are no fills to match.
+  static int _clampTo(int level, List<int> fills) =>
+      fills.isEmpty ? level : level.clamp(0, fills.length - 1);
+
   String _inline(GridCell cell) {
-    final isData = cell.kind == GridCellKind.data;
-    final fill = isData
-        ? theme.levelFill(cell.level, summary: cell.isSummary)
-        : cell.isSummary
-        ? theme.summaryFill
-        : theme.headerFill;
-    final font = cell.isSummary
-        ? theme.summaryFont
-        : isData
-        ? theme.cellFont
-        : theme.headerFont;
+    final fill = theme.fillOf(cell);
+    final font = theme.fontOf(cell);
     return 'border: 1px solid ${_rgb(theme.borderColor)}; padding: 2px 6px; '
         'white-space: nowrap; background: ${_rgb(fill)}; ${_font(font)} '
         'text-align: ${cell.alignRight ? 'right' : 'left'};';

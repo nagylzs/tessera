@@ -670,8 +670,8 @@ void main() {
             controller: CubeController(cube.toggleRow(europe).toggleColumn(a)),
             aggregate: sumQty,
             theme: CubeTheme(
-              levelColor: (depth, maxDepth) {
-                seen.add((depth, maxDepth));
+              levelColor: (level) {
+                seen.add((level.depth, level.maxDepth));
                 return Colors.transparent;
               },
             ),

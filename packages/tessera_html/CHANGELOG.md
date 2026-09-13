@@ -6,3 +6,6 @@
   the engine's `CubeExportTheme` (embedded, inline or none), sticky
   headers, a whole document or a fragment, localized labels and numbers.
 * `example/main.dart`: command-line round trip on `example/sales.csv`.
+* Header cells carry `row-level-N` / `col-level-N` classes and the
+  stylesheet colours them from the theme's `rowHeaderFills` /
+  `columnHeaderFills`; data cells follow the theme's `levelBasis`.

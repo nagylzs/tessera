@@ -24,3 +24,9 @@
   `CubeTheme.selectionColor`.
 * `CubeView`: a data cell's level (for `CubeTheme.levelColor`) is the sum
   of its row and column depths, not the maximum.
+* `CubeTheme.levelColor` takes a `CellLevel` (row and column depth
+  separately, `depth` = their sum); `headerLevelColor` colours headers
+  per level (`HeaderLevel`); `hueLevels: HueLevels()` colours levels by
+  hue alone — cells by their row level, headers the same hue with more
+  chroma, the first hue from the app's primary colour, light and dark
+  defaults from the brightness, summaries neutral.

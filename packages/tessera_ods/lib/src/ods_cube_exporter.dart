@@ -94,15 +94,8 @@ final class _Writer {
   // ------------------------------------------------------------------ cells
 
   int _styleOf(GridCell cell) {
-    final ExportFont font;
-    final int fill;
-    if (cell.kind == GridCellKind.data) {
-      fill = theme.levelFill(cell.level, summary: cell.isSummary);
-      font = cell.isSummary ? theme.summaryFont : theme.cellFont;
-    } else {
-      fill = cell.isSummary ? theme.summaryFill : theme.headerFill;
-      font = cell.isSummary ? theme.summaryFont : theme.headerFont;
-    }
+    final font = theme.fontOf(cell);
+    final fill = theme.fillOf(cell);
     _fonts.add(font.family);
     final style = _CellStyle(fill, font, cell.alignRight);
     return _styleIndex.putIfAbsent(style, () {

@@ -87,6 +87,22 @@ void main() {
       expect(d.kind, GridCellKind.data);
       expect(d.value, 1);
       expect(d.level, 1);
+      expect(d.rowLevel, 1);
+      expect(d.columnLevel, 0);
+      // header cells know their level: titles by position, labels and
+      // legs by their group, aggregate names by their column entry
+      expect(g.cellAt(0, 0).columnLevel, 0);
+      expect(g.cellAt(0, 0).rowLevel, -1);
+      expect(g.cellAt(0, 1).columnLevel, 0); // covered cell repeats it
+      expect(g.cellAt(1, 1).rowLevel, 1);
+      expect(a.columnLevel, 0);
+      expect(g.cellAt(1, 4).columnLevel, 0);
+      expect(eu.rowLevel, 0);
+      expect(leg.rowLevel, 0);
+      expect(g.cellAt(2 + 4, 1).rowLevel, 1);
+      expect(g.cellAt(2 + 6, 0).rowLevel, -1); // summary
+      expect(g.cellAt(2 + 6, 4).rowLevel, -1);
+      expect(g.cellAt(2 + 6, 4).columnLevel, 0);
       expect(g.cellAt(2 + 4, 5).value, 1); // count
       expect(g.cellAt(2 + 2, 8).isSummary, isTrue);
       expect(g.cellAt(2 + 2, 8).value, 10);
@@ -103,6 +119,70 @@ void main() {
   });
 
   group('CubeExportTheme', () {
+    test('fillOf / fontOf by cell kind, level basis, header fills', () {
+      final g = CubeGrid.of(cube().layout, strings: const TesseraStringsEn());
+      const theme = CubeExportTheme(
+        headerFill: 1,
+        summaryFill: 2,
+        levelFills: [10, 11, 12],
+        rowHeaderFills: [20, 21],
+        columnHeaderFills: [30],
+      );
+      expect(theme.fillOf(g.cellAt(0, 0)), 30); // column title
+      expect(theme.fillOf(g.cellAt(1, 0)), 20); // row title 'region'
+      expect(theme.fillOf(g.cellAt(1, 1)), 21); // row title 'country'
+      expect(theme.fillOf(g.cellAt(0, 4)), 30); // column label 'A'
+      expect(theme.fillOf(g.cellAt(1, 4)), 30); // aggregate name
+      expect(theme.fillOf(g.cellAt(2 + 2, 0)), 20); // 'Europe'
+      expect(theme.fillOf(g.cellAt(2 + 2, 1)), 20); // its leg
+      expect(theme.fillOf(g.cellAt(2 + 4, 1)), 21); // 'Germany'
+      expect(theme.fillOf(g.cellAt(2 + 4, 4)), 11); // Germany × A, level 1
+      expect(theme.fillOf(g.cellAt(2 + 2, 4)), 10); // Europe × A, level 0
+      expect(theme.fillOf(g.cellAt(2 + 6, 0)), 2); // Σ label
+      expect(theme.fillOf(g.cellAt(2 + 4, 8)), 2); // Germany × Σ
+      expect(theme.fontOf(g.cellAt(2 + 4, 8)), theme.summaryFont);
+      expect(theme.fontOf(g.cellAt(2 + 4, 4)), theme.cellFont);
+      expect(theme.fontOf(g.cellAt(1, 4)), theme.headerFont);
+      // deeper than the lists: the last entry repeats
+      const short = CubeExportTheme(rowHeaderFills: [20], levelFills: [10]);
+      expect(short.fillOf(g.cellAt(2 + 4, 1)), 20);
+      expect(short.fillOf(g.cellAt(2 + 4, 4)), 10);
+      // no header fills: the plain header fill
+      expect(const CubeExportTheme(headerFill: 1).fillOf(g.cellAt(1, 1)), 1);
+      // row basis: Germany × A follows the row level, not the sum
+      const byRow = CubeExportTheme(
+        levelFills: [10, 11, 12],
+        levelBasis: LevelBasis.row,
+      );
+      expect(byRow.levelOf(g.cellAt(2 + 4, 4)), 1);
+      expect(byRow.fillOf(g.cellAt(2 + 4, 4)), 11);
+      expect(byRow.levelOf(g.cellAt(2 + 4, 8)), -1);
+      expect(
+        byRow.copyWith(levelBasis: LevelBasis.combined).levelBasis,
+        LevelBasis.combined,
+      );
+    });
+
+    test('hueLevels: rows first, then columns, cells by row', () {
+      const levels = HueLevels(hue: 30);
+      final theme = CubeExportTheme.hueLevels(
+        levels: levels,
+        rowLevels: 2,
+        columnLevels: 3,
+      );
+      expect(theme.levelBasis, LevelBasis.row);
+      expect(theme.levelFills, levels.fills(2));
+      expect(theme.rowHeaderFills, levels.headerFills(2));
+      expect(theme.columnHeaderFills, levels.headerFills(3, from: 2));
+      expect(theme.headerFill, levels.headerFill(0));
+      expect(theme.summaryFill, 0xFFDDDDDD);
+      expect(theme.summaryFont.bold, isTrue);
+      final g = CubeGrid.of(cube().layout, strings: const TesseraStringsEn());
+      expect(theme.fillOf(g.cellAt(2 + 4, 4)), levels.fill(1));
+      expect(theme.fillOf(g.cellAt(0, 4)), levels.headerFill(2));
+      expect(theme.fillOf(g.cellAt(2 + 6, 4)), 0xFFDDDDDD);
+    });
+
     test('brand, gradient, mix, level fills, number format', () {
       final theme = CubeExportTheme.brand(
         primary: 0xFF1A73E8,

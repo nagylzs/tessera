@@ -20,9 +20,17 @@ the root, ignored; members carry `resolution: workspace`):
   `europeanExcel` preset) and `CubeExportTheme` (+ `ExportFont`,
   `NumberFormat`): the format-neutral look every exporter takes —
   fills, border, fonts per role, decimals/grouping; `brand(primary:)`,
-  `gradient`, `mix`. Format-specific behaviour (frozen panes, widths,
-  native number-format codes, page size) stays on each exporter. Every
-  exporter renders from `CubeGrid`, the xlsx one included. Tests read `test/data/sales.csv`.
+  `gradient`, `mix`; `rowHeaderFills`/`columnHeaderFills` per level,
+  `levelBasis` (`combined` = row + column depth, `row`), `fillOf(cell)` /
+  `fontOf(cell)` are what exporters call; `hueLevels(levels:)`).
+  `color/`: `Oklch` (perceptual colour, ARGB both ways, gamut clipping
+  by chroma) and `HueLevels` (levels differ in hue only, golden-angle
+  step from a start hue, rows first then columns, header = same hue
+  more chroma, light/dark defaults). `GridCell` carries `rowLevel` /
+  `columnLevel` besides the summed `level`. Format-specific behaviour
+  (frozen panes, widths, native number-format codes, page size) stays
+  on each exporter. Every exporter renders from `CubeGrid`, the xlsx one
+  included. Tests read `test/data/sales.csv`.
 - `packages/tessera_flutter` — the widgets (layer 4) and
   `TesseraLocalizations` (the Flutter `LocalizationsDelegate` / `of`
   glue). Depends on `tessera` and `two_dimensional_scrollables`;
@@ -91,7 +99,8 @@ the root, ignored; members carry `resolution: workspace`):
   `CubeGrid` as a `<table>`: `<thead>` for the header band, `<th>` for
   titles/labels/aggregate names with `scope`, `rowspan`/`colspan` from
   the grid spans (covered cells skipped), classes
-  `<prefix>-title/header/leg/aggregate/data/summary/level-N/num`;
+  `<prefix>-title/header/leg/aggregate/data/summary/level-N/num` and
+  `row-level-N` / `col-level-N` on header cells;
   `HtmlStyling.stylesheet` (a `<style>` from `CubeExportTheme`, sticky
   `thead th`), `.inline` (style attributes, for e-mail) or `.none`;
   `standalone` document or fragment; numbers with the theme's
@@ -202,9 +211,11 @@ Paths below are relative to the package (`lib/src/...` means
   xdg-desktop-portal.
 - "Theming" (`example/lib/theming/`): the sales cube with an AppBar
   palette menu — `ThemePreset`s in `presets.dart` (`themePresets`:
-  Material/default, Spreadsheet, Gradient, High contrast, Compact),
-  seed colours and light/dark, applied by wrapping the workbench in a
-  local `Theme`. `CubeWorkbench` gained `theme` and `actions` for it.
+  Material/default, Spreadsheet, Gradient, Hue levels, High contrast,
+  Compact), seed colours and light/dark, applied by wrapping the
+  workbench in a local `Theme`; "Hue levels" is
+  `CubeTheme(hueLevels: HueLevels())` with `CubeExportTheme.hueLevels`
+  for Excel. `CubeWorkbench` gained `theme` and `actions` for it.
   This is the place to demonstrate new `CubeTheme` features; each
   preset must resolve in light and dark (`test/theming_test.dart`).
   Each preset also carries a hand-authored `xlsxTheme`
@@ -246,8 +257,15 @@ Paths below are relative to the package (`lib/src/...` means
   label row; row header = one column per row dimension; top-left corner
   shows column-dimension names.
 - Hooks: `CellFormatter`, `CellStyler` (zero/negative colours),
-  `CubeTheme.levelColor(depth, maxDepth)` (cell depth = row depth +
-  column depth, from 0) + `CubeTheme.gradient(colors)`,
+  `CubeTheme.levelColor(CellLevel)` (`row`/`column` depth from 0,
+  `rowLevels`/`columnLevels`, `depth` = sum, `maxDepth`) +
+  `CubeTheme.gradient(colors)` (by `depth`), `headerLevelColor(HeaderLevel)`
+  (`isRow`, `level`, `index` = rows first then columns; default: the
+  plain `headerColor`), `hueLevels: HueLevels?` (resolve fills the hue
+  from the primary and the light/dark defaults from the brightness;
+  cells take their row level's hue, column headers continue after the
+  row levels, summaries stay neutral — the owner's decision after the
+  "darker = highlighted" complaint about gradients),
   `CubeTheme.headerIconColor` (default: `headerTextStyle.color`, applied
   with an `IconTheme.merge` around the `TableView`),
   separate row/column summary labels, `expansionLimit` +

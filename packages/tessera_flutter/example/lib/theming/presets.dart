@@ -37,7 +37,7 @@ final themePresets = <ThemePreset>[
     name: 'Spreadsheet',
     description: 'White cells at every level, grey grid, monospace figures.',
     theme: CubeTheme(
-      levelColor: (depth, maxDepth) => Colors.white,
+      levelColor: (_) => Colors.white,
       headerColor: Colors.grey.shade200,
       summaryColor: Colors.grey.shade300,
       borderColor: Colors.grey.shade500,
@@ -90,6 +90,14 @@ final themePresets = <ThemePreset>[
       borderColor: 0xFF00796B,
       headerFont: const ExportFont(bold: true),
     ),
+  ),
+  ThemePreset(
+    name: 'Hue levels',
+    description:
+        'CubeTheme.hueLevels: levels differ in hue only (from the primary), '
+        'headers share it with more chroma, totals stay neutral.',
+    theme: const CubeTheme(hueLevels: HueLevels()),
+    xlsxTheme: CubeExportTheme.hueLevels(levels: const HueLevels(hue: 175)),
   ),
   const ThemePreset(
     name: 'High contrast',

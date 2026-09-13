@@ -20,6 +20,13 @@
 * `CubeExportTheme` / `ExportFont` / `NumberFormat`: the format-neutral
   look of an exported document (fills, border, fonts per role, number
   format; `brand(primary:)`, `gradient`, `mix`), shared by every exporter.
+* `Oklch` (perceptual colour, to/from ARGB, gamut clipping) and
+  `HueLevels`: nesting levels coloured by hue alone at one lightness,
+  headers the same hue with more chroma, golden-angle steps so adding a
+  level keeps the others' colours. `CubeExportTheme.hueLevels`,
+  `rowHeaderFills` / `columnHeaderFills` per level, `levelBasis`
+  (`combined` / `row`), `fillOf` / `fontOf` for exporters;
+  `GridCell.rowLevel` / `columnLevel`.
 * `CsvCubeExporter` (`CsvExportOptions`: delimiter, quote, line ending,
   decimal separator, BOM, group labels at the origin or repeated).
 * `FactTable.withLabels` relabels columns without a re-import (data is

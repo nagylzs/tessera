@@ -16,8 +16,32 @@ void main() {
               for (final p in themePresets) {
                 final t = p.theme.resolve(context);
                 expect(t.rowHeight, greaterThan(0), reason: p.name);
-                expect(t.levelColor(0, 2), isA<Color>(), reason: p.name);
-                expect(t.levelColor(2, 2), isA<Color>(), reason: p.name);
+                const top = CellLevel(
+                  row: 0,
+                  column: 0,
+                  rowLevels: 2,
+                  columnLevels: 2,
+                );
+                const deep = CellLevel(
+                  row: 1,
+                  column: 1,
+                  rowLevels: 2,
+                  columnLevels: 2,
+                );
+                expect(t.levelColor(top), isA<Color>(), reason: p.name);
+                expect(t.levelColor(deep), isA<Color>(), reason: p.name);
+                expect(
+                  t.headerLevelColor(
+                    const HeaderLevel(
+                      isRow: true,
+                      level: 1,
+                      rowLevels: 2,
+                      columnLevels: 2,
+                    ),
+                  ),
+                  isA<Color>(),
+                  reason: p.name,
+                );
               }
               return const SizedBox();
             },
