@@ -87,6 +87,8 @@ void main() {
         l.totalsHidden,
         l.subtotalsAbove,
         l.subtotalsBelow,
+        l.subtotalsLeft,
+        l.subtotalsRight,
         l.subtotalsHidden,
         l.expandAll,
         l.collapseAll,

@@ -171,6 +171,12 @@ final class TesseraStringsHu extends TesseraStrings {
   String get subtotalsBelow => 'Részösszeg a csoport alatt';
 
   @override
+  String get subtotalsLeft => 'Részösszeg a csoport bal oldalán';
+
+  @override
+  String get subtotalsRight => 'Részösszeg a csoport jobb oldalán';
+
+  @override
   String get subtotalsHidden => 'Részösszegek elrejtése';
 
   @override

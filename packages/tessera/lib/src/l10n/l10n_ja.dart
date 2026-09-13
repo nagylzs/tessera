@@ -163,6 +163,12 @@ final class TesseraStringsJa extends TesseraStrings {
   String get subtotalsBelow => '小計をグループの下に';
 
   @override
+  String get subtotalsLeft => '小計をグループの左に';
+
+  @override
+  String get subtotalsRight => '小計をグループの右に';
+
+  @override
   String get subtotalsHidden => '小計を非表示';
 
   @override

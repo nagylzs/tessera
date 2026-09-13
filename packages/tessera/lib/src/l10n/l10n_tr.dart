@@ -171,6 +171,12 @@ final class TesseraStringsTr extends TesseraStrings {
   String get subtotalsBelow => 'Ara toplamlar grubun altında';
 
   @override
+  String get subtotalsLeft => 'Ara toplamlar grubun solunda';
+
+  @override
+  String get subtotalsRight => 'Ara toplamlar grubun sağında';
+
+  @override
   String get subtotalsHidden => 'Ara toplamları gizle';
 
   @override

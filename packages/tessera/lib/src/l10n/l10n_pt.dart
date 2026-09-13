@@ -171,6 +171,12 @@ final class TesseraStringsPt extends TesseraStrings {
   String get subtotalsBelow => 'Subtotais abaixo do grupo';
 
   @override
+  String get subtotalsLeft => 'Subtotais à esquerda do grupo';
+
+  @override
+  String get subtotalsRight => 'Subtotais à direita do grupo';
+
+  @override
   String get subtotalsHidden => 'Ocultar subtotais';
 
   @override

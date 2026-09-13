@@ -171,6 +171,12 @@ final class TesseraStringsCs extends TesseraStrings {
   String get subtotalsBelow => 'Mezisoučty pod skupinou';
 
   @override
+  String get subtotalsLeft => 'Mezisoučty vlevo od skupiny';
+
+  @override
+  String get subtotalsRight => 'Mezisoučty vpravo od skupiny';
+
+  @override
   String get subtotalsHidden => 'Skrýt mezisoučty';
 
   @override

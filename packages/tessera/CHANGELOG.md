@@ -11,7 +11,7 @@
   `ExpansionState.collapseLevel`. Strings `sortAscending`,
   `sortDescending`, `expandAll`, `collapseAll`, `inheritSort`,
   `totalsAtEnd`, `totalsAtStart`, `totalsHidden`, `subtotalsAbove`,
-  `subtotalsBelow`, `subtotalsHidden`.
+  `subtotalsBelow`, `subtotalsLeft`, `subtotalsRight`, `subtotalsHidden`.
 * `CubeAxis.subtotalPosition` (`SubtotalPosition.top` / `bottom` /
   `hidden`): where an expanded group's own row goes; `AxisLayout.entryFor`
   resolves groups without a row; `HeaderArea.path`.

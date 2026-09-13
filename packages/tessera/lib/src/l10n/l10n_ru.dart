@@ -171,6 +171,12 @@ final class TesseraStringsRu extends TesseraStrings {
   String get subtotalsBelow => 'Промежуточные итоги под группой';
 
   @override
+  String get subtotalsLeft => 'Промежуточные итоги слева от группы';
+
+  @override
+  String get subtotalsRight => 'Промежуточные итоги справа от группы';
+
+  @override
   String get subtotalsHidden => 'Скрыть промежуточные итоги';
 
   @override

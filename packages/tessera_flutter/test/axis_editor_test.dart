@@ -112,6 +112,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.cube.spec.rows.subtotalPosition, SubtotalPosition.bottom);
     expect(controller.cube.spec.rows.summaryPosition, SummaryPosition.start);
+    // the column axis speaks of left/right
+    await tester.tap(find.text('Columns'));
+    await tester.pumpAndSettle();
+    expect(find.text('Subtotals below the group'), findsNothing);
+    await tester.tap(find.text('Subtotals right of the group'));
+    await tester.pumpAndSettle();
+    expect(
+      controller.cube.spec.columns.subtotalPosition,
+      SubtotalPosition.bottom,
+    );
     // dimensions and sorts untouched
     expect(controller.cube.spec.rows.dimensions.length, 2);
     expect(

@@ -106,10 +106,14 @@ abstract class TesseraStrings {
   String get totalsAtStart;
   String get totalsHidden;
 
-  /// Where an expanded group's own row/column goes
-  /// (`CubeAxis.subtotalPosition`).
+  /// Where an expanded group's own row goes (`CubeAxis.subtotalPosition`
+  /// on the row axis) …
   String get subtotalsAbove;
   String get subtotalsBelow;
+
+  /// … and its own column on the column axis.
+  String get subtotalsLeft;
+  String get subtotalsRight;
   String get subtotalsHidden;
   String get expandAll;
   String get collapseAll;

@@ -165,8 +165,16 @@ class _ThemingPageState extends State<ThemingPage> {
         SubmenuButton(
           menuChildren: [
             for (final (label, position) in [
-              ('Above the group', SubtotalPosition.top),
-              ('Below the group', SubtotalPosition.bottom),
+              (
+                side == AxisSide.rows ? 'Above the group' : 'Left of the group',
+                SubtotalPosition.top,
+              ),
+              (
+                side == AxisSide.rows
+                    ? 'Below the group'
+                    : 'Right of the group',
+                SubtotalPosition.bottom,
+              ),
               ('Hidden', SubtotalPosition.hidden),
             ])
               MenuItemButton(

@@ -119,7 +119,8 @@ Paths below are relative to the package (`lib/src/...` means
   (`widgets/dimension_picker.dart`; searchable, used dimensions disabled).
   Both verified on Linux desktop. The caption ("Rows"/"Columns") is a
   `MenuAnchor` setting `CubeAxis.summaryPosition` (end/start/hidden;
-  strings `totalsAtEnd` …) and `subtotalPosition` (`subtotalsAbove` …);
+  strings `totalsAtEnd` …) and `subtotalPosition` (`subtotalsAbove`/`Below` on rows,
+  `subtotalsLeft`/`Right` on columns);
   the theming example offers the same in its palette menu (`CubeWorkbench.actions` is a builder receiving the
   controller).
 - Implemented: `AggregateEditor` (`widgets/aggregate_editor.dart`; chips

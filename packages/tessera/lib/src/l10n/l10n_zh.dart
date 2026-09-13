@@ -163,6 +163,12 @@ final class TesseraStringsZh extends TesseraStrings {
   String get subtotalsBelow => '小计在分组下方';
 
   @override
+  String get subtotalsLeft => '小计在分组左侧';
+
+  @override
+  String get subtotalsRight => '小计在分组右侧';
+
+  @override
   String get subtotalsHidden => '隐藏小计';
 
   @override

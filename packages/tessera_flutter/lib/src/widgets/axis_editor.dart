@@ -85,9 +85,21 @@ class AxisEditor extends StatelessWidget {
             child: Text(text),
           ),
         const Divider(height: 1),
+        // a group's own entry is a row above/below on the row axis, a
+        // column left/right on the column axis
         for (final (position, text) in [
-          (SubtotalPosition.top, strings.subtotalsAbove),
-          (SubtotalPosition.bottom, strings.subtotalsBelow),
+          (
+            SubtotalPosition.top,
+            side == AxisSide.rows
+                ? strings.subtotalsAbove
+                : strings.subtotalsLeft,
+          ),
+          (
+            SubtotalPosition.bottom,
+            side == AxisSide.rows
+                ? strings.subtotalsBelow
+                : strings.subtotalsRight,
+          ),
           (SubtotalPosition.hidden, strings.subtotalsHidden),
         ])
           MenuItemButton(

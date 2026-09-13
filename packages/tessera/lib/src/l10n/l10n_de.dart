@@ -171,6 +171,12 @@ final class TesseraStringsDe extends TesseraStrings {
   String get subtotalsBelow => 'Zwischensummen unter der Gruppe';
 
   @override
+  String get subtotalsLeft => 'Zwischensummen links der Gruppe';
+
+  @override
+  String get subtotalsRight => 'Zwischensummen rechts der Gruppe';
+
+  @override
   String get subtotalsHidden => 'Zwischensummen ausblenden';
 
   @override
