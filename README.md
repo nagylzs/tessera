@@ -9,7 +9,7 @@ engine with expandable row/column hierarchies, and widgets to display and
 edit the result.
 
 This repository is a [pub workspace](https://dart.dev/tools/pub/workspaces)
-with two packages:
+with these packages:
 
 | Package | Depends on | What it is |
 |---|---|---|
@@ -25,6 +25,37 @@ Every exporter renders a `CubeLayout` without Flutter; further formats
 can be added the same way.
 
 > **Status: early development.** Nothing is published to pub.dev yet.
+
+## Scope and alternatives
+
+tessera is for turning a flat table of facts into an interactive pivot:
+group by any columns on two axes, expand and collapse groups, sort by
+values or aggregates, show the result in a Flutter grid or write it to a
+file. The engine runs wherever Dart runs, so the same cube can be built on
+a server or in a CLI. A few things are deliberately out of scope; these
+packages cover them:
+
+- **Charts.** tessera draws tables only. Feed a `CubeLayout` (its row
+  entries and cell values) to a charting package such as
+  [`fl_chart`](https://pub.dev/packages/fl_chart) or
+  [`syncfusion_flutter_charts`](https://pub.dev/packages/syncfusion_flutter_charts).
+- **Editing cells and general data grids.** The grid is read-only and
+  shaped by the cube. For an editable, general-purpose grid see
+  [`pluto_grid`](https://pub.dev/packages/pluto_grid) or
+  [`syncfusion_flutter_datagrid`](https://pub.dev/packages/syncfusion_flutter_datagrid),
+  which also offers a pivot mode.
+- **Server-side and lazy data.** A cube is computed from a `FactTable` in
+  memory (millions of rows are fine; see the engine README). Querying a
+  database on demand is the job of your data layer; load the result into a
+  `ListDataSource` or implement `DataSource`.
+- **DataFrame-style manipulation.** Joins, reshaping and column arithmetic
+  belong to a data-frame library such as
+  [`dartframe`](https://pub.dev/packages/dartframe); tessera starts where
+  the table is ready to be grouped.
+- **Reading Excel workbooks in full.** `tessera_xlsx` and `tessera_ods`
+  read one sheet as rows and write one formatted sheet. For workbooks
+  with formulas, charts and many sheets use
+  [`excel`](https://pub.dev/packages/excel).
 
 ## Development
 

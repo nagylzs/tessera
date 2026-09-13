@@ -35,7 +35,7 @@ through these in order, then publish.
 - [x] Fix the GitHub repository description: it promises TSV, Excel and
       JSONL input. TSV works through `CsvOptions` (tab delimiter), Excel
       through `tessera_xlsx`, JSONL does not exist (see below).
-- [ ] Optional: a short, neutral "Alternatives" section in the root README
+- [x] Optional: a short, neutral "Alternatives" section in the root README
       (what tessera is for, what it deliberately is not: charts, editing,
       server-side data) with links to the packages that cover those; no
       metrics or judgements, so it cannot go stale.
