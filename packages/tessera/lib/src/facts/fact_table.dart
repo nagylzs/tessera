@@ -53,4 +53,10 @@ abstract interface class FactTable {
 
   /// Number of rows whose [dimension] value equals [value].
   int countWhere(Dimension dimension, Object? value);
+
+  /// The same data with the columns named in [labels] relabelled (`null`
+  /// = back to the column name); [schema] follows. Column data is shared,
+  /// so a label change does not need a re-import. Unknown names are
+  /// ignored.
+  FactTable withLabels(Map<String, String?> labels);
 }

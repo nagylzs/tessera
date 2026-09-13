@@ -32,6 +32,35 @@ void main() {
     expect(find.widgetWithText(InputChip, 'sum of total'), findsOneWidget);
   });
 
+  testWidgets('schema page: a label edit applies on back without re-import', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.runAsync(() async {
+      await tester.pumpWidget(const TesseraExampleApp());
+      await tester.tap(find.text('Simple pivot'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
+      expect(find.widgetWithText(InputChip, 'date year'), findsOneWidget);
+      await tester.tap(find.byTooltip('Schema…'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const ValueKey('label-date')), 'dátum');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+    });
+    // chips and the grid's titles follow the new label immediately
+    expect(find.widgetWithText(InputChip, 'dátum year'), findsOneWidget);
+    expect(find.widgetWithText(InputChip, 'dátum quarter'), findsOneWidget);
+    expect(find.text('dátum year'), findsNWidgets(2)); // chip + corner title
+    expect(find.text('date year'), findsNothing);
+    // no re-import happened: the report line is the original one
+    expect(find.textContaining('1000 facts, 11 columns'), findsOneWidget);
+  });
+
   testWidgets(
     'schema page: exclude a column and change a type, then re-import',
     (tester) async {
@@ -67,7 +96,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('Import'));
+        await tester.tap(find.text('Apply'));
         await tester.pumpAndSettle();
         await waitFor(tester, find.textContaining('1000 facts, 10 columns'));
       });

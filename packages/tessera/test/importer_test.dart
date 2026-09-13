@@ -354,6 +354,32 @@ void main() {
       );
     });
 
+    test('withLabels relabels without touching the data', () {
+      final relabelled = facts.withLabels({'date': 'Sold on', 'qty': null});
+      expect(relabelled.column('date').label, 'Sold on');
+      expect(relabelled.column('qty').label, 'qty');
+      expect(relabelled.column('region').label, 'region');
+      expect(relabelled.schema['date']!.label, 'Sold on');
+      expect(relabelled.schema['qty']!.label, isNull);
+      expect(relabelled.rowCount, facts.rowCount);
+      expect(relabelled.valueAt(1, 'date'), facts.valueAt(1, 'date'));
+      expect(relabelled.measureValue(3, const Measure('qty')), 5.0);
+      // dimensions and aggregates pick the new label up
+      const month = DatePartDimension('date', DatePart.month);
+      expect(month.labelFor(relabelled), 'Sold on month');
+      expect(
+        TesseraStrings.forLanguage('hu')!.dimensionLabel(month, relabelled),
+        'Sold on hónap',
+      );
+      expect(
+        Aggregate.sum(const Measure('qty')).labelFor(relabelled),
+        'sum of qty',
+      );
+      // the original is untouched, unknown names are ignored
+      expect(facts.column('date').label, 'date');
+      expect(facts.withLabels({'nope': 'x'}).columns.length, 3);
+    });
+
     test('column metadata', () {
       expect(facts.column('region').nullCount, 1);
       expect(facts.column('region').distinctCount, 2);

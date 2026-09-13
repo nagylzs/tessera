@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../schema/column_spec.dart';
 import '../schema/column_type.dart';
 import '../schema/schema.dart';
 import 'dimension.dart';
@@ -279,6 +280,9 @@ abstract base class FactColumnImpl implements FactColumn {
 
   int get length;
 
+  /// A copy sharing this column's data under another [label].
+  FactColumnImpl withLabel(String label);
+
   Object? valueAt(int row);
 
   /// Numeric view; only valid when [type] is numeric.
@@ -314,6 +318,9 @@ final class NumberColumn extends FactColumnImpl {
   final Float64List data;
 
   @override
+  NumberColumn withLabel(String label) => NumberColumn(name, label, type, data);
+
+  @override
   int get length => data.length;
 
   @override
@@ -336,6 +343,9 @@ final class DateColumn extends FactColumnImpl {
   final Float64List data;
 
   @override
+  DateColumn withLabel(String label) => DateColumn(name, label, type, data);
+
+  @override
   int get length => data.length;
 
   @override
@@ -354,6 +364,9 @@ final class BoolColumn extends FactColumnImpl {
   final Uint8List data;
 
   @override
+  BoolColumn withLabel(String label) => BoolColumn(name, label, data);
+
+  @override
   int get length => data.length;
 
   @override
@@ -370,6 +383,10 @@ final class TextColumn extends FactColumnImpl {
 
   final List<String> dictionary;
   final Int32List codes;
+
+  @override
+  TextColumn withLabel(String label) =>
+      TextColumn(name, label, dictionary, codes);
 
   @override
   int get length => codes.length;
@@ -410,6 +427,34 @@ final class FactTableImpl implements FactTable {
 
   @override
   FactColumnImpl? findColumn(String name) => _byName[name];
+
+  @override
+  FactTableImpl withLabels(Map<String, String?> labels) => FactTableImpl(
+    Schema([
+      for (final c in schema.columns)
+        if (labels.containsKey(c.name))
+          ColumnSpec(
+            name: c.name,
+            type: c.type,
+            label: labels[c.name],
+            include: c.include,
+            format: c.format,
+            numberSyntax: c.numberSyntax,
+            parser: c.parser,
+            nullValues: c.nullValues,
+          )
+        else
+          c,
+    ]),
+    [
+      for (final c in columns)
+        if (labels.containsKey(c.name))
+          c.withLabel(labels[c.name] ?? c.name)
+        else
+          c,
+    ],
+    rowCount,
+  );
 
   @override
   Object? valueAt(int row, String column) => this.column(column).valueAt(row);

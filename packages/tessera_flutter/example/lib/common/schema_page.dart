@@ -5,7 +5,8 @@ import 'package:tessera_flutter/tessera_flutter.dart';
 /// exclude columns, change their type and label, and set the date format or
 /// number syntax used to parse text.
 ///
-/// Pops with the edited [Schema], or `null` when cancelled.
+/// Pops with the edited [Schema] — through "Apply" and through the back
+/// button alike; the caller decides whether anything needs a re-import.
 class SchemaPage extends StatefulWidget {
   const SchemaPage({
     super.key,
@@ -45,7 +46,15 @@ class _SchemaPageState extends State<SchemaPage> {
   void _set(ColumnSpec spec) => setState(() => _schema = _schema.replace(spec));
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => PopScope(
+    canPop: false,
+    onPopInvokedWithResult: (didPop, _) {
+      if (!didPop) Navigator.pop(context, _schema);
+    },
+    child: _page(context),
+  );
+
+  Widget _page(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: const Text('Schema'),
       actions: [
@@ -56,8 +65,8 @@ class _SchemaPageState extends State<SchemaPage> {
         const SizedBox(width: 8),
         FilledButton.icon(
           onPressed: () => Navigator.pop(context, _schema),
-          icon: const Icon(Icons.download),
-          label: const Text('Import'),
+          icon: const Icon(Icons.check),
+          label: const Text('Apply'),
         ),
         const SizedBox(width: 8),
       ],

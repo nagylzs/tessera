@@ -125,8 +125,11 @@ Paths below are relative to the package (`lib/src/...` means
   language menu (TesseraLocalizations + flutter_localizations). AppBar "Schema…"
   opens `example/lib/schema_page.dart` (include switch, type, label, date
   format / number syntax per column, sample raw values, reset) and
-  re-imports on "Import"; `_prune` drops spec dimensions/aggregates whose
-  columns vanished or changed type, expansion state is carried over. The
+  applies on "Apply" and on back alike: label-only edits relabel the
+  facts in place (`FactTable.withLabels`, spec and expansion kept),
+  anything else re-imports; `_prune` drops spec dimensions/aggregates
+  whose columns vanished or changed type, expansion state is carried
+  over. The
   info line summarises the `ImportReport` and opens it in a dialog.
   Verified visually on Linux desktop.
 

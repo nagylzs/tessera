@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
 
@@ -186,7 +187,48 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
         ),
       ),
     );
-    if (edited != null) await _import(edited);
+    final controller = _controller;
+    if (edited == null || controller == null) return;
+    final current = _schema ?? _inferred;
+    if (!_sameExceptLabels(current, edited)) {
+      await _import(edited);
+      return;
+    }
+    // Only labels changed (if anything): relabel the facts in place, no
+    // re-import; the spec and expansion carry over unchanged.
+    final changed = <String, String?>{
+      for (final c in edited.columns)
+        if (c.label != current[c.name]?.label) c.name: c.label,
+    };
+    if (changed.isEmpty) return;
+    final old = controller.cube;
+    setState(() {
+      _schema = edited;
+      controller.cube = Cube(
+        facts: old.facts.withLabels(changed),
+        spec: old.spec,
+        rowExpansion: old.rowExpansion,
+        columnExpansion: old.columnExpansion,
+      );
+    });
+  }
+
+  /// Whether [a] and [b] describe the same import apart from labels.
+  static bool _sameExceptLabels(Schema a, Schema b) {
+    if (a.columns.length != b.columns.length) return false;
+    for (var i = 0; i < a.columns.length; i++) {
+      final x = a.columns[i], y = b.columns[i];
+      if (x.name != y.name ||
+          x.type != y.type ||
+          x.include != y.include ||
+          x.format != y.format ||
+          x.numberSyntax != y.numberSyntax ||
+          x.parser != y.parser ||
+          !setEquals(x.nullValues, y.nullValues)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void _showReport() {
@@ -271,7 +313,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             ),
           );
         }
-        final facts = result.facts;
+        final facts = controller.cube.facts; // relabelled in place, maybe
         final report = result.report;
         final shown = _shown ?? controller.cube.spec.aggregates.first;
         return Column(
