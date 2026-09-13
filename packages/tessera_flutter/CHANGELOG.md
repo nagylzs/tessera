@@ -11,5 +11,8 @@
   lets the others inherit; a deeper level's title cycles through the
   opposite direction, the same direction and inheriting, and its menu has
   "same order as the level above".
+* Current cell: `CubeController.selection` / `currentCell`, `CellAddress`;
+  `CubeView.selectable`, `focusNode`, `autofocus`, keyboard navigation and
+  `CubeTheme.selectionColor`.
 * `CubeView`: a data cell's level (for `CubeTheme.levelColor`) is the sum
   of its row and column depths, not the maximum.

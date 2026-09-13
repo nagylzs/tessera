@@ -155,6 +155,18 @@ Paths below are relative to the package (`lib/src/...` means
   goes through `expansionLimit` with `confirmLevelExpansion` (dimension +
   `rowsAddedByExpandingLevel`, one count-only pass); the default dialog
   reuses `largeExpansion`. Titles reserve 2 × icon width.
+- Current cell: `CubeController.selection` (`CellAddress` = row path +
+  column path, kept when invisible) and `currentCell` (resolved against
+  the layout, null when not visible). `CubeView.selectable` (default
+  true), `focusNode`, `autofocus`; a `Focus` around the `TableView`
+  requests focus on cell tap; `onKeyEvent` handles arrows, Home/End,
+  PageUp/Down (page = rows under the header band), Enter/Space (toggle
+  the row group), Escape; `_scrollIntoView` uses the fixed extents and
+  the two internal `ScrollController`s. `CellBorder.outline` draws the
+  2 px inset outline (`CubeTheme.selectionColor`, default primary); the
+  row/column label areas of the current cell are tinted 15 %. The
+  example shows the current cell's coordinate and fact count under the
+  grid.
 - Grid geometry: `levelRows = max(columnDepth, 1)` header rows for group
   labels + 1 aggregate row; `headerColumns = max(rowDepth, 1)`. Pinned
   rows/columns = those. Cells draw their own right/bottom borders.

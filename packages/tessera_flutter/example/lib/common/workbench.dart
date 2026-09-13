@@ -318,6 +318,28 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             Expanded(
               child: CubeView(controller: controller, aggregate: shown),
             ),
+            // the current cell: what an app would chart or drill into
+            ListenableBuilder(
+              listenable: controller,
+              builder: (context, _) {
+                final cell = controller.currentCell;
+                final l10n = TesseraLocalizations.of(context);
+                final text = cell == null
+                    ? 'No current cell — tap a cell or use the arrow keys.'
+                    : cell.coordinate.isEmpty
+                    ? 'Current cell: grand total — ${cell.factCount} facts'
+                    : 'Current cell: '
+                          '${cell.coordinate.values.entries.map((e) => '${l10n.dimensionLabel(e.key, facts)} = ${e.value == null ? l10n.emptyGroup : l10n.formatValue(e.key, e.value)}').join(', ')}'
+                          ' — ${cell.factCount} facts';
+                return Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    text,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                );
+              },
+            ),
           ],
         );
       },

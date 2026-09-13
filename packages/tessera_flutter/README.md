@@ -58,6 +58,18 @@ and "expand all" / "collapse all" for that level. `expansionLimit` with
 `confirmExpansion` / `confirmLevelExpansion` ask before an expansion would
 add too many rows or columns.
 
+Tapping a data cell makes it the *current cell*: it is outlined, its row
+and column headers are tinted, and `controller.selection` holds its
+`CellAddress` (row and column paths, so it survives sorting and expanding
+other groups). `controller.currentCell` resolves it against the current
+layout — the `CubeCell` with its facts and aggregates, or `null` when the
+cell is not visible — which is what an app charts or drills into. The view
+takes focus on tap; the arrow keys, Home/End and Page Up/Down move the
+current cell (scrolled into view), Enter or Space toggles its row group and
+Escape clears it. `selectable: false` turns this off; `focusNode` and
+`autofocus` work as on a `TextField`. `CubeTheme.selectionColor` is the
+outline colour.
+
 ### Localization
 
 ```dart

@@ -4,8 +4,9 @@
 /// gives you the engine and the widgets:
 ///
 /// * [CubeView] renders a cube driven by a [CubeController], with pinned,
-///   merged group headers, expand/collapse and sort gestures and a menu
-///   per dimension (sort direction, expand/collapse all).
+///   merged group headers, expand/collapse and sort gestures, a menu per
+///   dimension (sort direction, expand/collapse all) and a keyboard-
+///   navigable current cell ([CubeController.selection], [CellAddress]).
 /// * [AxisEditor] and [AggregateEditor] edit the axes and aggregates of the
 ///   controller's spec with drag-and-drop chips; [showDimensionPicker] and
 ///   [showAggregatePicker] open the dialogs behind their `+` buttons.

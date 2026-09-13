@@ -20,6 +20,7 @@ final class CubeTheme {
     this.headerColor,
     this.summaryColor,
     this.sortKeyColor,
+    this.selectionColor,
     this.borderColor,
     this.cellTextStyle,
     this.headerTextStyle,
@@ -45,6 +46,10 @@ final class CubeTheme {
   /// Tint laid over the column (or row) whose aggregate currently drives an
   /// aggregate sort.
   final Color? sortKeyColor;
+
+  /// Outline of the current cell; its row and column headers get a light
+  /// tint of it. Defaults to the primary colour.
+  final Color? selectionColor;
 
   final Color? borderColor;
 
@@ -83,6 +88,7 @@ final class CubeTheme {
     Color? headerColor,
     Color? summaryColor,
     Color? sortKeyColor,
+    Color? selectionColor,
     Color? borderColor,
     TextStyle? cellTextStyle,
     TextStyle? headerTextStyle,
@@ -98,6 +104,7 @@ final class CubeTheme {
     headerColor: headerColor ?? this.headerColor,
     summaryColor: summaryColor ?? this.summaryColor,
     sortKeyColor: sortKeyColor ?? this.sortKeyColor,
+    selectionColor: selectionColor ?? this.selectionColor,
     borderColor: borderColor ?? this.borderColor,
     cellTextStyle: cellTextStyle ?? this.cellTextStyle,
     headerTextStyle: headerTextStyle ?? this.headerTextStyle,
@@ -127,6 +134,7 @@ final class CubeTheme {
       summaryColor: summaryColor ?? scheme.surfaceContainerHighest,
       sortKeyColor:
           sortKeyColor ?? scheme.secondaryContainer.withValues(alpha: 0.45),
+      selectionColor: selectionColor ?? scheme.primary,
       borderColor: borderColor ?? scheme.outlineVariant,
       cellTextStyle: cellTextStyle ?? base,
       headerTextStyle:
@@ -149,6 +157,7 @@ final class ResolvedCubeTheme {
     required this.headerColor,
     required this.summaryColor,
     required this.sortKeyColor,
+    required this.selectionColor,
     required this.borderColor,
     required this.cellTextStyle,
     required this.headerTextStyle,
@@ -165,6 +174,7 @@ final class ResolvedCubeTheme {
   final Color headerColor;
   final Color summaryColor;
   final Color sortKeyColor;
+  final Color selectionColor;
   final Color borderColor;
   final TextStyle cellTextStyle;
   final TextStyle headerTextStyle;

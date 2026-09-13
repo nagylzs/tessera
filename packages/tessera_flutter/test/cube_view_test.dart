@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tessera_flutter/src/widgets/cell_border.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
 
 const region = ColumnDimension('region');
@@ -619,6 +621,184 @@ void main() {
       final aWidth = tester.getSize(aBox.first).width;
       expect(aBorder.bottomFrom, greaterThan(0));
       expect(aBorder.bottomFrom, lessThan(aWidth));
+    });
+
+    test('currentCell resolves the selection against the layout', () {
+      final germany = europe.child(const DimensionValue(country, 'Germany'));
+      final address = CellAddress(row: germany, column: DimensionPath.root);
+      expect(controller.currentCell, isNull);
+      controller.selection = address;
+      expect(controller.currentCell, isNull); // Europe is collapsed
+      controller.toggleRow(europe);
+      expect(controller.currentCell!.factCount, 2);
+      expect(controller.currentCell!.aggregate(sumQty), 3);
+      controller.toggleRow(europe);
+      expect(controller.currentCell, isNull);
+      expect(controller.selection, address); // kept, not cleared
+      var notified = 0;
+      controller.addListener(() => notified++);
+      controller.selection = address; // same → no notification
+      controller.selection = null;
+      expect(notified, 1);
+    });
+
+    testWidgets('tapping a data cell makes it the current cell', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final tapped = <CubeCell>[];
+      await tester.pumpWidget(
+        host(
+          CubeView(
+            controller: controller,
+            aggregate: sumQty,
+            onCellTap: tapped.add,
+          ),
+        ),
+      );
+      List<CellBorder> outlined() => [
+        for (final w in tester.widgetList<CustomPaint>(
+          find.byType(CustomPaint),
+        ))
+          if (w.foregroundPainter case final CellBorder b
+              when b.outline != null)
+            b,
+      ];
+      expect(outlined(), isEmpty);
+      await tester.tap(find.text('10')); // Europe × Σ
+      await tester.pumpAndSettle();
+      expect(
+        controller.selection,
+        CellAddress(row: europe, column: DimensionPath.root),
+      );
+      expect(controller.currentCell!.factCount, 4);
+      expect(tapped.single.factCount, 4);
+      expect(outlined().length, 1);
+      expect(FocusManager.instance.primaryFocus?.debugLabel, 'CubeView');
+      // the row and column headers of the current cell are tinted: the
+      // "Europe" label and the column summary's "Total", nothing else
+      final scheme = Theme.of(tester.element(find.text('Europe'))).colorScheme;
+      Color tinted(Color base) =>
+          Color.alphaBlend(scheme.primary.withValues(alpha: 0.15), base);
+      final tintedHeader = tinted(scheme.surfaceContainer);
+      final tintedSummary = tinted(scheme.surfaceContainerHighest);
+      Iterable<Container> withColor(Color c) => tester
+          .widgetList<Container>(find.byType(Container))
+          .where((w) => w.color == c);
+      expect(withColor(tintedHeader).length, 1);
+      expect(withColor(tintedSummary).length, 1);
+      expect(
+        find.descendant(
+          of: find.byWidgetPredicate(
+            (w) => w is Container && w.color == tintedHeader,
+          ),
+          matching: find.text('Europe'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('selectable: false only reports taps', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final tapped = <CubeCell>[];
+      await tester.pumpWidget(
+        host(
+          CubeView(
+            controller: controller,
+            aggregate: sumQty,
+            selectable: false,
+            onCellTap: tapped.add,
+          ),
+        ),
+      );
+      await tester.tap(find.text('10'));
+      await tester.pumpAndSettle();
+      expect(controller.selection, isNull);
+      expect(tapped.length, 1);
+      expect(FocusManager.instance.primaryFocus?.debugLabel, isNot('CubeView'));
+    });
+
+    testWidgets('the keyboard moves the current cell', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregate: sumQty)),
+      );
+      // rows: ∅, Asia, Europe, Σ; columns: ∅, A, B, Σ
+      final asia = DimensionPath([const DimensionValue(region, 'Asia')]);
+      final byB = DimensionPath([const DimensionValue(category, 'B')]);
+      Future<void> key(LogicalKeyboardKey k) async {
+        await tester.sendKeyEvent(k);
+        await tester.pumpAndSettle();
+      }
+
+      await tester.tap(find.text('10')); // Europe × Σ
+      await tester.pumpAndSettle();
+      await key(LogicalKeyboardKey.arrowUp);
+      expect(controller.selection!.row, asia);
+      await key(LogicalKeyboardKey.arrowRight); // clamped at the last column
+      expect(controller.selection!.column, DimensionPath.root);
+      await key(LogicalKeyboardKey.arrowLeft);
+      expect(controller.selection!.column, byB);
+      await key(LogicalKeyboardKey.home);
+      expect(controller.selection!.column.entries.single.value, isNull);
+      await key(LogicalKeyboardKey.end);
+      expect(controller.selection!.column, DimensionPath.root);
+      await key(LogicalKeyboardKey.escape);
+      expect(controller.selection, isNull);
+      // with nothing selected a movement key selects the first cell
+      await key(LogicalKeyboardKey.arrowDown);
+      expect(controller.selection!.row.length, 1);
+      expect(controller.selection!.row.entries.single.value, isNull);
+      expect(controller.selection!.column.entries.single.value, isNull);
+      // Enter toggles the current row's group
+      await tester.tap(find.text('10'));
+      await tester.pumpAndSettle();
+      await key(LogicalKeyboardKey.enter);
+      expect(controller.cube.rowExpansion.isExpanded(europe), isTrue);
+      expect(find.text('Germany'), findsOneWidget);
+    });
+
+    testWidgets('moving the current cell scrolls it into view', (tester) async {
+      // 4 data rows of 28 px under 56 px of header do not fit in 120 px
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 600,
+              height: 120,
+              child: CubeView(
+                controller: controller,
+                aggregate: sumQty,
+                autofocus: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      ScrollController vertical() => tester
+          .widget<TableView>(find.byType(TableView))
+          .verticalDetails
+          .controller!;
+      final byA = DimensionPath([const DimensionValue(category, 'A')]);
+      controller.selection = CellAddress(row: europe, column: byA); // row 2
+      await tester.pumpAndSettle();
+      expect(vertical().offset, 0);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(controller.selection!.row.isRoot, isTrue); // the summary row
+      expect(vertical().offset, greaterThan(0));
+      // a page is the 2 rows that fit under the header: up to Asia (row 1),
+      // revealed right under the pinned header band
+      await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+      await tester.pumpAndSettle();
+      expect(controller.selection!.row.entries.single.value, 'Asia');
+      expect(vertical().offset, 28);
     });
 
     testWidgets('cell taps report the cell', (tester) async {

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:tessera/tessera.dart';
 
@@ -59,6 +60,14 @@ typedef LevelExpansionConfirmation = Future<bool> Function(
 /// level above", and "expand all" / "collapse all" for that level. Cells are built lazily,
 /// so large cubes stay cheap to scroll.
 ///
+/// The current cell: tapping a data cell selects it (outlined, its row and
+/// column headers tinted) and stores a [CellAddress] in
+/// [CubeController.selection]; [CubeController.currentCell] gives the
+/// cell with its facts, e.g. to chart them. The view takes focus on tap;
+/// the arrow keys, Home/End and Page Up/Down move the current cell (kept
+/// scrolled into view), Enter or Space toggles its row group, Escape
+/// clears the selection. `selectable: false` turns all of this off.
+///
 /// Column widths follow the content: the widest text of each column (its
 /// values, labels and titles) is measured up front and the width clamped to
 /// the [CubeTheme]'s bounds. Once widened, a column keeps its width for the
@@ -83,6 +92,9 @@ class CubeView extends StatelessWidget {
     this.onCellTap,
     this.measuredRows = 1000,
     this.keepColumnWidths = true,
+    this.selectable = true,
+    this.focusNode,
+    this.autofocus = false,
   });
 
   final CubeController controller;
@@ -139,6 +151,15 @@ class CubeView extends StatelessWidget {
   /// `false` resizes both ways on every change.
   final bool keepColumnWidths;
 
+  /// Whether tapping a data cell makes it the current cell and the view
+  /// takes keyboard focus (see the class comment).
+  final bool selectable;
+
+  /// Focus node of the grid; one is created when not given.
+  final FocusNode? focusNode;
+
+  final bool autofocus;
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
@@ -172,6 +193,24 @@ class _CubeGridState extends State<_CubeGrid> {
   ResolvedCubeTheme get theme => widget.theme;
   TesseraStrings get strings => widget.strings;
   CubeLayout get layout => view.controller.cube.layout;
+
+  final _vertical = ScrollController();
+  final _horizontal = ScrollController();
+  FocusNode? _ownFocusNode;
+  FocusNode get _focusNode =>
+      view.focusNode ?? (_ownFocusNode ??= FocusNode(debugLabel: 'CubeView'));
+
+  /// Indices of the current cell in [layout], or `-1` (set in [build]).
+  int _selectedRow = -1;
+  int _selectedColumn = -1;
+
+  @override
+  void dispose() {
+    _vertical.dispose();
+    _horizontal.dispose();
+    _ownFocusNode?.dispose();
+    super.dispose();
+  }
 
   AxisGeometry? _rowGeometry;
   AxisGeometry? _columnGeometry;
@@ -299,7 +338,24 @@ class _CubeGridState extends State<_CubeGrid> {
   @override
   Widget build(BuildContext context) {
     final widths = _columnWidths(context);
+    final selection = view.selectable ? view.controller.selection : null;
+    _selectedRow = selection == null ? -1 : layout.rows.indexOf(selection.row);
+    _selectedColumn = selection == null
+        ? -1
+        : layout.columns.indexOf(selection.column);
+    return Focus(
+      focusNode: _focusNode,
+      autofocus: view.autofocus && view.selectable,
+      canRequestFocus: view.selectable,
+      onKeyEvent: view.selectable ? _onKey : null,
+      child: _table(widths),
+    );
+  }
+
+  Widget _table(List<double> widths) {
     return TableView.builder(
+      verticalDetails: ScrollableDetails.vertical(controller: _vertical),
+      horizontalDetails: ScrollableDetails.horizontal(controller: _horizontal),
       rowCount: headerRows + layout.rows.length,
       columnCount: headerColumns + layout.columns.length,
       pinnedRowCount: headerRows,
@@ -526,7 +582,10 @@ class _CubeGridState extends State<_CubeGrid> {
           : null,
       columnMergeSpan: area.entrySpan > 1 ? area.entrySpan : null,
       child: _box(
-        color: owner.isSummary ? theme.summaryColor : theme.headerColor,
+        color: _headerColor(
+          owner,
+          selected: area.isLabel && area.entryIndex == _selectedColumn,
+        ),
         alignment: Alignment.topLeft,
         // an expanded group's label and the leg below it form one area
         bottomBorderFrom: area.isLabel && area.entrySpan > 1
@@ -560,7 +619,10 @@ class _CubeGridState extends State<_CubeGrid> {
       rowMergeStart: area.entrySpan > 1 ? headerRows + area.entryStart : null,
       rowMergeSpan: area.entrySpan > 1 ? area.entrySpan : null,
       child: _box(
-        color: owner.isSummary ? theme.summaryColor : theme.headerColor,
+        color: _headerColor(
+          owner,
+          selected: area.isLabel && area.entryIndex == _selectedRow,
+        ),
         alignment: Alignment.topLeft,
         // an expanded group's label and the leg beside it form one area
         rightBorderFrom: area.isLabel && area.entrySpan > 1
@@ -571,6 +633,15 @@ class _CubeGridState extends State<_CubeGrid> {
             : const SizedBox(),
       ),
     );
+  }
+
+  /// Header background: summary or header colour, tinted with the selection
+  /// colour for the current cell's row/column label.
+  Color _headerColor(HeaderEntry entry, {required bool selected}) {
+    final base = entry.isSummary ? theme.summaryColor : theme.headerColor;
+    return selected
+        ? Color.alphaBlend(theme.selectionColor.withValues(alpha: 0.15), base)
+        : base;
   }
 
   /// A header entry's text: the summary label, the empty-group label or
@@ -653,12 +724,28 @@ class _CubeGridState extends State<_CubeGrid> {
       );
     }
     final onTap = view.onCellTap;
+    final selected = i == _selectedRow && j == _selectedColumn;
     return TableViewCell(
-      child: _box(
-        color: color,
-        alignment: Alignment.centerRight,
-        onTap: onTap == null ? null : () => onTap(cell),
-        child: child,
+      child: Semantics(
+        selected: selected,
+        child: _box(
+          color: color,
+          alignment: Alignment.centerRight,
+          onTap: !view.selectable && onTap == null
+              ? null
+              : () {
+                  if (view.selectable) {
+                    _focusNode.requestFocus();
+                    view.controller.selection = CellAddress(
+                      row: rowEntry.path,
+                      column: colEntry.path,
+                    );
+                  }
+                  onTap?.call(cell);
+                },
+          outline: selected ? theme.selectionColor : null,
+          child: child,
+        ),
       ),
     );
   }
@@ -688,12 +775,14 @@ class _CubeGridState extends State<_CubeGrid> {
     VoidCallback? onTap,
     double rightBorderFrom = 0,
     double bottomBorderFrom = 0,
+    Color? outline,
   }) {
     final box = CustomPaint(
       foregroundPainter: CellBorder(
         color: theme.borderColor,
         rightFrom: rightBorderFrom,
         bottomFrom: bottomBorderFrom,
+        outline: outline,
       ),
       child: Container(
         color: color,
@@ -703,6 +792,118 @@ class _CubeGridState extends State<_CubeGrid> {
       ),
     );
     return onTap == null ? box : InkWell(onTap: onTap, child: box);
+  }
+
+  // -------------------------------------------------------------- keyboard
+
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    if (event is KeyUpEvent) return KeyEventResult.ignored;
+    final rows = layout.rows.length, columns = layout.columns.length;
+    if (rows == 0 || columns == 0) return KeyEventResult.ignored;
+    // the page size in rows: what fits under the header band
+    final page = _vertical.hasClients
+        ? math.max(
+            1,
+            ((_vertical.position.viewportDimension -
+                        headerRows * theme.headerRowHeight) /
+                    theme.rowHeight)
+                .floor(),
+          )
+        : 10;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.escape) {
+      view.controller.selection = null;
+      return KeyEventResult.handled;
+    }
+    final i = _selectedRow < 0 ? 0 : _selectedRow;
+    final j = _selectedColumn < 0 ? 0 : _selectedColumn;
+    final (int, int)? target = switch (key) {
+      LogicalKeyboardKey.arrowUp => (i - 1, j),
+      LogicalKeyboardKey.arrowDown => (i + 1, j),
+      LogicalKeyboardKey.arrowLeft => (i, j - 1),
+      LogicalKeyboardKey.arrowRight => (i, j + 1),
+      LogicalKeyboardKey.home => (i, 0),
+      LogicalKeyboardKey.end => (i, columns - 1),
+      LogicalKeyboardKey.pageUp => (i - page, j),
+      LogicalKeyboardKey.pageDown => (i + page, j),
+      _ => null,
+    };
+    if (target != null) {
+      // with nothing selected, any movement key selects the first cell
+      final (ti, tj) = _selectedRow < 0 || _selectedColumn < 0
+          ? (0, 0)
+          : (target.$1.clamp(0, rows - 1), target.$2.clamp(0, columns - 1));
+      view.controller.selection = CellAddress(
+        row: layout.rows.entries[ti].path,
+        column: layout.columns.entries[tj].path,
+      );
+      _scrollIntoView(ti, tj);
+      return KeyEventResult.handled;
+    }
+    if ((key == LogicalKeyboardKey.enter ||
+            key == LogicalKeyboardKey.numpadEnter ||
+            key == LogicalKeyboardKey.space) &&
+        _selectedRow >= 0) {
+      final entry = layout.rows.entries[_selectedRow];
+      if (entry.isExpandable) _toggle(context, entry, isRow: true);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  /// Scrolls so that data cell ([i], [j]) is not hidden by the viewport
+  /// edges or the pinned headers. Every extent is fixed, so the offsets
+  /// are arithmetic on the row heights and [_widths].
+  void _scrollIntoView(int i, int j) {
+    final widths = _widths;
+    if (widths == null) return;
+    if (_vertical.hasClients) {
+      final pinned = headerRows * theme.headerRowHeight;
+      _reveal(
+        _vertical,
+        pinned: pinned,
+        start: pinned + i * theme.rowHeight,
+        extent: theme.rowHeight,
+      );
+    }
+    if (_horizontal.hasClients) {
+      var pinned = 0.0;
+      for (var c = 0; c < headerColumns; c++) {
+        pinned += widths[c];
+      }
+      var start = pinned;
+      for (var c = 0; c < j; c++) {
+        start += widths[headerColumns + c];
+      }
+      _reveal(
+        _horizontal,
+        pinned: pinned,
+        start: start,
+        extent: widths[headerColumns + j],
+      );
+    }
+  }
+
+  static void _reveal(
+    ScrollController controller, {
+    required double pinned,
+    required double start,
+    required double extent,
+  }) {
+    final position = controller.position;
+    final offset = position.pixels;
+    final viewport = position.viewportDimension;
+    double? target;
+    if (start - pinned < offset) {
+      target = start - pinned;
+    } else if (start + extent > offset + viewport) {
+      target = start + extent - viewport;
+    }
+    if (target != null) {
+      controller.jumpTo(
+        target.clamp(position.minScrollExtent, position.maxScrollExtent),
+      );
+    }
   }
 
   Future<void> _toggle(

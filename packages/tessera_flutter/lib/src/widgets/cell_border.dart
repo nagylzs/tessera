@@ -3,15 +3,20 @@ import 'package:flutter/rendering.dart';
 /// The hairlines of one grid cell: a 1 px right and bottom border, each
 /// optionally starting part-way along its edge so that a merged header
 /// label and the blank leg beside it (the "rotated L") show no line
-/// between them. Internal to `CubeView`.
+/// between them; plus the 2 px inset [outline] of the current cell.
+/// Internal to `CubeView`.
 final class CellBorder extends CustomPainter {
   const CellBorder({
     required this.color,
     this.rightFrom = 0,
     this.bottomFrom = 0,
+    this.outline,
   });
 
   final Color color;
+
+  /// Drawn just inside the cell when set.
+  final Color? outline;
 
   /// Where the right border starts, measured from the top.
   final double rightFrom;
@@ -34,11 +39,22 @@ final class CellBorder extends CustomPainter {
         paint,
       );
     }
+    final outline = this.outline;
+    if (outline != null) {
+      canvas.drawRect(
+        (Offset.zero & size).deflate(1),
+        Paint()
+          ..color = outline
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+    }
   }
 
   @override
   bool shouldRepaint(CellBorder old) =>
       old.color != color ||
       old.rightFrom != rightFrom ||
-      old.bottomFrom != bottomFrom;
+      old.bottomFrom != bottomFrom ||
+      old.outline != outline;
 }
