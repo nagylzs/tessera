@@ -756,6 +756,28 @@ void main() {
       expect(controller.selection!.row.length, 1);
       expect(controller.selection!.row.entries.single.value, isNull);
       expect(controller.selection!.column.entries.single.value, isNull);
+      // Ctrl+Home/End: first/last row, same column
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await key(LogicalKeyboardKey.home);
+      expect(controller.selection!.row.entries.single.value, isNull); // ∅
+      expect(controller.selection!.column.entries.single.value, isNull);
+      await key(LogicalKeyboardKey.end);
+      expect(controller.selection!.row.isRoot, isTrue);
+      expect(controller.selection!.column.entries.single.value, isNull);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      // the number block's Home/End (numpad7/1 without a character while
+      // NumLock is off) work too; with NumLock on they are digits
+      await tester.tap(find.text('10'));
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad7, character: '');
+      await tester.pumpAndSettle();
+      expect(controller.selection!.column.entries.single.value, isNull);
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad1, character: '');
+      await tester.pumpAndSettle();
+      expect(controller.selection!.column, DimensionPath.root);
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad7, character: '7');
+      await tester.pumpAndSettle();
+      expect(controller.selection!.column, DimensionPath.root);
       // Enter toggles the current row's group
       await tester.tap(find.text('10'));
       await tester.pumpAndSettle();

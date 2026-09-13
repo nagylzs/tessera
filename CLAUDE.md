@@ -159,8 +159,10 @@ Paths below are relative to the package (`lib/src/...` means
   column path, kept when invisible) and `currentCell` (resolved against
   the layout, null when not visible). `CubeView.selectable` (default
   true), `focusNode`, `autofocus`; a `Focus` around the `TableView`
-  requests focus on cell tap; `onKeyEvent` handles arrows, Home/End,
-  PageUp/Down (page = rows under the header band), Enter/Space (toggle
+  requests focus on cell tap; `onKeyEvent` handles arrows, Home/End (Ctrl: first/last row),
+  PageUp/Down (page = rows under the header band; the number block's
+  KP_Home etc. arrive as `numpad7` … without a character while NumLock
+  is off and are translated), Enter/Space (toggle
   the row group), Escape; `_scrollIntoView` uses the fixed extents and
   the two internal `ScrollController`s. `CellBorder.outline` draws the
   2 px inset outline (`CubeTheme.selectionColor`, default primary); the

@@ -64,7 +64,8 @@ and column headers are tinted, and `controller.selection` holds its
 other groups). `controller.currentCell` resolves it against the current
 layout — the `CubeCell` with its facts and aggregates, or `null` when the
 cell is not visible — which is what an app charts or drills into. The view
-takes focus on tap; the arrow keys, Home/End and Page Up/Down move the
+takes focus on tap; the arrow keys, Home/End (first/last column, with
+Ctrl first/last row) and Page Up/Down (on the number block too) move the
 current cell (scrolled into view), Enter or Space toggles its row group and
 Escape clears it. `selectable: false` turns this off; `focusNode` and
 `autofocus` work as on a `TextField`. `CubeTheme.selectionColor` is the

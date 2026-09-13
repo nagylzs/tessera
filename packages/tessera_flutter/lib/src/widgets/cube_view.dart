@@ -64,9 +64,9 @@ typedef LevelExpansionConfirmation = Future<bool> Function(
 /// column headers tinted) and stores a [CellAddress] in
 /// [CubeController.selection]; [CubeController.currentCell] gives the
 /// cell with its facts, e.g. to chart them. The view takes focus on tap;
-/// the arrow keys, Home/End and Page Up/Down move the current cell (kept
-/// scrolled into view), Enter or Space toggles its row group, Escape
-/// clears the selection. `selectable: false` turns all of this off.
+/// the arrow keys, Home/End (first/last column; with Ctrl first/last row)
+/// and Page Up/Down move the current cell (kept scrolled into view), Enter
+/// or Space toggles its row group, Escape clears the selection. `selectable: false` turns all of this off.
 ///
 /// Column widths follow the content: the widest text of each column (its
 /// values, labels and titles) is measured up front and the width clamped to
@@ -810,20 +810,21 @@ class _CubeGridState extends State<_CubeGrid> {
                 .floor(),
           )
         : 10;
-    final key = event.logicalKey;
+    final key = _navigationKey(event);
     if (key == LogicalKeyboardKey.escape) {
       view.controller.selection = null;
       return KeyEventResult.handled;
     }
     final i = _selectedRow < 0 ? 0 : _selectedRow;
     final j = _selectedColumn < 0 ? 0 : _selectedColumn;
+    final ctrl = HardwareKeyboard.instance.isControlPressed;
     final (int, int)? target = switch (key) {
       LogicalKeyboardKey.arrowUp => (i - 1, j),
       LogicalKeyboardKey.arrowDown => (i + 1, j),
       LogicalKeyboardKey.arrowLeft => (i, j - 1),
       LogicalKeyboardKey.arrowRight => (i, j + 1),
-      LogicalKeyboardKey.home => (i, 0),
-      LogicalKeyboardKey.end => (i, columns - 1),
+      LogicalKeyboardKey.home => ctrl ? (0, j) : (i, 0),
+      LogicalKeyboardKey.end => ctrl ? (rows - 1, j) : (i, columns - 1),
       LogicalKeyboardKey.pageUp => (i - page, j),
       LogicalKeyboardKey.pageDown => (i + page, j),
       _ => null,
@@ -850,6 +851,27 @@ class _CubeGridState extends State<_CubeGrid> {
     }
     return KeyEventResult.ignored;
   }
+
+  /// The logical key of [event], with the number block's navigation keys
+  /// (Home, arrows, Page Up …, sent as `numpad7` etc. without a character
+  /// while NumLock is off — Flutter does not tell them apart otherwise)
+  /// translated to their main-keyboard counterparts.
+  static LogicalKeyboardKey _navigationKey(KeyEvent event) {
+    final key = event.logicalKey;
+    if (event.character?.isNotEmpty ?? false) return key;
+    return _numpadNavigation[key] ?? key;
+  }
+
+  static final _numpadNavigation = {
+    LogicalKeyboardKey.numpad1: LogicalKeyboardKey.end,
+    LogicalKeyboardKey.numpad2: LogicalKeyboardKey.arrowDown,
+    LogicalKeyboardKey.numpad3: LogicalKeyboardKey.pageDown,
+    LogicalKeyboardKey.numpad4: LogicalKeyboardKey.arrowLeft,
+    LogicalKeyboardKey.numpad6: LogicalKeyboardKey.arrowRight,
+    LogicalKeyboardKey.numpad7: LogicalKeyboardKey.home,
+    LogicalKeyboardKey.numpad8: LogicalKeyboardKey.arrowUp,
+    LogicalKeyboardKey.numpad9: LogicalKeyboardKey.pageUp,
+  };
 
   /// Scrolls so that data cell ([i], [j]) is not hidden by the viewport
   /// edges or the pinned headers. Every extent is fixed, so the offsets
