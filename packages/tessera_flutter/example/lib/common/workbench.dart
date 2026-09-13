@@ -1,7 +1,7 @@
 import 'dart:convert' show utf8;
 import 'dart:typed_data';
 
-import 'package:file_selector/file_selector.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
@@ -240,18 +240,13 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
 
   /// Writes the cube as shown (every aggregate of the spec) to a file
   /// chosen in the platform's save dialog: an .xlsx workbook, or CSV.
+  /// file_picker takes the bytes itself, which is what Android and iOS
+  /// need (they hand out a document Uri, not a path).
   Future<void> _export({required bool csv}) async {
     final controller = _controller;
     if (controller == null) return;
     final base = widget.source.name.replaceFirst(RegExp(r'\.[^.]*$'), '');
     final ext = csv ? 'csv' : 'xlsx';
-    final location = await getSaveLocation(
-      suggestedName: '$base.$ext',
-      acceptedTypeGroups: [
-        XTypeGroup(label: csv ? 'CSV' : 'Excel workbook', extensions: [ext]),
-      ],
-    );
-    if (location == null || !mounted) return;
     final strings = TesseraLocalizations.of(context);
     final layout = controller.cube.layout;
     final Uint8List bytes;
@@ -272,15 +267,19 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
       mimeType =
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     }
-    await XFile.fromData(
-      bytes,
+    final uri = await FilePicker.saveFile(
+      dialogTitle: 'Export',
+      fileName: '$base.$ext',
+      bytes: bytes,
       mimeType: mimeType,
-      name: '$base.$ext',
-    ).saveTo(location.path);
-    if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Saved ${location.path}')));
-    }
+      type: FileType.custom,
+      allowedExtensions: [ext],
+    );
+    if (uri == null || !mounted) return;
+    // desktop gives a file path; Android/iOS a content Uri, so name the file
+    final where = uri.isScheme('file') ? uri.toFilePath() : '$base.$ext';
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Saved $where')));
   }
 
   void _showReport() {
