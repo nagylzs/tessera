@@ -62,7 +62,7 @@ class _ThemingPageState extends State<ThemingPage> {
             title: 'Tessera — ${_preset.name}',
             progressEvery: 250,
             theme: _preset.theme,
-            xlsxTheme: excelThemeFor(_excel, _preset, seedColors[_seed]!),
+            exportTheme: excelThemeFor(_excel, _preset, seedColors[_seed]!),
             actions: (context, controller) => [_themeMenu(controller)],
             initialSpec: (facts) => CubeSpec(
               rows: CubeAxis.of([region, country]),

@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
+import 'package:tessera_ods/tessera_ods.dart';
 import 'package:tessera_xlsx/tessera_xlsx.dart';
 
 import '../language_menu.dart';
@@ -23,7 +24,7 @@ class CubeWorkbench extends StatefulWidget {
     this.adjustSchema,
     this.progressEvery = 5000,
     this.theme = const CubeTheme(),
-    this.xlsxTheme = const CubeExportTheme(),
+    this.exportTheme = const CubeExportTheme(),
     this.actions,
   });
 
@@ -45,8 +46,8 @@ class CubeWorkbench extends StatefulWidget {
   /// Theme of the [CubeView].
   final CubeTheme theme;
 
-  /// Theme of the Excel export.
-  final CubeExportTheme xlsxTheme;
+  /// Theme of the Excel / OpenDocument exports.
+  final CubeExportTheme exportTheme;
 
   /// Extra AppBar actions, placed before the built-in ones; [controller]
   /// is `null` until the import has finished.
@@ -243,47 +244,50 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
   }
 
   /// Writes the cube as shown (every aggregate of the spec) to a file
-  /// chosen in the platform's save dialog: an .xlsx workbook, or CSV.
-  /// file_picker takes the bytes itself, which is what Android and iOS
-  /// need (they hand out a document Uri, not a path).
-  Future<void> _export({required bool csv}) async {
+  /// chosen in the platform's save dialog: an .xlsx workbook, an .ods
+  /// spreadsheet, or CSV. file_picker takes the bytes itself, which is
+  /// what Android and iOS need (they hand out a document Uri, not a path).
+  Future<void> _export(ExportFormat format) async {
     final controller = _controller;
     if (controller == null) return;
     final base = widget.source.name.replaceFirst(RegExp(r'\.[^.]*$'), '');
-    final ext = csv ? 'csv' : 'xlsx';
     final strings = TesseraLocalizations.of(context);
     final layout = controller.cube.layout;
     final Uint8List bytes;
-    final String mimeType;
-    if (csv) {
-      bytes = Uint8List.fromList(
-        utf8.encode(
-          CsvCubeExporter(
-            strings: strings,
-            options: const CsvExportOptions(byteOrderMark: true),
-          ).export(layout),
-        ),
-      );
-      mimeType = 'text/csv';
-    } else {
-      bytes = XlsxCubeExporter(
-        strings: strings,
-        theme: widget.xlsxTheme,
-      ).export(layout, sheetName: base);
-      mimeType =
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    switch (format) {
+      case ExportFormat.xlsx:
+        bytes = XlsxCubeExporter(
+          strings: strings,
+          theme: widget.exportTheme,
+        ).export(layout, sheetName: base);
+      case ExportFormat.ods:
+        bytes = OdsCubeExporter(
+          strings: strings,
+          theme: widget.exportTheme,
+        ).export(layout, sheetName: base);
+      case ExportFormat.csv:
+        bytes = Uint8List.fromList(
+          utf8.encode(
+            CsvCubeExporter(
+              strings: strings,
+              options: const CsvExportOptions(byteOrderMark: true),
+            ).export(layout),
+          ),
+        );
     }
     final uri = await FilePicker.saveFile(
       dialogTitle: 'Export',
-      fileName: '$base.$ext',
+      fileName: '$base.${format.extension}',
       bytes: bytes,
-      mimeType: mimeType,
+      mimeType: format.mimeType,
       type: FileType.custom,
-      allowedExtensions: [ext],
+      allowedExtensions: [format.extension],
     );
     if (uri == null || !mounted) return;
     // desktop gives a file path; Android/iOS a content Uri, so name the file
-    final where = uri.isScheme('file') ? uri.toFilePath() : '$base.$ext';
+    final where = uri.isScheme('file')
+        ? uri.toFilePath()
+        : '$base.${format.extension}';
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Saved $where')));
   }
@@ -334,14 +338,11 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
         ...?widget.actions?.call(context, _controller),
         MenuAnchor(
           menuChildren: [
-            MenuItemButton(
-              onPressed: _controller == null ? null : () => _export(csv: false),
-              child: const Text('Excel workbook (.xlsx)…'),
-            ),
-            MenuItemButton(
-              onPressed: _controller == null ? null : () => _export(csv: true),
-              child: const Text('CSV (.csv)…'),
-            ),
+            for (final format in ExportFormat.values)
+              MenuItemButton(
+                onPressed: _controller == null ? null : () => _export(format),
+                child: Text('${format.label} (.${format.extension})…'),
+              ),
           ],
           builder: (context, menu, _) => IconButton(
             icon: const Icon(Icons.file_download_outlined),
@@ -474,4 +475,25 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
       },
     ),
   );
+}
+
+/// The formats the workbench exports to.
+enum ExportFormat {
+  xlsx(
+    'Excel workbook',
+    'xlsx',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ),
+  ods(
+    'OpenDocument spreadsheet',
+    'ods',
+    'application/vnd.oasis.opendocument.spreadsheet',
+  ),
+  csv('CSV', 'csv', 'text/csv');
+
+  const ExportFormat(this.label, this.extension, this.mimeType);
+
+  final String label;
+  final String extension;
+  final String mimeType;
 }

@@ -63,6 +63,29 @@ the root, ignored; members carry `resolution: workspace`):
   `XlsxDataSource`, check merge refs, and round-trip through
   `soffice --convert-to csv` (skipped when soffice is missing; its csv
   filter writes raw values, not formatted ones).
+- `packages/tessera_ods` — pure Dart, `tessera` + `archive` + `xml`,
+  same shape as tessera_xlsx: `OdsDataSource` (`ods_document.dart`
+  unzips and checks the mimetype; `ods_sheet_reader.dart` streams
+  `table:table-row`s with `parseEvents` — typed cells from
+  `office:value-type`/`value`/`date-value`/`boolean-value`, `text:p`
+  paragraphs joined with `\n`, `text:s`/`tab`/`line-break`, annotations
+  skipped, `number-columns-repeated` expanded, `number-rows-repeated`
+  yielded that many times unless the row is empty — that is how sheets
+  pad to 1 M rows; self-closing rows still count for `skipRows`) and
+  `OdsCubeExporter` (renders `CubeGrid`: `mimetype` stored first, manifest,
+  `content.xml` with automatic styles per (fill, font, align) →
+  `ce<n>`, `number:number-style` N1 from `NumberFormat`, column styles
+  in cm from the longest text, merges via
+  `number-columns/rows-spanned` + `covered-table-cell`, `settings.xml`
+  view settings for frozen panes — LibreOffice's documented
+  `HorizontalSplitMode=2` layout; unverifiable headless because a
+  headless conversion has no view and drops view settings both ways).
+  Test data `test/data/sales.ods` = `sales.csv` via `soffice
+  --convert-to ods` (LibreOffice's hu locale kept decimals as strings,
+  which inference parses like CSV); tests compare with the CSV import,
+  hand-build documents with `ZipEncoder`, and round-trip through
+  LibreOffice (csv + xlsx for merges). `example/main.dart` mirrors the
+  xlsx one.
 - Planned: further exporters (`tessera_pdf`, …) the same way; HTML export
   can live in the engine (no deps).
 
@@ -78,6 +101,7 @@ dart pub get                                   # at the root: resolves all membe
 dart analyze                                   # at the root: all packages, must be clean
 (cd packages/tessera && dart test)             # engine tests (package:test, no Flutter)
 (cd packages/tessera_xlsx && dart test)        # xlsx package (pure Dart)
+(cd packages/tessera_ods && dart test)         # ods package (pure Dart)
 (cd packages/tessera_flutter && flutter test)  # widget tests
 (cd packages/tessera_flutter/example && flutter test)
 dart format packages                           # run before committing
@@ -156,8 +180,9 @@ Paths below are relative to the package (`lib/src/...` means
   reads, disk cache after one full pass, HEAD Content-Length →
   `estimatedRowCount`; sendable to the import isolate; dart:io so not web);
   `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`). The
-  workbench's "Export…" menu writes the cube (all aggregates) as an
-  .xlsx (`XlsxCubeExporter`) or CSV (`CsvCubeExporter`, BOM) through
+  workbench's "Export…" menu writes the cube (all aggregates) as .xlsx
+  (`XlsxCubeExporter`), .ods (`OdsCubeExporter`) or CSV
+  (`CsvCubeExporter`, BOM) — `ExportFormat` — through
   `file_picker`'s `FilePicker.saveFile(bytes:)`, which writes the file
   itself — needed on Android/iOS (document Uri, no path;
   `file_selector` has no save dialog there). Linux goes through the
@@ -173,7 +198,7 @@ Paths below are relative to the package (`lib/src/...` means
   (`CubeExportTheme`); the menu's "Excel export theme" picks it,
   `CubeExportTheme.brand(seed.toARGB32())`
   or the package default (`ExcelTheme`, `excelThemeFor`) and passes it
-  as `CubeWorkbench.xlsxTheme`. No `CubeTheme → CubeExportTheme`
+  as `CubeWorkbench.exportTheme` (used by the .xlsx and .ods exports). No `CubeTheme → CubeExportTheme`
   converter on purpose (needs a context; screen shading is too subtle
   on paper) — Excel themes are authored.
 - "Public datasets" (`example/lib/datasets/`): six real CSVs (GitHub raw
