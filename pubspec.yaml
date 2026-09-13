@@ -12,3 +12,4 @@ workspace:
   - packages/tessera_flutter/example
   - packages/tessera_xlsx
   - packages/tessera_ods
+  - packages/tessera_html

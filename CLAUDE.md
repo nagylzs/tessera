@@ -86,8 +86,19 @@ the root, ignored; members carry `resolution: workspace`):
   hand-build documents with `ZipEncoder`, and round-trip through
   LibreOffice (csv + xlsx for merges). `example/main.dart` mirrors the
   xlsx one.
-- Planned: further exporters (`tessera_pdf`, …) the same way; HTML export
-  can live in the engine (no deps).
+- `packages/tessera_html` — pure Dart, depends on `tessera` only (the
+  owner chose a package over the engine). `HtmlCubeExporter` renders
+  `CubeGrid` as a `<table>`: `<thead>` for the header band, `<th>` for
+  titles/labels/aggregate names with `scope`, `rowspan`/`colspan` from
+  the grid spans (covered cells skipped), classes
+  `<prefix>-title/header/leg/aggregate/data/summary/level-N/num`;
+  `HtmlStyling.stylesheet` (a `<style>` from `CubeExportTheme`, sticky
+  `thead th`), `.inline` (style attributes, for e-mail) or `.none`;
+  `standalone` document or fragment; numbers with the theme's
+  decimals/grouping and the locale's separators (`formatNumber`).
+  Tests parse the output with `package:xml` (it is well-formed). Example
+  on `example/sales.csv`.
+- Planned: further exporters (`tessera_pdf`, …) the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a
 package that depends on Flutter cannot be used with the standalone Dart
@@ -102,6 +113,7 @@ dart analyze                                   # at the root: all packages, must
 (cd packages/tessera && dart test)             # engine tests (package:test, no Flutter)
 (cd packages/tessera_xlsx && dart test)        # xlsx package (pure Dart)
 (cd packages/tessera_ods && dart test)         # ods package (pure Dart)
+(cd packages/tessera_html && dart test)        # html package (pure Dart)
 (cd packages/tessera_flutter && flutter test)  # widget tests
 (cd packages/tessera_flutter/example && flutter test)
 dart format packages                           # run before committing
@@ -181,7 +193,8 @@ Paths below are relative to the package (`lib/src/...` means
   `estimatedRowCount`; sendable to the import isolate; dart:io so not web);
   `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`). The
   workbench's "Export…" menu writes the cube (all aggregates) as .xlsx
-  (`XlsxCubeExporter`), .ods (`OdsCubeExporter`) or CSV
+  (`XlsxCubeExporter`), .ods (`OdsCubeExporter`), .html
+  (`HtmlCubeExporter`) or CSV
   (`CsvCubeExporter`, BOM) — `ExportFormat` — through
   `file_picker`'s `FilePicker.saveFile(bytes:)`, which writes the file
   itself — needed on Android/iOS (document Uri, no path;

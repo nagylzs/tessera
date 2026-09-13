@@ -1,0 +1,8 @@
+## 0.0.1
+
+* `HtmlCubeExporter`: writes a `CubeLayout` as an HTML table — merged
+  "rotated L" group headers (`rowspan`/`colspan`), one column per
+  exported aggregate, classes per cell kind and level, a stylesheet from
+  the engine's `CubeExportTheme` (embedded, inline or none), sticky
+  headers, a whole document or a fragment, localized labels and numbers.
+* `example/main.dart`: command-line round trip on `example/sales.csv`.

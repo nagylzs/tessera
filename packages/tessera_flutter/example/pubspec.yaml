@@ -42,6 +42,7 @@ dependencies:
     sdk: flutter
   tessera_xlsx: ^0.0.1
   tessera_ods: ^0.0.1
+  tessera_html: ^0.0.1
   file_picker: ^12.3.0
 
 dev_dependencies:
