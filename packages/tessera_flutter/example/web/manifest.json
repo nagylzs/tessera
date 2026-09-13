@@ -1,11 +1,11 @@
 {
-    "name": "tessera_example",
-    "short_name": "tessera_example",
+    "name": "Tessera examples",
+    "short_name": "Tessera",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#f2f9f6",
+    "theme_color": "#00856e",
+    "description": "Pivot tables with the tessera engine and widgets.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

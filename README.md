@@ -1,3 +1,5 @@
+<img src="icon/tessera-icon.svg" width="96" height="96" alt="" align="right">
+
 # tessera
 
 Analyze, group and aggregate tabular data in Dart and Flutter: a pivot-table

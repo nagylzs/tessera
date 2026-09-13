@@ -517,6 +517,14 @@ consistent otherwise.
 - Widgets import `package:tessera/tessera.dart` (never
   `package:tessera/src/...`); the engine package must stay Flutter-free.
 - Example app org id: `eu.nagylzs` (`eu.nagylzs.tessera_example`).
+- Icon: `icon/*.svg` at the repo root are the sources (the "Band"
+  design: a teal L header band and nine tiles in the level hues on
+  paper; `-foreground`/`-monochrome` are the layers, `-adaptive-*`
+  the same scaled to 85 % for Android's 66 dp safe zone). The example
+  rasterizes them into `assets/icon/*.png` (not bundled) and
+  `flutter_launcher_icons` (config in its pubspec) writes every
+  platform's icons: `dart run flutter_launcher_icons`. Re-rasterize
+  with `rsvg-convert -w 1024 -h 1024` after editing an SVG.
 - Doc comments on every public type; keep the library-level docs in
   `packages/tessera/lib/tessera.dart` and
   `packages/tessera_flutter/lib/tessera_flutter.dart` in sync with the
