@@ -165,6 +165,15 @@ final class TesseraStringsTr extends TesseraStrings {
   String get totalsHidden => 'Toplamları gizle';
 
   @override
+  String get subtotalsAbove => 'Ara toplamlar grubun üstünde';
+
+  @override
+  String get subtotalsBelow => 'Ara toplamlar grubun altında';
+
+  @override
+  String get subtotalsHidden => 'Ara toplamları gizle';
+
+  @override
   String get expandAll => 'Tümünü genişlet';
 
   @override

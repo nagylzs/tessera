@@ -165,6 +165,15 @@ final class TesseraStringsPl extends TesseraStrings {
   String get totalsHidden => 'Ukryj sumy';
 
   @override
+  String get subtotalsAbove => 'Sumy częściowe nad grupą';
+
+  @override
+  String get subtotalsBelow => 'Sumy częściowe pod grupą';
+
+  @override
+  String get subtotalsHidden => 'Ukryj sumy częściowe';
+
+  @override
   String get expandAll => 'Rozwiń wszystko';
 
   @override

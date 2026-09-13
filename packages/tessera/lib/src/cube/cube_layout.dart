@@ -52,9 +52,16 @@ abstract interface class AxisLayout {
   /// Index of the entry with [path], or `-1`.
   int indexOf(DimensionPath path);
 
-  /// Number of entries after [index] that belong to its subtree — the
-  /// extra rows/columns its label spans. `0` for leaves and for a summary
-  /// placed at the end.
+  /// The group at [path]: its entry when it has one, or — for an expanded
+  /// group whose subtotal is hidden ([SubtotalPosition.hidden]) — an entry
+  /// that is not in [entries] but still carries the label, expansion state
+  /// and fact count its header area needs. `null` for a group the layout
+  /// does not have.
+  HeaderEntry? entryFor(DimensionPath path);
+
+  /// Number of other entries in the subtree of the entry at [index] — the
+  /// rows/columns its label spans besides its own. `0` for leaves and for
+  /// the summary.
   int descendantCount(int index);
 }
 

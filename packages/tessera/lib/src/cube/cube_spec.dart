@@ -20,6 +20,13 @@ enum NullPosition { first, last }
 /// Where the summary row/column of an axis is placed.
 enum SummaryPosition { start, end, hidden }
 
+/// Where an expanded group's own row/column — its subtotal — is placed
+/// relative to its children: first (the tree-grid look, the default), last
+/// (the classic "Africa … Africa total" report), or not shown at all. The
+/// group is still aggregated (sorting by its value keeps working) and its
+/// label still spans the children; see `AxisLayout.entryFor`.
+enum SubtotalPosition { top, bottom, hidden }
+
 /// Ordering of the groups produced by one [AxisDimension].
 ///
 /// With [SortBy.value] the empty group goes where [nulls] says. With
@@ -77,19 +84,23 @@ final class CubeAxis {
   const CubeAxis({
     this.dimensions = const [],
     this.summaryPosition = SummaryPosition.end,
+    this.subtotalPosition = SubtotalPosition.top,
   });
 
   /// Shorthand for an axis with default sorting.
   CubeAxis.of(
     List<Dimension> dimensions, {
     SummaryPosition summaryPosition = SummaryPosition.end,
+    SubtotalPosition subtotalPosition = SubtotalPosition.top,
   }) : this(
          dimensions: [for (final d in dimensions) AxisDimension(d)],
          summaryPosition: summaryPosition,
+         subtotalPosition: subtotalPosition,
        );
 
   final List<AxisDimension> dimensions;
   final SummaryPosition summaryPosition;
+  final SubtotalPosition subtotalPosition;
 
   /// Number of levels below the summary.
   int get depth => dimensions.length;
@@ -118,9 +129,11 @@ final class CubeAxis {
   CubeAxis copyWith({
     List<AxisDimension>? dimensions,
     SummaryPosition? summaryPosition,
+    SubtotalPosition? subtotalPosition,
   }) => CubeAxis(
     dimensions: dimensions ?? this.dimensions,
     summaryPosition: summaryPosition ?? this.summaryPosition,
+    subtotalPosition: subtotalPosition ?? this.subtotalPosition,
   );
 }
 

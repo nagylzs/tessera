@@ -165,6 +165,15 @@ final class TesseraStringsCs extends TesseraStrings {
   String get totalsHidden => 'Skrýt součty';
 
   @override
+  String get subtotalsAbove => 'Mezisoučty nad skupinou';
+
+  @override
+  String get subtotalsBelow => 'Mezisoučty pod skupinou';
+
+  @override
+  String get subtotalsHidden => 'Skrýt mezisoučty';
+
+  @override
   String get expandAll => 'Rozbalit vše';
 
   @override

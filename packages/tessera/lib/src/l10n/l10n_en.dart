@@ -165,6 +165,15 @@ final class TesseraStringsEn extends TesseraStrings {
   String get totalsHidden => 'Hide totals';
 
   @override
+  String get subtotalsAbove => 'Subtotals above the group';
+
+  @override
+  String get subtotalsBelow => 'Subtotals below the group';
+
+  @override
+  String get subtotalsHidden => 'Hide subtotals';
+
+  @override
   String get expandAll => 'Expand all';
 
   @override

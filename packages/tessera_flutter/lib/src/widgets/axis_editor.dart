@@ -61,14 +61,15 @@ class AxisEditor extends StatelessWidget {
       s == AxisSide.rows ? spec.rows : spec.columns;
 
   /// The caption ("Rows" / "Columns"); tapping it opens a menu with the
-  /// axis's summary position ([CubeAxis.summaryPosition]).
+  /// axis's summary and subtotal positions ([CubeAxis.summaryPosition],
+  /// [CubeAxis.subtotalPosition]).
   Widget _caption(
     BuildContext context,
     CubeSpec spec,
     TesseraStrings strings,
     ThemeData theme,
   ) {
-    final current = _axisOf(spec, side).summaryPosition;
+    final axis = _axisOf(spec, side);
     return MenuAnchor(
       menuChildren: [
         for (final (position, text) in [
@@ -77,8 +78,24 @@ class AxisEditor extends StatelessWidget {
           (SummaryPosition.hidden, strings.totalsHidden),
         ])
           MenuItemButton(
-            leadingIcon: Icon(position == current ? Icons.check : null),
-            onPressed: () => _setSummaryPosition(position),
+            leadingIcon: Icon(
+              position == axis.summaryPosition ? Icons.check : null,
+            ),
+            onPressed: () => _setAxis(axis.copyWith(summaryPosition: position)),
+            child: Text(text),
+          ),
+        const Divider(height: 1),
+        for (final (position, text) in [
+          (SubtotalPosition.top, strings.subtotalsAbove),
+          (SubtotalPosition.bottom, strings.subtotalsBelow),
+          (SubtotalPosition.hidden, strings.subtotalsHidden),
+        ])
+          MenuItemButton(
+            leadingIcon: Icon(
+              position == axis.subtotalPosition ? Icons.check : null,
+            ),
+            onPressed: () =>
+                _setAxis(axis.copyWith(subtotalPosition: position)),
             child: Text(text),
           ),
       ],
@@ -103,9 +120,8 @@ class AxisEditor extends StatelessWidget {
     );
   }
 
-  void _setSummaryPosition(SummaryPosition position) {
+  void _setAxis(CubeAxis axis) {
     final spec = controller.cube.spec;
-    final axis = _axisOf(spec, side).copyWith(summaryPosition: position);
     controller.updateSpec(
       side == AxisSide.rows
           ? spec.copyWith(rows: axis)

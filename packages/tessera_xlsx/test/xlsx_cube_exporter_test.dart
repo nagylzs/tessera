@@ -207,6 +207,63 @@ void main() {
     );
   });
 
+  test('subtotals below the group, and a flat export', () async {
+    final below = Cube(
+      facts: f,
+      spec: CubeSpec(
+        rows: CubeAxis.of([
+          region,
+          country,
+        ], subtotalPosition: SubtotalPosition.bottom),
+        columns: CubeAxis.of([category]),
+        aggregates: [sumQty],
+      ),
+    ).toggleRow(europe);
+    final xlsx = const XlsxCubeExporter().export(below.layout);
+    final g = await grid(xlsx);
+    // rows: ∅, Asia, ∅, Germany, Hungary, Europe, Σ — Europe's label is
+    // merged over its children and its own last row; a merged cell's
+    // value sits at its top-left, so the read-back shows it on the first
+    // child's row
+    expect(g.map((r) => r.take(2).toList()).skip(2), [
+      ['(empty)', null],
+      ['Asia', null],
+      ['Europe', '(empty)'],
+      [null, 'Germany'],
+      [null, 'Hungary'],
+      [null, null], // Europe's own row: the merge and the leg
+      ['Total', null],
+    ]);
+    expect(g[7].sublist(2), [null, 8, 2, 10]);
+    expect(merges(xlsx), contains('A5:A8'));
+    // both hidden: leaf rows only, nothing counted twice — a table one can
+    // sum in Excel
+    final flat = Cube(
+      facts: f,
+      spec: CubeSpec(
+        rows: CubeAxis.of(
+          [region, country],
+          subtotalPosition: SubtotalPosition.hidden,
+          summaryPosition: SummaryPosition.hidden,
+        ),
+        columns: CubeAxis.of([
+          category,
+        ], summaryPosition: SummaryPosition.hidden),
+        aggregates: [sumQty],
+      ),
+    ).expandRowsToDepth(2);
+    final flatGrid = await grid(const XlsxCubeExporter().export(flat.layout));
+    expect(flatGrid.length, 2 + 6); // header rows + 6 leaf rows
+    expect(flatGrid.skip(2).every((r) => r[1] != null || r[0] != null), isTrue);
+    final values = [
+      for (final r in flatGrid.skip(2))
+        for (final v in r.skip(2))
+          if (v is num) v,
+    ];
+    expect(values.fold<num>(0, (a, b) => a + b), 28);
+    expect(flatGrid.any((r) => r.contains('Total')), isFalse);
+  });
+
   test('LibreOffice opens the export and reads the same grid', () async {
     if (Process.runSync('which', ['soffice']).exitCode != 0) {
       markTestSkipped('soffice not installed');

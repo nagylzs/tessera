@@ -225,7 +225,7 @@ final class _Export {
       }
       for (var level = 0; level < columnDepth; level++) {
         final area = columnGeometry.areaAt(level, j);
-        final owner = columns[area.entryIndex];
+        final owner = layout.columns.entryFor(area.path)!;
         final isOrigin = area.levelStart == level && area.entryStart == j;
         final s = _headerStyle(summary: owner.isSummary);
         for (var a = 0; a < perEntry; a++) {
@@ -263,7 +263,7 @@ final class _Export {
       }
       for (var level = 0; level < rowDepth; level++) {
         final area = rowGeometry.areaAt(level, i);
-        final owner = rows[area.entryIndex];
+        final owner = layout.rows.entryFor(area.path)!;
         final isOrigin = area.levelStart == level && area.entryStart == i;
         _put(
           sheetRow,

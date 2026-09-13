@@ -9,7 +9,9 @@ final class CellBorder extends CustomPainter {
   const CellBorder({
     required this.color,
     this.rightFrom = 0,
+    this.rightUntil = double.infinity,
     this.bottomFrom = 0,
+    this.bottomUntil = double.infinity,
     this.outline,
   });
 
@@ -18,24 +20,28 @@ final class CellBorder extends CustomPainter {
   /// Drawn just inside the cell when set.
   final Color? outline;
 
-  /// Where the right border starts, measured from the top.
+  /// Where the right border starts and ends, measured from the top.
   final double rightFrom;
+  final double rightUntil;
 
-  /// Where the bottom border starts, measured from the left.
+  /// Where the bottom border starts and ends, measured from the left.
   final double bottomFrom;
+  final double bottomUntil;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = color;
-    if (rightFrom < size.height) {
+    final rightEnd = rightUntil < size.height ? rightUntil : size.height;
+    if (rightFrom < rightEnd) {
       canvas.drawRect(
-        Rect.fromLTRB(size.width - 1, rightFrom, size.width, size.height),
+        Rect.fromLTRB(size.width - 1, rightFrom, size.width, rightEnd),
         paint,
       );
     }
-    if (bottomFrom < size.width) {
+    final bottomEnd = bottomUntil < size.width ? bottomUntil : size.width;
+    if (bottomFrom < bottomEnd) {
       canvas.drawRect(
-        Rect.fromLTRB(bottomFrom, size.height - 1, size.width, size.height),
+        Rect.fromLTRB(bottomFrom, size.height - 1, bottomEnd, size.height),
         paint,
       );
     }
@@ -55,6 +61,8 @@ final class CellBorder extends CustomPainter {
   bool shouldRepaint(CellBorder old) =>
       old.color != color ||
       old.rightFrom != rightFrom ||
+      old.rightUntil != rightUntil ||
       old.bottomFrom != bottomFrom ||
+      old.bottomUntil != bottomUntil ||
       old.outline != outline;
 }

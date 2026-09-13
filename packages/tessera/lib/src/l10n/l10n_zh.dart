@@ -157,6 +157,15 @@ final class TesseraStringsZh extends TesseraStrings {
   String get totalsHidden => '隐藏总计';
 
   @override
+  String get subtotalsAbove => '小计在分组上方';
+
+  @override
+  String get subtotalsBelow => '小计在分组下方';
+
+  @override
+  String get subtotalsHidden => '隐藏小计';
+
+  @override
   String get expandAll => '全部展开';
 
   @override

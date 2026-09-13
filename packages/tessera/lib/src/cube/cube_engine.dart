@@ -316,21 +316,45 @@ final class AxisTree {
   /// Visible nodes in display order.
   List<AxisNode> entries() {
     final out = <AxisNode>[];
+    // an expanded group's own entry goes before, after or nowhere
     void visit(AxisNode n) {
-      out.add(n);
-      if (!isLeaf(n)) n.ordered.forEach(visit);
+      if (isLeaf(n)) {
+        out.add(n);
+        return;
+      }
+      switch (axis.subtotalPosition) {
+        case SubtotalPosition.top:
+          out.add(n);
+          n.ordered.forEach(visit);
+        case SubtotalPosition.bottom:
+          n.ordered.forEach(visit);
+          out.add(n);
+        case SubtotalPosition.hidden:
+          n.ordered.forEach(visit);
+      }
+    }
+
+    void children() {
+      if (!isLeaf(root)) root.ordered.forEach(visit);
     }
 
     switch (axis.summaryPosition) {
       case SummaryPosition.start:
-        visit(root);
+        out.add(root);
+        children();
       case SummaryPosition.end:
-        if (!isLeaf(root)) root.ordered.forEach(visit);
+        children();
         out.add(root);
       case SummaryPosition.hidden:
-        if (!isLeaf(root)) root.ordered.forEach(visit);
+        children();
     }
     return out;
+  }
+
+  /// Whether [n] gets an entry of its own in [entries].
+  bool hasEntry(AxisNode n) {
+    if (n.depth == 0) return axis.summaryPosition != SummaryPosition.hidden;
+    return isLeaf(n) || axis.subtotalPosition != SubtotalPosition.hidden;
   }
 }
 
@@ -464,9 +488,9 @@ int countEntries({
   for (final r in cache.filteredRows(facts, filter)) {
     tree.walk(r);
   }
-  var count = axis.summaryPosition == SummaryPosition.hidden ? 0 : 1;
+  var count = 0;
   for (final n in tree.nodes) {
-    if (n.depth > 0 && n.factCount > 0) count++;
+    if ((n.depth == 0 || n.factCount > 0) && tree.hasEntry(n)) count++;
   }
   return count;
 }
@@ -527,30 +551,54 @@ final class HeaderEntryImpl implements HeaderEntry {
 }
 
 final class AxisLayoutImpl implements AxisLayout {
-  AxisLayoutImpl(this.tree, Int32List rows)
+  AxisLayoutImpl(this.tree, this._rows)
     : entries = List.unmodifiable([
-        for (final n in tree.entries()) HeaderEntryImpl(tree, n, rows),
+        for (final n in tree.entries()) HeaderEntryImpl(tree, n, _rows),
       ]);
 
   final AxisTree tree;
+  final Int32List _rows;
 
   @override
   final List<HeaderEntryImpl> entries;
 
+  /// Entries for groups without a row of their own (hidden subtotals).
+  final _hidden = <DimensionPath, HeaderEntryImpl?>{};
+
+  @override
+  HeaderEntryImpl? entryFor(DimensionPath path) {
+    final i = indexOf(path);
+    if (i >= 0) return entries[i];
+    return _hidden.putIfAbsent(path, () {
+      final n = tree.resolve(path);
+      return n == null || (n.depth > 0 && n.factCount == 0)
+          ? null
+          : HeaderEntryImpl(tree, n, _rows);
+    });
+  }
+
   late final List<int> _descendants = _countDescendants();
 
+  /// Entries whose path starts with the entry's own, minus itself; `0`
+  /// for the summary. Works for any subtotal position because a subtree
+  /// is always contiguous.
   List<int> _countDescendants() {
     final counts = List<int>.filled(entries.length, 0);
-    final ancestors = <int>[]; // indices of open entries, shallow to deep
     for (var i = 0; i < entries.length; i++) {
-      final depth = entries[i].depth;
-      while (ancestors.isNotEmpty && entries[ancestors.last].depth >= depth) {
-        ancestors.removeLast();
+      final path = entries[i].path;
+      if (path.isRoot) continue;
+      var n = 0;
+      for (var j = i - 1; j >= 0 && entries[j].path.startsWith(path); j--) {
+        n++;
       }
-      for (final a in ancestors) {
-        counts[a]++;
+      for (
+        var j = i + 1;
+        j < entries.length && entries[j].path.startsWith(path);
+        j++
+      ) {
+        n++;
       }
-      ancestors.add(i);
+      counts[i] = n;
     }
     return counts;
   }

@@ -15,7 +15,8 @@
   ambient `DefaultTextStyle`, as `Text` renders them, so styles without a
   font family or size no longer produce truncated columns.
 * `AxisEditor`: the caption ("Rows" / "Columns") opens a menu with the
-  axis's summary position (end / start / hidden).
+  axis's summary position (end / start / hidden) and subtotal position
+  (above / below / hidden).
 * `CubeTheme.headerIconColor`: header icons default to the header text
   colour instead of the ambient icon colour.
 * Current cell: `CubeController.selection` / `currentCell`, `CellAddress`;

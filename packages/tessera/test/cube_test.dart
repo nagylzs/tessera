@@ -513,6 +513,78 @@ void main() {
       );
     });
 
+    test('subtotal position orders and hides group rows', () {
+      final europe = p([const DimensionValue(region, 'Europe')]);
+      Cube cube(
+        SubtotalPosition sp, [
+        SummaryPosition sm = SummaryPosition.end,
+      ]) => Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: CubeAxis.of(
+            [region, country],
+            subtotalPosition: sp,
+            summaryPosition: sm,
+          ),
+          aggregates: [sumQty],
+        ),
+      ).toggleRow(europe);
+      expect(labels(cube(SubtotalPosition.top).layout.rows), [
+        '∅',
+        'Asia',
+        'Europe',
+        '∅',
+        'Germany',
+        'Hungary',
+        'Σ',
+      ]);
+      expect(labels(cube(SubtotalPosition.bottom).layout.rows), [
+        '∅',
+        'Asia',
+        '∅',
+        'Germany',
+        'Hungary',
+        'Europe',
+        'Σ',
+      ]);
+      final hidden = cube(SubtotalPosition.hidden, SummaryPosition.hidden);
+      expect(labels(hidden.layout.rows), [
+        '∅',
+        'Asia',
+        '∅',
+        'Germany',
+        'Hungary',
+      ]);
+      // the hidden group is still aggregated, and sortable by its value
+      expect(hidden.layout.rows.entryFor(europe)!.factCount, 4);
+      // values are unchanged wherever the rows are
+      final bottom = cube(SubtotalPosition.bottom).layout;
+      expect(bottom.cellAt(5, 0).aggregate(sumQty), 10); // Europe
+      expect(bottom.cellAt(3, 0).aggregate(sumQty), 3); // Germany
+      // a fully flat table: every row is a leaf, nothing is counted twice
+      final flat = Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: CubeAxis.of(
+            [region, country],
+            subtotalPosition: SubtotalPosition.hidden,
+            summaryPosition: SummaryPosition.hidden,
+          ),
+          aggregates: [sumQty],
+        ),
+      ).expandRowsToDepth(2).layout;
+      expect(flat.rows.entries.every((e) => e.depth == 2), isTrue);
+      final sum = flat.rows.entries.indexed
+          .map((e) => flat.cellAt(e.$1, 0).aggregate(sumQty) ?? 0)
+          .fold<num>(0, (a, b) => a + b);
+      expect(sum, 28);
+      // the count of rows an expansion adds respects hidden subtotals
+      final base = cube(SubtotalPosition.hidden).collapseRowLevel(0);
+      expect(base.layout.rows.length, 4); // ∅, Asia, Europe, Σ
+      expect(base.rowsAddedByExpandingLevel(0), 3); // 4 - 3 + 6 = 7
+      expect(base.expandRowLevel(0).layout.rows.length, 7);
+    });
+
     test('rowsAddedByExpandingLevel counts without computing cells', () {
       final cube = Cube(
         facts: f,

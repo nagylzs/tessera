@@ -228,7 +228,7 @@ void main() {
       );
     });
 
-    test('summary at the start spans everything', () {
+    test('the summary has no descendants wherever it is', () {
       final l = Cube(
         facts: f,
         spec: CubeSpec(
@@ -238,7 +238,7 @@ void main() {
           ], summaryPosition: SummaryPosition.start),
         ),
       ).expandRowsToDepth(2).layout;
-      expect(l.rows.descendantCount(0), l.rows.length - 1);
+      expect(l.rows.descendantCount(0), 0); // Σ first, spans only itself
       expect(l.rows.descendantCount(1), 2); // ∅ → ∅, Iceland
     });
   });

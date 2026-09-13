@@ -119,8 +119,8 @@ Paths below are relative to the package (`lib/src/...` means
   (`widgets/dimension_picker.dart`; searchable, used dimensions disabled).
   Both verified on Linux desktop. The caption ("Rows"/"Columns") is a
   `MenuAnchor` setting `CubeAxis.summaryPosition` (end/start/hidden;
-  strings `totalsAtEnd` …); the theming example offers the same in its
-  palette menu (`CubeWorkbench.actions` is a builder receiving the
+  strings `totalsAtEnd` …) and `subtotalPosition` (`subtotalsAbove` …);
+  the theming example offers the same in its palette menu (`CubeWorkbench.actions` is a builder receiving the
   controller).
 - Implemented: `AggregateEditor` (`widgets/aggregate_editor.dart`; chips
   with delete — never the last one; removing resets any `AxisSort` that
@@ -291,7 +291,19 @@ Layers 1–3 must not import Flutter — enforced now by the package split
 - **Summary = root path.** `DimensionPath.root` (empty) is the summary
   row/column. `ExpansionState.initial()` has only the root expanded, which
   makes the first level visible. Expanded parent rows double as subtotals
-  (outline/tree-grid model, no separate subtotal rows).
+  (outline/tree-grid model, no separate subtotal rows); where that row
+  goes is `CubeAxis.subtotalPosition` (`top` default, `bottom`, `hidden`)
+  — independent of `summaryPosition`, like Excel's subtotal vs grand
+  total settings. `AxisTree.entries()` orders accordingly; a hidden
+  group has no entry but `AxisLayout.entryFor(path)` still returns a
+  `HeaderEntry` for its label/toggle; `AxisGeometry` works from paths
+  and contiguous runs (`HeaderArea.path`, `entryIndex` -1 when hidden),
+  so `CubeView` and the xlsx exporter follow automatically. The
+  hairline-free L (`CellBorder.rightFrom/rightUntil`,
+  `bottomFrom/bottomUntil`) follows the leg's position
+  (`_legAt(area)`: first row/column, last, or none when hidden).
+  `descendantCount` = subtree size excluding itself, summary 0. Both
+  hidden → a flat leaf table (nothing counted twice), handy for export.
 - **Nesting order is the hierarchy.** `[region, country]` groups by region
   then country; no hierarchy declarations. A dimension may appear on at most
   one axis; different derived dimensions of the same column (`date.year`,

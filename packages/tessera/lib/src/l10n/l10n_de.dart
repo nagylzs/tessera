@@ -165,6 +165,15 @@ final class TesseraStringsDe extends TesseraStrings {
   String get totalsHidden => 'Summen ausblenden';
 
   @override
+  String get subtotalsAbove => 'Zwischensummen über der Gruppe';
+
+  @override
+  String get subtotalsBelow => 'Zwischensummen unter der Gruppe';
+
+  @override
+  String get subtotalsHidden => 'Zwischensummen ausblenden';
+
+  @override
   String get expandAll => 'Alle ausklappen';
 
   @override

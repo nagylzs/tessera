@@ -588,7 +588,7 @@ class _CubeGridState extends State<_CubeGrid> {
       );
     }
     final area = columnGeometry.areaAt(r, j);
-    final owner = layout.columns.entries[area.entryIndex];
+    final owner = layout.columns.entryFor(area.path)!;
     return TableViewCell(
       rowMergeStart: area.levelSpan > 1 ? area.levelStart : null,
       rowMergeSpan: area.levelSpan > 1 ? area.levelSpan : null,
@@ -604,9 +604,12 @@ class _CubeGridState extends State<_CubeGrid> {
         ),
         alignment: Alignment.topLeft,
         // an expanded group's label and the leg below it form one area
-        bottomBorderFrom: area.isLabel && area.entrySpan > 1
+        bottomBorderFrom: _legAt(area) == 0
             ? _widths![headerColumns + area.entryStart]
             : 0,
+        bottomBorderUntil: _legAt(area) == area.entrySpan - 1
+            ? _spanWidth(area, area.entrySpan - 1)
+            : double.infinity,
         child: area.isLabel
             ? _entryLabel(context, owner, isRow: false)
             : const SizedBox(),
@@ -628,7 +631,7 @@ class _CubeGridState extends State<_CubeGrid> {
       );
     }
     final area = rowGeometry.areaAt(c, i);
-    final owner = layout.rows.entries[area.entryIndex];
+    final owner = layout.rows.entryFor(area.path)!;
     return TableViewCell(
       columnMergeStart: area.levelSpan > 1 ? area.levelStart : null,
       columnMergeSpan: area.levelSpan > 1 ? area.levelSpan : null,
@@ -638,14 +641,32 @@ class _CubeGridState extends State<_CubeGrid> {
         color: _headerColor(owner, selected: area.entryIndex == _selectedRow),
         alignment: Alignment.topLeft,
         // an expanded group's label and the leg beside it form one area
-        rightBorderFrom: area.isLabel && area.entrySpan > 1
-            ? theme.rowHeight
-            : 0,
+        rightBorderFrom: _legAt(area) == 0 ? theme.rowHeight : 0,
+        rightBorderUntil: _legAt(area) == area.entrySpan - 1
+            ? (area.entrySpan - 1) * theme.rowHeight
+            : double.infinity,
         child: area.isLabel
             ? _entryLabel(context, owner, isRow: true)
             : const SizedBox(),
       ),
     );
+  }
+
+  /// Position of the group's own row/column within a merged label area
+  /// (`0` first, `entrySpan - 1` last), or `-1` when the area is not a
+  /// multi-entry label or the group has no row of its own.
+  static int _legAt(HeaderArea area) =>
+      area.isLabel && area.entrySpan > 1 && area.entryIndex >= 0
+      ? area.entryIndex - area.entryStart
+      : -1;
+
+  /// Total width of the first [count] data columns of [area]'s span.
+  double _spanWidth(HeaderArea area, int count) {
+    var w = 0.0;
+    for (var k = 0; k < count; k++) {
+      w += _widths![headerColumns + area.entryStart + k];
+    }
+    return w;
   }
 
   /// Header background: summary or header colour, tinted with the selection
@@ -787,14 +808,18 @@ class _CubeGridState extends State<_CubeGrid> {
     Alignment alignment = Alignment.centerLeft,
     VoidCallback? onTap,
     double rightBorderFrom = 0,
+    double rightBorderUntil = double.infinity,
     double bottomBorderFrom = 0,
+    double bottomBorderUntil = double.infinity,
     Color? outline,
   }) {
     final box = CustomPaint(
       foregroundPainter: CellBorder(
         color: theme.borderColor,
         rightFrom: rightBorderFrom,
+        rightUntil: rightBorderUntil,
         bottomFrom: bottomBorderFrom,
+        bottomUntil: bottomBorderUntil,
         outline: outline,
       ),
       child: Container(

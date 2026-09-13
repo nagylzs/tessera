@@ -165,6 +165,15 @@ final class TesseraStringsHu extends TesseraStrings {
   String get totalsHidden => 'Összesen elrejtése';
 
   @override
+  String get subtotalsAbove => 'Részösszeg a csoport felett';
+
+  @override
+  String get subtotalsBelow => 'Részösszeg a csoport alatt';
+
+  @override
+  String get subtotalsHidden => 'Részösszegek elrejtése';
+
+  @override
   String get expandAll => 'Összes kibontása';
 
   @override

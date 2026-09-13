@@ -105,6 +105,13 @@ void main() {
       controller.cube.layout.columns.entries.any((e) => e.isSummary),
       isFalse,
     );
+    // subtotals: the second group of the same menu
+    await tester.tap(find.text('Rows'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Subtotals below the group'));
+    await tester.pumpAndSettle();
+    expect(controller.cube.spec.rows.subtotalPosition, SubtotalPosition.bottom);
+    expect(controller.cube.spec.rows.summaryPosition, SummaryPosition.start);
     // dimensions and sorts untouched
     expect(controller.cube.spec.rows.dimensions.length, 2);
     expect(

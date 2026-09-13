@@ -72,7 +72,8 @@ void main() {
       // entries: ∅, Asia, Europe, ∅, Germany, Hungary, Σ
       final g = AxisGeometry(layout.rows);
       expect(g.levels, 2);
-      const leaf0 = HeaderArea(
+      final leaf0 = HeaderArea(
+        path: DimensionPath([const DimensionValue(region, null)]),
         entryIndex: 0,
         levelStart: 0,
         levelSpan: 2,
@@ -82,7 +83,8 @@ void main() {
       );
       expect(g.areaAt(0, 0), leaf0);
       expect(g.areaAt(1, 0), leaf0);
-      const europeLabel = HeaderArea(
+      final europeLabel = HeaderArea(
+        path: europe,
         entryIndex: 2,
         levelStart: 0,
         levelSpan: 1,
@@ -95,7 +97,8 @@ void main() {
       expect(g.areaAt(0, 5), europeLabel);
       expect(
         g.areaAt(1, 2),
-        const HeaderArea(
+        HeaderArea(
+          path: europe,
           entryIndex: 2,
           levelStart: 1,
           levelSpan: 1,
@@ -106,7 +109,8 @@ void main() {
       );
       expect(
         g.areaAt(1, 4),
-        const HeaderArea(
+        HeaderArea(
+          path: europe.child(const DimensionValue(country, 'Germany')),
           entryIndex: 4,
           levelStart: 1,
           levelSpan: 1,
@@ -117,7 +121,8 @@ void main() {
       );
       expect(
         g.areaAt(0, 6),
-        const HeaderArea(
+        HeaderArea(
+          path: DimensionPath.root,
           entryIndex: 6,
           levelStart: 0,
           levelSpan: 2,
@@ -127,6 +132,78 @@ void main() {
         ),
       );
       expect(g.areaAt(1, 6), g.areaAt(0, 6));
+    });
+
+    test('subtotals below and hidden', () {
+      Cube cube(SubtotalPosition p) => Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: CubeAxis.of([region, country], subtotalPosition: p),
+        ),
+      ).toggleRow(europe);
+      String? label(HeaderEntry e) =>
+          e.isSummary ? 'Σ' : e.value as String? ?? '∅';
+      final bottom = cube(SubtotalPosition.bottom).layout.rows;
+      // entries: ∅, Asia, ∅, Germany, Hungary, Europe, Σ
+      expect(bottom.entries.map(label), [
+        '∅',
+        'Asia',
+        '∅',
+        'Germany',
+        'Hungary',
+        'Europe',
+        'Σ',
+      ]);
+      expect(bottom.descendantCount(5), 3);
+      var g = AxisGeometry(bottom);
+      expect(
+        g.areaAt(0, 3),
+        HeaderArea(
+          path: europe,
+          entryIndex: 5,
+          levelStart: 0,
+          levelSpan: 1,
+          entryStart: 2,
+          entrySpan: 4,
+          isLabel: true,
+        ),
+      );
+      expect(g.areaAt(0, 5), g.areaAt(0, 3));
+      expect(g.areaAt(1, 5).isLabel, isFalse); // the leg, on the last row
+      expect(g.areaAt(1, 5).entryStart, 5);
+      final hidden = cube(SubtotalPosition.hidden).layout.rows;
+      // entries: ∅, Asia, ∅, Germany, Hungary, Σ — Europe has no row
+      expect(hidden.entries.map(label), [
+        '∅',
+        'Asia',
+        '∅',
+        'Germany',
+        'Hungary',
+        'Σ',
+      ]);
+      expect(hidden.indexOf(europe), -1);
+      final group = hidden.entryFor(europe)!;
+      expect(group.isExpanded, isTrue);
+      expect(group.value, 'Europe');
+      expect(group.factCount, 4);
+      expect(
+        hidden.entryFor(DimensionPath([const DimensionValue(region, 'Mars')])),
+        isNull,
+      );
+      g = AxisGeometry(hidden);
+      expect(
+        g.areaAt(0, 4),
+        HeaderArea(
+          path: europe,
+          entryIndex: -1,
+          levelStart: 0,
+          levelSpan: 1,
+          entryStart: 2,
+          entrySpan: 3,
+          isLabel: true,
+        ),
+      );
+      expect(g.areaAt(1, 4).isLabel, isTrue); // Hungary's own cell
     });
 
     test('summary at the start is not an ancestor', () {
@@ -661,6 +738,36 @@ void main() {
       final aWidth = tester.getSize(aBox.first).width;
       expect(aBorder.bottomFrom, greaterThan(0));
       expect(aBorder.bottomFrom, lessThan(aWidth));
+      // subtotals below: the leg is the last row, so the border stops
+      // before it; hidden: no leg, full border
+      for (final (position, from, until) in [
+        (SubtotalPosition.bottom, 0.0, 3 * const CubeTheme().rowHeight),
+        (SubtotalPosition.hidden, 0.0, double.infinity),
+      ]) {
+        controller.cube = Cube(
+          facts: f,
+          spec: CubeSpec(
+            rows: CubeAxis.of([region, country], subtotalPosition: position),
+            columns: CubeAxis.of([category, qtyDim]),
+            aggregates: [sumQty],
+          ),
+        ).toggleRow(europe);
+        await tester.pumpAndSettle();
+        final b =
+            tester
+                    .widget<CustomPaint>(
+                      find
+                          .ancestor(
+                            of: find.text('Europe'),
+                            matching: find.byType(CustomPaint),
+                          )
+                          .first,
+                    )
+                    .foregroundPainter
+                as CellBorder;
+        expect(b.rightFrom, from, reason: '$position');
+        expect(b.rightUntil, until, reason: '$position');
+      }
     });
 
     test('currentCell resolves the selection against the layout', () {
@@ -929,6 +1036,56 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
       expect(c.selection!.row.isRoot, isFalse);
+    });
+
+    testWidgets('subtotals below the group and hidden', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      Cube cube(SubtotalPosition rows, SubtotalPosition columns) =>
+          Cube(
+                facts: f,
+                spec: CubeSpec(
+                  rows: CubeAxis.of([region, country], subtotalPosition: rows),
+                  columns: CubeAxis.of([
+                    category,
+                    const ColumnDimension('qty'),
+                  ], subtotalPosition: columns),
+                  aggregates: [sumQty],
+                ),
+              )
+              .toggleRow(europe)
+              .toggleColumn(
+                DimensionPath([const DimensionValue(category, 'A')]),
+              );
+      // below: Europe's row is the last of its group, the L is upside down
+      var c = CubeController(
+        cube(SubtotalPosition.bottom, SubtotalPosition.bottom),
+      );
+      await tester.pumpWidget(host(CubeView(controller: c, aggregate: sumQty)));
+      final rowsBelow = c.cube.layout.rows.entries.map((e) => e.label).toList();
+      expect(
+        rowsBelow.indexOf('Europe'),
+        greaterThan(rowsBelow.indexOf('Hungary')),
+      );
+      expect(find.text('Europe'), findsOneWidget); // label drawn once
+      expect(find.text('8'), findsOneWidget); // Europe × A: its subtotal
+      // hidden: no row for Europe, but its label still spans its children
+      // and carries the toggle
+      c = CubeController(
+        cube(SubtotalPosition.hidden, SubtotalPosition.hidden),
+      );
+      await tester.pumpWidget(host(CubeView(controller: c, aggregate: sumQty)));
+      expect(c.cube.layout.rows.indexOf(europe), -1);
+      expect(find.text('Europe'), findsOneWidget);
+      expect(find.text('Germany'), findsOneWidget);
+      expect(find.text('8'), findsNothing); // no Europe row, no A column
+      expect(find.text('A'), findsOneWidget); // hidden column group label
+      await tester.tap(toggleIconOf('Europe'));
+      await tester.pumpAndSettle();
+      expect(c.cube.rowExpansion.isExpanded(europe), isFalse);
+      expect(find.text('Germany'), findsNothing);
+      expect(c.cube.layout.rows.indexOf(europe), greaterThanOrEqualTo(0));
     });
 
     testWidgets('empty axes render a single summary cell', (tester) async {

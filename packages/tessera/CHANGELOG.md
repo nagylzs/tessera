@@ -10,7 +10,11 @@
   `columnsAddedByExpandingLevel` count the effect beforehand;
   `ExpansionState.collapseLevel`. Strings `sortAscending`,
   `sortDescending`, `expandAll`, `collapseAll`, `inheritSort`,
-  `totalsAtEnd`, `totalsAtStart`, `totalsHidden`.
+  `totalsAtEnd`, `totalsAtStart`, `totalsHidden`, `subtotalsAbove`,
+  `subtotalsBelow`, `subtotalsHidden`.
+* `CubeAxis.subtotalPosition` (`SubtotalPosition.top` / `bottom` /
+  `hidden`): where an expanded group's own row goes; `AxisLayout.entryFor`
+  resolves groups without a row; `HeaderArea.path`.
 * `FactTable.withLabels` relabels columns without a re-import (data is
   shared).
 * `AxisDimension.sort` is nullable: `null` inherits the ordering of the

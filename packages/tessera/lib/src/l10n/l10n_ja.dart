@@ -157,6 +157,15 @@ final class TesseraStringsJa extends TesseraStrings {
   String get totalsHidden => '合計を非表示';
 
   @override
+  String get subtotalsAbove => '小計をグループの上に';
+
+  @override
+  String get subtotalsBelow => '小計をグループの下に';
+
+  @override
+  String get subtotalsHidden => '小計を非表示';
+
+  @override
   String get expandAll => 'すべて展開';
 
   @override

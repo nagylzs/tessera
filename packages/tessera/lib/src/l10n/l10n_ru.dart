@@ -165,6 +165,15 @@ final class TesseraStringsRu extends TesseraStrings {
   String get totalsHidden => 'Скрыть итоги';
 
   @override
+  String get subtotalsAbove => 'Промежуточные итоги над группой';
+
+  @override
+  String get subtotalsBelow => 'Промежуточные итоги под группой';
+
+  @override
+  String get subtotalsHidden => 'Скрыть промежуточные итоги';
+
+  @override
   String get expandAll => 'Развернуть всё';
 
   @override

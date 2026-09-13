@@ -105,6 +105,12 @@ abstract class TesseraStrings {
   String get totalsAtEnd;
   String get totalsAtStart;
   String get totalsHidden;
+
+  /// Where an expanded group's own row/column goes
+  /// (`CubeAxis.subtotalPosition`).
+  String get subtotalsAbove;
+  String get subtotalsBelow;
+  String get subtotalsHidden;
   String get expandAll;
   String get collapseAll;
   String largeExpansion(String label, int added, {required bool isRow});

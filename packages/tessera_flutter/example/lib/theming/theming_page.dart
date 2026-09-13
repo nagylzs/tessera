@@ -161,25 +161,59 @@ class _ThemingPageState extends State<ThemingPage> {
           ],
           child: Text(side == AxisSide.rows ? 'Row totals' : 'Column totals'),
         ),
+      for (final side in AxisSide.values)
+        SubmenuButton(
+          menuChildren: [
+            for (final (label, position) in [
+              ('Above the group', SubtotalPosition.top),
+              ('Below the group', SubtotalPosition.bottom),
+              ('Hidden', SubtotalPosition.hidden),
+            ])
+              MenuItemButton(
+                leadingIcon: Icon(
+                  controller != null &&
+                          _axisOf(controller, side).subtotalPosition == position
+                      ? Icons.check
+                      : null,
+                ),
+                onPressed: controller == null
+                    ? null
+                    : () => _setAxis(
+                        controller,
+                        side,
+                        _axisOf(
+                          controller,
+                          side,
+                        ).copyWith(subtotalPosition: position),
+                      ),
+                child: Text(label),
+              ),
+          ],
+          child: Text(
+            side == AxisSide.rows ? 'Row subtotals' : 'Column subtotals',
+          ),
+        ),
     ],
   );
 
+  static CubeAxis _axisOf(CubeController c, AxisSide side) =>
+      side == AxisSide.rows ? c.cube.spec.rows : c.cube.spec.columns;
+
+  static void _setAxis(CubeController c, AxisSide side, CubeAxis axis) {
+    final spec = c.cube.spec;
+    c.updateSpec(
+      side == AxisSide.rows
+          ? spec.copyWith(rows: axis)
+          : spec.copyWith(columns: axis),
+    );
+  }
+
   static SummaryPosition _positionOf(CubeController c, AxisSide side) =>
-      (side == AxisSide.rows ? c.cube.spec.rows : c.cube.spec.columns)
-          .summaryPosition;
+      _axisOf(c, side).summaryPosition;
 
   static void _setPosition(
     CubeController c,
     AxisSide side,
     SummaryPosition position,
-  ) {
-    final spec = c.cube.spec;
-    c.updateSpec(
-      side == AxisSide.rows
-          ? spec.copyWith(rows: spec.rows.copyWith(summaryPosition: position))
-          : spec.copyWith(
-              columns: spec.columns.copyWith(summaryPosition: position),
-            ),
-    );
-  }
+  ) => _setAxis(c, side, _axisOf(c, side).copyWith(summaryPosition: position));
 }
