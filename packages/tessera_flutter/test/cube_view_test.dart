@@ -994,6 +994,41 @@ void main() {
       );
     });
 
+    testWidgets('measuring merges the ambient DefaultTextStyle', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      // theme styles without a size: Text renders them at the ambient 30 px,
+      // so measuring at TextPainter's default 14 px would truncate
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DefaultTextStyle(
+              style: const TextStyle(fontSize: 30),
+              child: SizedBox(
+                width: 1500,
+                height: 700,
+                child: viewOf(
+                  big,
+                  sumAmount,
+                  const CubeTheme(
+                    cellTextStyle: TextStyle(fontWeight: FontWeight.bold),
+                    headerTextStyle: TextStyle(fontStyle: FontStyle.italic),
+                    maxColumnWidth: 2000,
+                    maxRowHeaderWidth: 2000,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(anyOverflow(tester), isFalse);
+      expect(cellWidth(tester, '1,234,567,890,123'), greaterThan(400));
+    });
+
     testWidgets('widths are clamped to the theme bounds', (tester) async {
       await tester.pumpWidget(
         host(

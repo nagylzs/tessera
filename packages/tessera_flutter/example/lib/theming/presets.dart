@@ -27,9 +27,7 @@ final themePresets = <ThemePreset>[
   ),
   ThemePreset(
     name: 'Spreadsheet',
-    description:
-        'White cells at every level, grey grid, fixed column widths, '
-        'monospace figures.',
+    description: 'White cells at every level, grey grid, monospace figures.',
     theme: CubeTheme(
       levelColor: (depth, maxDepth) => Colors.white,
       headerColor: Colors.grey.shade200,
@@ -43,10 +41,6 @@ final themePresets = <ThemePreset>[
         color: Colors.black87,
       ),
       headerTextStyle: const TextStyle(fontSize: 12, color: Colors.black),
-      minColumnWidth: 112,
-      maxColumnWidth: 112,
-      minRowHeaderWidth: 140,
-      maxRowHeaderWidth: 140,
       cellPadding: const EdgeInsets.symmetric(horizontal: 4),
     ),
   ),

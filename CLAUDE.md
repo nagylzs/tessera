@@ -188,7 +188,9 @@ Paths below are relative to the package (`lib/src/...` means
   summary rows, entry labels (column labels only when they stay in one
   column, i.e. not expanded), titles, the aggregate label — keeps the 4
   longest strings per column (length as proxy), lays those out with
-  `TextPainter`, adds padding + border + 2 px slack + 18 px for icons, and
+  `TextPainter` using the theme styles merged onto the ambient
+  `DefaultTextStyle` (as `Text` renders them — a bare style without a
+  family measures in the engine's default font and truncates), adds padding + border + 2 px slack + 18 px for icons, and
   clamps to `CubeTheme.min/maxColumnWidth` (72/320) and
   `min/maxRowHeaderWidth` (100/400); equal min and max = fixed widths.
   Cached per (layout, aggregate, strings, theme text bits, text scaler…),

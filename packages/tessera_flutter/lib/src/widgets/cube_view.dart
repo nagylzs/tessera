@@ -262,6 +262,12 @@ class _CubeGridState extends State<_CubeGrid> {
   List<double> _columnWidths(BuildContext context) {
     final textScaler = MediaQuery.textScalerOf(context);
     final textDirection = Directionality.of(context);
+    // Measure with the styles as Text renders them: merged onto the
+    // ambient DefaultTextStyle, which supplies the font family (and size)
+    // a theme style may leave unset.
+    final defaultStyle = DefaultTextStyle.of(context).style;
+    final cellStyle = defaultStyle.merge(theme.cellTextStyle);
+    final headerStyle = defaultStyle.merge(theme.headerTextStyle);
     final memoryKey = (
       shown,
       strings,
@@ -270,8 +276,8 @@ class _CubeGridState extends State<_CubeGrid> {
       view.emptyGroupLabel,
       view.rowSummaryLabel,
       view.columnSummaryLabel,
-      theme.cellTextStyle,
-      theme.headerTextStyle,
+      cellStyle,
+      headerStyle,
       theme.cellPadding,
       theme.minColumnWidth,
       theme.maxColumnWidth,
@@ -286,8 +292,8 @@ class _CubeGridState extends State<_CubeGrid> {
     _widthsKey = key;
     final widths =
         ColumnWidthMeasurer(
-          cellStyle: theme.cellTextStyle,
-          headerStyle: theme.headerTextStyle,
+          cellStyle: cellStyle,
+          headerStyle: headerStyle,
           horizontalPadding: theme.cellPadding.horizontal + 1 + _slack,
           textDirection: textDirection,
           textScaler: textScaler,

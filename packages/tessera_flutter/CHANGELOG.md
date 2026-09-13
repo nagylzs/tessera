@@ -11,6 +11,9 @@
   lets the others inherit; a deeper level's title cycles through the
   opposite direction, the same direction and inheriting, and its menu has
   "same order as the level above".
+* Column widths are measured with the theme's text styles merged onto the
+  ambient `DefaultTextStyle`, as `Text` renders them, so styles without a
+  font family or size no longer produce truncated columns.
 * `CubeTheme.headerIconColor`: header icons default to the header text
   colour instead of the ambient icon colour.
 * Current cell: `CubeController.selection` / `currentCell`, `CellAddress`;
