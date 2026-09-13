@@ -153,6 +153,9 @@ final class TesseraStringsNl extends TesseraStrings {
   String get sortDescending => 'Aflopend sorteren';
 
   @override
+  String get inheritSort => 'Zelfde volgorde als het niveau erboven';
+
+  @override
   String get expandAll => 'Alles uitklappen';
 
   @override

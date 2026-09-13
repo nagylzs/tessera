@@ -128,12 +128,12 @@ class AggregateEditor extends StatelessWidget {
     CubeAxis fix(CubeAxis axis) => axis.copyWith(
       dimensions: [
         for (final d in axis.dimensions)
-          d.sort.aggregate == aggregate
+          d.sort?.aggregate == aggregate
               ? AxisDimension(
                   d.dimension,
                   sort: AxisSort(
-                    direction: d.sort.direction,
-                    nulls: d.sort.nulls,
+                    direction: d.sort!.direction,
+                    nulls: d.sort!.nulls,
                   ),
                 )
               : d,

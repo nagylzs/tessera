@@ -140,10 +140,14 @@ Paths below are relative to the package (`lib/src/...` means
   column depth, from 0) + `CubeTheme.gradient(colors)`,
   separate row/column summary labels, `expansionLimit` +
   `confirmExpansion` (default: AlertDialog), `onCellTap`. Sort UI rule:
-  tapping a dimension title toggles value sort on that level; tapping the
-  aggregate name under a column sets aggregate sort with that `keyPath`
-  on ALL row levels (tap again flips direction). Sort-key column is
-  tinted with `sortKeyColor`. Every dimension title also carries a
+  `AxisDimension.sort` is nullable — `null` inherits the level above
+  (`CubeAxis.sortAt(level)` resolves; the engine and the widget only use
+  that). Tapping the first level's title toggles asc/desc; a deeper
+  level cycles opposite-of-inherited → same explicit → inherit (`null`),
+  inherited icons are drawn faded. Tapping the aggregate name under a
+  column sets aggregate sort with that `keyPath` on the FIRST row level
+  and resets the deeper ones to inherit (tap again flips direction).
+  Sort-key column is tinted with `sortKeyColor`. Every dimension title also carries a
   `MenuAnchor` (`▾` button always shown, long press, secondary click):
   sort ascending/descending (checked), expand all / collapse all for that
   level (`Cube.expandRowLevel` keeps deeper expansions, unlike

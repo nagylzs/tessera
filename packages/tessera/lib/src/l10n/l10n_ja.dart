@@ -145,6 +145,9 @@ final class TesseraStringsJa extends TesseraStrings {
   String get sortDescending => '降順で並べ替え';
 
   @override
+  String get inheritSort => '上の階層と同じ順序';
+
+  @override
   String get expandAll => 'すべて展開';
 
   @override

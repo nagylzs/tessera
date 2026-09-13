@@ -56,10 +56,17 @@ final class AxisSort {
 
 /// One level of a [CubeAxis].
 final class AxisDimension {
-  const AxisDimension(this.dimension, {this.sort = const AxisSort()});
+  const AxisDimension(this.dimension, {this.sort});
 
   final Dimension dimension;
-  final AxisSort sort;
+
+  /// This level's own ordering, or `null` to inherit the level above (the
+  /// first level then uses the default [AxisSort]: by value, ascending).
+  /// Inheriting an aggregate sort orders the groups of this level by the
+  /// same aggregate and key; inheriting a value sort applies the parent's
+  /// direction and null position to this level's own values. Resolve with
+  /// [CubeAxis.sortAt].
+  final AxisSort? sort;
 }
 
 /// The hierarchy of one side of the cube: an ordered list of dimensions.
@@ -86,6 +93,16 @@ final class CubeAxis {
 
   /// Number of levels below the summary.
   int get depth => dimensions.length;
+
+  /// The ordering in effect on [level]: its own [AxisDimension.sort], else
+  /// the nearest level above with one, else the default [AxisSort].
+  AxisSort sortAt(int level) {
+    for (var i = level; i >= 0; i--) {
+      final sort = dimensions[i].sort;
+      if (sort != null) return sort;
+    }
+    return const AxisSort();
+  }
 
   bool get isEmpty => dimensions.isEmpty;
 

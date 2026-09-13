@@ -122,7 +122,7 @@ void main() {
     expect(ids(controller.cube.spec.rows), ['country']);
     expect(ids(controller.cube.spec.columns), ['category', 'region']);
     expect(
-      controller.cube.spec.columns.dimensions.last.sort.direction,
+      controller.cube.spec.columns.dimensions.last.sort!.direction,
       SortDirection.descending,
     );
   });

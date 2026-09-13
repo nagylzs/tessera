@@ -89,7 +89,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(ids(), ['avg(price)']);
     expect(switched, avgPrice);
-    final sort = controller.cube.spec.rows.dimensions.single.sort;
+    final sort = controller.cube.spec.rows.dimensions.single.sort!;
     expect(sort.by, SortBy.value);
     expect(sort.direction, SortDirection.descending);
     // the cube still lays out

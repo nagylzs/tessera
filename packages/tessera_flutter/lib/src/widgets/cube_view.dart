@@ -50,10 +50,13 @@ typedef LevelExpansionConfirmation = Future<bool> Function(
 ///
 /// Interaction: `+`/`−` on a group toggles it via the [controller]; tapping
 /// a dimension name sorts that level by value (tap again to flip); tapping
-/// the aggregate name under a column sorts every row level by that column's
-/// values (tap again to flip). Each dimension name also has a menu — the
-/// `▾` button, a long press or a secondary click — with the sort direction
-/// and "expand all" / "collapse all" for that level. Cells are built lazily,
+/// the aggregate name under a column sorts the rows by that column's values
+/// (tap again to flip). A level without a sort of its own follows the level
+/// above ([AxisDimension.sort]); tapping a deeper level's name cycles
+/// through the opposite direction, the same direction, and inheriting
+/// again. Each dimension name also has a menu — the `▾` button, a long
+/// press or a secondary click — with the sort direction, "same order as the
+/// level above", and "expand all" / "collapse all" for that level. Cells are built lazily,
 /// so large cubes stay cheap to scroll.
 ///
 /// Column widths follow the content: the widest text of each column (its
@@ -354,12 +357,16 @@ class _CubeGridState extends State<_CubeGrid> {
   }) {
     final axis = isRow ? spec.rows : spec.columns;
     final dimension = axis.dimensions[level];
-    final sort = dimension.sort;
+    final sort = axis.sortAt(level);
     return MenuAnchor(
       menuChildren: _titleMenu(context, isRow: isRow, level: level),
       builder: (context, menu, _) => InkWell(
         onTap: view.sortable
-            ? () => _sortByValue(isRow: isRow, level: level)
+            ? () => _setSort(
+                isRow: isRow,
+                level: level,
+                sort: _nextTapSort(axis, level),
+              )
             : null,
         onLongPress: menu.open,
         onSecondaryTapUp: (details) =>
@@ -378,7 +385,11 @@ class _CubeGridState extends State<_CubeGrid> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (sort.by == SortBy.value) _sortIcon(sort.direction),
+              if (sort.by == SortBy.value)
+                _sortIcon(
+                  sort.direction,
+                  faded: level > 0 && dimension.sort == null,
+                ),
               InkWell(
                 onTap: () => menu.isOpen ? menu.close() : menu.open(),
                 child: const Icon(Icons.arrow_drop_down, size: 16),
@@ -390,15 +401,16 @@ class _CubeGridState extends State<_CubeGrid> {
     );
   }
 
-  /// Sort direction (when [CubeView.sortable]) and expand/collapse all for
-  /// one level of an axis.
+  /// Sort direction (when [CubeView.sortable]; deeper levels can also
+  /// inherit the level above) and expand/collapse all for one level of an
+  /// axis.
   List<Widget> _titleMenu(
     BuildContext context, {
     required bool isRow,
     required int level,
   }) {
     final axis = isRow ? spec.rows : spec.columns;
-    final sort = axis.dimensions[level].sort;
+    final own = axis.dimensions[level].sort;
     final entries = isRow ? layout.rows.entries : layout.columns.entries;
     final anyExpanded = entries.any(
       (e) => e.depth == level + 1 && e.isExpanded,
@@ -409,15 +421,29 @@ class _CubeGridState extends State<_CubeGrid> {
         for (final direction in SortDirection.values)
           MenuItemButton(
             leadingIcon: check(
-              sort.by == SortBy.value && sort.direction == direction,
+              own != null &&
+                  own.by == SortBy.value &&
+                  own.direction == direction,
             ),
-            onPressed: () =>
-                _sortByValue(isRow: isRow, level: level, direction: direction),
+            onPressed: () => _setSort(
+              isRow: isRow,
+              level: level,
+              sort: AxisSort(
+                direction: direction,
+                nulls: axis.sortAt(level).nulls,
+              ),
+            ),
             child: Text(
               direction == SortDirection.ascending
                   ? strings.sortAscending
                   : strings.sortDescending,
             ),
+          ),
+        if (level > 0)
+          MenuItemButton(
+            leadingIcon: check(own == null),
+            onPressed: () => _setSort(isRow: isRow, level: level, sort: null),
+            child: Text(strings.inheritSort),
           ),
         const Divider(height: 1),
       ],
@@ -440,12 +466,16 @@ class _CubeGridState extends State<_CubeGrid> {
     ];
   }
 
-  Widget _sortIcon(SortDirection direction) => Icon(
-    direction == SortDirection.ascending
-        ? Icons.arrow_upward
-        : Icons.arrow_downward,
-    size: 12,
-  );
+  /// [faded] marks a direction inherited from the level above.
+  Widget _sortIcon(SortDirection direction, {bool faded = false}) {
+    final icon = Icon(
+      direction == SortDirection.ascending
+          ? Icons.arrow_upward
+          : Icons.arrow_downward,
+      size: 12,
+    );
+    return faded ? Opacity(opacity: 0.4, child: icon) : icon;
+  }
 
   // --------------------------------------------------------- column header
 
@@ -763,50 +793,82 @@ class _CubeGridState extends State<_CubeGrid> {
     ),
   );
 
-  bool _isSortKeyColumn(HeaderEntry column) => spec.rows.dimensions.any((d) {
-    final s = d.sort;
-    if (s.by != SortBy.aggregate || s.aggregate != shown) return false;
-    final key = s.keyPath;
-    return key == null ? column.isSummary : key == column.path;
-  });
+  bool _isSortKeyColumn(HeaderEntry column) {
+    for (var i = 0; i < spec.rows.depth; i++) {
+      final s = spec.rows.sortAt(i);
+      if (s.by != SortBy.aggregate || s.aggregate != shown) continue;
+      final key = s.keyPath;
+      if (key == null ? column.isSummary : key == column.path) return true;
+    }
+    return false;
+  }
 
-  SortDirection _rowSortDirection() => spec.rows.dimensions
-      .map((d) => d.sort)
-      .firstWhere((s) => s.by == SortBy.aggregate, orElse: AxisSort.new)
-      .direction;
+  SortDirection _rowSortDirection() {
+    for (var i = 0; i < spec.rows.depth; i++) {
+      final s = spec.rows.sortAt(i);
+      if (s.by == SortBy.aggregate) return s.direction;
+    }
+    return SortDirection.ascending;
+  }
 
-  /// Sorts [level] by value in [direction]; without one, ascending unless
-  /// it already is (the tap toggle).
-  void _sortByValue({
+  /// The sort a tap on [level]'s title gives. The first level toggles
+  /// between ascending and descending. A deeper level cycles through three
+  /// states: the direction opposite to the one it inherits (so the first
+  /// tap is visible), the same direction set explicitly, then inheriting
+  /// the level above again (`null`).
+  AxisSort? _nextTapSort(CubeAxis axis, int level) {
+    final effective = axis.sortAt(level);
+    AxisSort value(SortDirection d) =>
+        AxisSort(direction: d, nulls: effective.nulls);
+    if (level == 0) {
+      return value(
+        effective.by == SortBy.value &&
+                effective.direction == SortDirection.ascending
+            ? SortDirection.descending
+            : SortDirection.ascending,
+      );
+    }
+    final own = axis.dimensions[level].sort;
+    final inherited = axis.sortAt(level - 1);
+    final first =
+        inherited.by == SortBy.value &&
+            inherited.direction == SortDirection.descending
+        ? SortDirection.ascending
+        : SortDirection.descending;
+    if (own == null || own.by != SortBy.value) return value(first);
+    if (own.direction == first) {
+      return value(
+        first == SortDirection.ascending
+            ? SortDirection.descending
+            : SortDirection.ascending,
+      );
+    }
+    return null;
+  }
+
+  /// Gives [level] its own [sort] (`null` = inherit the level above).
+  void _setSort({
     required bool isRow,
     required int level,
-    SortDirection? direction,
+    required AxisSort? sort,
   }) {
     final axis = isRow ? spec.rows : spec.columns;
-    final current = axis.dimensions[level].sort;
-    direction ??=
-        current.by == SortBy.value &&
-            current.direction == SortDirection.ascending
-        ? SortDirection.descending
-        : SortDirection.ascending;
     final dims = List.of(axis.dimensions);
-    dims[level] = AxisDimension(
-      dims[level].dimension,
-      sort: AxisSort(direction: direction, nulls: current.nulls),
-    );
+    dims[level] = AxisDimension(dims[level].dimension, sort: sort);
     _updateAxis(
       isRow: isRow,
       axis: axis.copyWith(dimensions: dims),
     );
   }
 
+  /// Sorts the first row level by [column]'s aggregate (tap again to flip)
+  /// and lets the deeper levels inherit it.
   void _sortRowsByColumn(HeaderEntry column) {
     final aggregate = shown;
-    if (aggregate == null) return;
+    if (aggregate == null || spec.rows.depth == 0) return;
     final keyPath = column.isSummary ? null : column.path;
-    final first = spec.rows.dimensions.firstOrNull?.sort;
+    final first = spec.rows.sortAt(0);
     final same =
-        first != null &&
         first.by == SortBy.aggregate &&
         first.aggregate == aggregate &&
         first.keyPath == keyPath;
@@ -814,16 +876,18 @@ class _CubeGridState extends State<_CubeGrid> {
         ? SortDirection.ascending
         : SortDirection.descending;
     final dims = [
-      for (final d in spec.rows.dimensions)
+      for (final (i, d) in spec.rows.dimensions.indexed)
         AxisDimension(
           d.dimension,
-          sort: AxisSort(
-            by: SortBy.aggregate,
-            aggregate: aggregate,
-            keyPath: keyPath,
-            direction: direction,
-            nulls: d.sort.nulls,
-          ),
+          sort: i == 0
+              ? AxisSort(
+                  by: SortBy.aggregate,
+                  aggregate: aggregate,
+                  keyPath: keyPath,
+                  direction: direction,
+                  nulls: first.nulls,
+                )
+              : null,
         ),
     ];
     _updateAxis(isRow: true, axis: spec.rows.copyWith(dimensions: dims));

@@ -148,7 +148,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
       dimensions: [
         for (final d in axis.dimensions)
           if (dimensionOk(d.dimension) &&
-              (d.sort.aggregate == null || aggregateOk(d.sort.aggregate!)))
+              (d.sort?.aggregate == null || aggregateOk(d.sort!.aggregate!)))
             d
           else if (dimensionOk(d.dimension))
             AxisDimension(d.dimension),

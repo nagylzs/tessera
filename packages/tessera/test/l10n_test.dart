@@ -81,6 +81,7 @@ void main() {
         l.largeExpansionTitle,
         l.sortAscending,
         l.sortDescending,
+        l.inheritSort,
         l.expandAll,
         l.collapseAll,
         l.countLabel,

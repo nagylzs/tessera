@@ -153,6 +153,9 @@ final class TesseraStringsIt extends TesseraStrings {
   String get sortDescending => 'Ordina decrescente';
 
   @override
+  String get inheritSort => 'Stesso ordine del livello superiore';
+
+  @override
   String get expandAll => 'Espandi tutto';
 
   @override

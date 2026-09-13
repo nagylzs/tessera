@@ -9,4 +9,7 @@
   deeper expansions), `rowsAddedByExpandingLevel` /
   `columnsAddedByExpandingLevel` count the effect beforehand;
   `ExpansionState.collapseLevel`. Strings `sortAscending`,
-  `sortDescending`, `expandAll`, `collapseAll`.
+  `sortDescending`, `expandAll`, `collapseAll`, `inheritSort`.
+* `AxisDimension.sort` is nullable: `null` inherits the ordering of the
+  level above (`CubeAxis.sortAt` resolves it), so an aggregate sort on the
+  first level orders every level.

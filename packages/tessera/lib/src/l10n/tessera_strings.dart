@@ -95,6 +95,10 @@ abstract class TesseraStrings {
   /// Items of the dimension-title menu of the grid.
   String get sortAscending;
   String get sortDescending;
+
+  /// Menu item that clears a level's own sort so it inherits the level
+  /// above (see `AxisDimension.sort`).
+  String get inheritSort;
   String get expandAll;
   String get collapseAll;
   String largeExpansion(String label, int added, {required bool isRow});

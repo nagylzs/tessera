@@ -285,6 +285,59 @@ void main() {
       expect(labels(l.columns), ['∅', 'B', 'A', 'Σ']); // 6, 7, 15
     });
 
+    test('a level without its own sort inherits the level above', () {
+      final byQtyDesc = AxisSort(
+        by: SortBy.aggregate,
+        aggregate: sumQty,
+        direction: SortDirection.descending,
+      );
+      Cube cube(AxisSort? countrySort) => Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: CubeAxis(
+            dimensions: [
+              AxisDimension(region, sort: byQtyDesc),
+              AxisDimension(country, sort: countrySort),
+            ],
+          ),
+          aggregates: [sumQty],
+        ),
+      ).expandRowsToDepth(2);
+      final axis = cube(null).spec.rows;
+      expect(axis.sortAt(0), same(byQtyDesc));
+      expect(axis.sortAt(1), same(byQtyDesc));
+      expect(
+        CubeAxis.of([region, country]).sortAt(1).direction,
+        SortDirection.ascending,
+      );
+      // Europe: ∅ 4, Germany 3, Hungary 3 → by qty desc, ties by value asc
+      expect(labels(cube(null).layout.rows), [
+        'Asia',
+        'Japan',
+        'Europe',
+        '∅',
+        'Germany',
+        'Hungary',
+        '∅',
+        'Iceland',
+        '∅',
+        'Σ',
+      ]);
+      // an explicit value sort on the second level overrides it
+      expect(labels(cube(const AxisSort()).layout.rows), [
+        'Asia',
+        'Japan',
+        'Europe',
+        '∅',
+        'Germany',
+        'Hungary',
+        '∅',
+        '∅',
+        'Iceland',
+        'Σ',
+      ]);
+    });
+
     test('sorting by an aggregate the cube lacks is an error', () {
       final cube = Cube(
         facts: f,

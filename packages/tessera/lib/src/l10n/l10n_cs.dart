@@ -153,6 +153,9 @@ final class TesseraStringsCs extends TesseraStrings {
   String get sortDescending => 'Seřadit sestupně';
 
   @override
+  String get inheritSort => 'Stejné pořadí jako úroveň výše';
+
+  @override
   String get expandAll => 'Rozbalit vše';
 
   @override

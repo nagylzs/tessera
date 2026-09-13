@@ -153,6 +153,9 @@ final class TesseraStringsPl extends TesseraStrings {
   String get sortDescending => 'Sortuj malejąco';
 
   @override
+  String get inheritSort => 'Kolejność jak na poziomie wyżej';
+
+  @override
   String get expandAll => 'Rozwiń wszystko';
 
   @override

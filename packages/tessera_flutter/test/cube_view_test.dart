@@ -270,10 +270,18 @@ void main() {
       expect(find.byIcon(Icons.arrow_upward), findsNWidgets(3));
       await tester.tap(find.text('region'));
       await tester.pumpAndSettle();
-      final sort = controller.cube.spec.rows.dimensions[0].sort;
+      final sort = controller.cube.spec.rows.dimensions[0].sort!;
       expect(sort.by, SortBy.value);
       expect(sort.direction, SortDirection.descending);
-      expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
+      // country inherits the direction and shows it faded
+      expect(find.byIcon(Icons.arrow_downward), findsNWidgets(2));
+      expect(
+        find.ancestor(
+          of: find.byIcon(Icons.arrow_downward),
+          matching: find.byType(Opacity),
+        ),
+        findsOneWidget,
+      );
       expect(controller.cube.layout.rows.entries.map((e) => e.label).take(3), [
         '',
         'Europe',
@@ -282,7 +290,7 @@ void main() {
       await tester.tap(find.text('region'));
       await tester.pumpAndSettle();
       expect(
-        controller.cube.spec.rows.dimensions[0].sort.direction,
+        controller.cube.spec.rows.dimensions[0].sort!.direction,
         SortDirection.ascending,
       );
     });
@@ -301,11 +309,14 @@ void main() {
       await tester.tap(find.text('sum of qty').at(1));
       await tester.pumpAndSettle();
       final byA = DimensionPath([const DimensionValue(category, 'A')]);
-      for (final d in controller.cube.spec.rows.dimensions) {
-        expect(d.sort.by, SortBy.aggregate);
-        expect(d.sort.aggregate, sumQty);
-        expect(d.sort.keyPath, byA);
-        expect(d.sort.direction, SortDirection.descending);
+      // the first level gets the sort, the deeper ones inherit it
+      expect(controller.cube.spec.rows.dimensions[1].sort, isNull);
+      for (var i = 0; i < 2; i++) {
+        final s = controller.cube.spec.rows.sortAt(i);
+        expect(s.by, SortBy.aggregate);
+        expect(s.aggregate, sumQty);
+        expect(s.keyPath, byA);
+        expect(s.direction, SortDirection.descending);
       }
       // A column: Europe 8, ∅ 7, Asia none
       expect(
@@ -319,13 +330,13 @@ void main() {
       await tester.tap(find.text('sum of qty').at(1));
       await tester.pumpAndSettle();
       expect(
-        controller.cube.spec.rows.dimensions[0].sort.direction,
+        controller.cube.spec.rows.dimensions[0].sort!.direction,
         SortDirection.ascending,
       );
       // sorting by the summary column uses keyPath == null
       await tester.tap(find.text('sum of qty').at(3));
       await tester.pumpAndSettle();
-      expect(controller.cube.spec.rows.dimensions[0].sort.keyPath, isNull);
+      expect(controller.cube.spec.rows.dimensions[0].sort!.keyPath, isNull);
     });
 
     testWidgets('sortable: false ignores taps', (tester) async {
@@ -336,10 +347,60 @@ void main() {
       );
       await tester.tap(find.text('region'));
       await tester.pumpAndSettle();
-      expect(
-        controller.cube.spec.rows.dimensions[0].sort.direction,
-        SortDirection.ascending,
+      expect(controller.cube.spec.rows.dimensions[0].sort, isNull);
+    });
+
+    testWidgets('a deeper level cycles through desc, asc and inheriting', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      controller.cube = controller.cube.toggleRow(europe);
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregate: sumQty)),
       );
+      AxisSort? own() => controller.cube.spec.rows.dimensions[1].sort;
+      List<String> europeChildren() => [
+        for (final e in controller.cube.layout.rows.entries)
+          if (e.depth == 2) e.value as String? ?? '∅',
+      ];
+      expect(own(), isNull);
+      expect(europeChildren(), ['∅', 'Germany', 'Hungary']);
+      // inherits ascending → the first tap is descending
+      await tester.tap(find.text('country'));
+      await tester.pumpAndSettle();
+      expect(own()!.direction, SortDirection.descending);
+      expect(europeChildren(), ['∅', 'Hungary', 'Germany']);
+      await tester.tap(find.text('country'));
+      await tester.pumpAndSettle();
+      expect(own()!.direction, SortDirection.ascending);
+      await tester.tap(find.text('country'));
+      await tester.pumpAndSettle();
+      expect(own(), isNull);
+      // the user's scenario: aggregate sort on all levels, then a value
+      // sort on the countries, then back to the aggregate order
+      await tester.tap(find.text('sum of qty').last); // summary column
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('sum of qty').last); // ascending
+      await tester.pumpAndSettle();
+      expect(controller.cube.spec.rows.sortAt(1).by, SortBy.aggregate);
+      expect(europeChildren(), ['Germany', 'Hungary', '∅']); // 3, 3, 4
+      await tester.tap(find.text('country'));
+      await tester.pumpAndSettle();
+      expect(own()!.by, SortBy.value);
+      expect(europeChildren(), ['∅', 'Hungary', 'Germany']);
+      // the menu offers inheriting directly
+      await tester.longPress(find.text('country'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Same order as the level above'));
+      await tester.pumpAndSettle();
+      expect(own(), isNull);
+      expect(europeChildren(), ['Germany', 'Hungary', '∅']);
+      // the first level has no such item
+      await tester.longPress(find.text('region'));
+      await tester.pumpAndSettle();
+      expect(find.text('Same order as the level above'), findsNothing);
     });
 
     testWidgets('the title menu expands and collapses a whole level', (
@@ -384,7 +445,7 @@ void main() {
       expect(find.text('Sort ascending'), findsOneWidget);
       await tester.tap(find.text('Sort descending'));
       await tester.pumpAndSettle();
-      AxisSort sort() => controller.cube.spec.rows.dimensions[0].sort;
+      AxisSort sort() => controller.cube.spec.rows.dimensions[0].sort!;
       expect(sort().direction, SortDirection.descending);
       // choosing it again keeps it, unlike the tap toggle
       await tester.tap(menuButtonOf('region'));
@@ -398,7 +459,7 @@ void main() {
       await tester.tap(find.text('Sort descending'));
       await tester.pumpAndSettle();
       expect(
-        controller.cube.spec.columns.dimensions[0].sort.direction,
+        controller.cube.spec.columns.dimensions[0].sort!.direction,
         SortDirection.descending,
       );
     });

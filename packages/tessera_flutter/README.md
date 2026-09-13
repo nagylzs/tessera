@@ -49,9 +49,12 @@ Column(
 
 Expand and collapse groups with the `+`/`−` icons; tap a dimension name to
 sort that level by value, or the aggregate name under a column to sort the
-rows by that column. Every dimension name also has a menu (its `▾` button,
-a long press, or a secondary click) with the sort direction and "expand
-all" / "collapse all" for that level. `expansionLimit` with
+rows by that column. A level without a sort of its own follows the level
+above (`AxisDimension.sort == null`), so a deeper level's name cycles
+through the opposite direction, the same direction, and inheriting again.
+Every dimension name also has a menu (its `▾` button, a long press, or a
+secondary click) with the sort direction, "same order as the level above",
+and "expand all" / "collapse all" for that level. `expansionLimit` with
 `confirmExpansion` / `confirmLevelExpansion` ask before an expansion would
 add too many rows or columns.
 

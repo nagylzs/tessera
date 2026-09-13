@@ -256,8 +256,7 @@ final class AxisTree {
     for (final n in nodes) {
       final children = n.children;
       if (children == null || isLeaf(n)) continue;
-      final level = axis.dimensions[n.depth];
-      final sort = level.sort;
+      final sort = axis.sortAt(n.depth);
       final withFacts = [
         for (final c in children.values)
           if (c.factCount > 0) c,
@@ -295,15 +294,20 @@ final class AxisTree {
             (keyPath == null ? null : other.resolve(keyPath)) ?? other.root;
         Object? keyOf(AxisNode c) =>
             cellOf(c, keyNode)?.accumulators[index].result;
+        // Only the key comparison follows the direction; ties stay in
+        // ascending value order either way.
         int compare(AxisNode a, AxisNode b) {
           final ka = keyOf(a), kb = keyOf(b);
-          if (ka == null) return kb == null ? a.code - b.code : -1;
-          if (kb == null) return 1;
-          final r = Comparable.compare(ka as Comparable, kb as Comparable);
-          return r != 0 ? r : a.code - b.code;
+          final r = ka == null
+              ? (kb == null ? 0 : -1)
+              : kb == null
+              ? 1
+              : Comparable.compare(ka as Comparable, kb as Comparable);
+          if (r == 0) return a.code - b.code;
+          return desc ? -r : r;
         }
 
-        withFacts.sort(desc ? (a, b) => compare(b, a) : compare);
+        withFacts.sort(compare);
         n.ordered = withFacts;
       }
     }

@@ -145,6 +145,9 @@ final class TesseraStringsZh extends TesseraStrings {
   String get sortDescending => '降序排序';
 
   @override
+  String get inheritSort => '与上一级相同的顺序';
+
+  @override
   String get expandAll => '全部展开';
 
   @override
