@@ -13,3 +13,4 @@ workspace:
   - packages/tessera_xlsx
   - packages/tessera_ods
   - packages/tessera_html
+  - packages/tessera_svg

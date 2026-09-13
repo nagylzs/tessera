@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
 import 'package:tessera_html/tessera_html.dart';
+import 'package:tessera_svg/tessera_svg.dart';
 import 'package:tessera_ods/tessera_ods.dart';
 import 'package:tessera_xlsx/tessera_xlsx.dart';
 
@@ -275,6 +276,15 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             ).export(layout, title: base),
           ),
         );
+      case ExportFormat.svg:
+        bytes = Uint8List.fromList(
+          utf8.encode(
+            SvgCubeExporter(
+              strings: strings,
+              theme: widget.exportTheme,
+            ).export(layout, title: base),
+          ),
+        );
       case ExportFormat.csv:
         bytes = Uint8List.fromList(
           utf8.encode(
@@ -500,6 +510,7 @@ enum ExportFormat {
     'application/vnd.oasis.opendocument.spreadsheet',
   ),
   html('Web page', 'html', 'text/html'),
+  svg('SVG image', 'svg', 'image/svg+xml'),
   csv('CSV', 'csv', 'text/csv');
 
   const ExportFormat(this.label, this.extension, this.mimeType);

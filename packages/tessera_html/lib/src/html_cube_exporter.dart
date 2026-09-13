@@ -218,27 +218,8 @@ final class HtmlCubeExporter {
   };
 
   /// [v] with the theme's decimals and grouping and the locale's
-  /// separators (integers without decimals).
-  String formatNumber(num v) {
-    final f = theme.numberFormat;
-    final isInt = v is int || (v == v.truncateToDouble() && v.abs() < 1e15);
-    final text = isInt
-        ? v.toInt().abs().toString()
-        : v.abs().toStringAsFixed(f.decimals);
-    final dot = text.indexOf('.');
-    final intPart = dot < 0 ? text : text.substring(0, dot);
-    final b = StringBuffer(v < 0 ? '-' : '');
-    for (var i = 0; i < intPart.length; i++) {
-      if (f.grouping && i > 0 && (intPart.length - i) % 3 == 0) {
-        b.write(strings.groupSeparator);
-      }
-      b.write(intPart[i]);
-    }
-    if (dot >= 0) {
-      b.write('${strings.decimalSeparator}${text.substring(dot + 1)}');
-    }
-    return b.toString();
-  }
+  /// separators ([NumberFormat.format]).
+  String formatNumber(num v) => theme.numberFormat.format(v, strings);
 
   static String _font(ExportFont f) =>
       'font-family: ${_quoteFamily(f.family)}; font-size: ${_pt(f.size)}pt; '

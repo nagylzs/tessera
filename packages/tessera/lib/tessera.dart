@@ -22,7 +22,8 @@
 /// [CubeGrid] lays a [CubeLayout] out as a rectangular grid (the way the
 /// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
 /// as CSV, `tessera_xlsx` as a workbook. [CubeExportTheme] is the
-/// format-neutral look every exporter takes; [HueLevels] colours nesting
+/// format-neutral look every exporter takes, [GridMetrics] the pixel
+/// geometry for renderers that lay cells out themselves (SVG, PDF); [HueLevels] colours nesting
 /// levels by hue alone (computed in OKLCH, see [Oklch]).
 ///
 /// Every user-facing text and the locale-specific label and number
@@ -44,6 +45,7 @@ export 'src/cube/filter.dart';
 export 'src/export/csv_cube_exporter.dart';
 export 'src/export/cube_export_theme.dart';
 export 'src/export/cube_grid.dart';
+export 'src/export/grid_metrics.dart';
 export 'src/facts/dimension.dart';
 export 'src/facts/fact_table.dart';
 export 'src/facts/importer.dart';

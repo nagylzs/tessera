@@ -1,4 +1,5 @@
 import '../color/hue_levels.dart';
+import '../l10n/tessera_strings.dart';
 import 'cube_grid.dart';
 
 /// A font for one role of an exported document. Pure Dart: the colour is
@@ -61,6 +62,29 @@ final class NumberFormat {
 
   /// Thousands separators.
   final bool grouping;
+
+  /// [v] with this format's decimals and grouping and the locale's
+  /// separators from [strings]; integers are written without decimals.
+  /// What text-based exporters (HTML, SVG, …) write into a cell.
+  String format(num v, TesseraStrings strings) {
+    final isInt = v is int || (v == v.truncateToDouble() && v.abs() < 1e15);
+    final text = isInt
+        ? v.toInt().abs().toString()
+        : v.abs().toStringAsFixed(decimals);
+    final dot = text.indexOf('.');
+    final intPart = dot < 0 ? text : text.substring(0, dot);
+    final b = StringBuffer(v < 0 ? '-' : '');
+    for (var i = 0; i < intPart.length; i++) {
+      if (grouping && i > 0 && (intPart.length - i) % 3 == 0) {
+        b.write(strings.groupSeparator);
+      }
+      b.write(intPart[i]);
+    }
+    if (dot >= 0) {
+      b.write('${strings.decimalSeparator}${text.substring(dot + 1)}');
+    }
+    return b.toString();
+  }
 
   @override
   bool operator ==(Object other) =>

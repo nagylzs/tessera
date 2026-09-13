@@ -107,6 +107,22 @@ the root, ignored; members carry `resolution: workspace`):
   decimals/grouping and the locale's separators (`formatNumber`).
   Tests parse the output with `package:xml` (it is well-formed). Example
   on `example/sales.csv`.
+- `packages/tessera_svg` — pure Dart, depends on `tessera` only.
+  `SvgCubeExporter` draws `CubeGrid` as one image: a `<rect>` per origin
+  cell (classes as in html) plus a `<text>`, right-anchored numbers,
+  fills/fonts from `fillOf`/`fontOf`, `viewBox` = natural size. Geometry
+  from the engine's `GridMetrics` (`export/grid_metrics.dart`: content-
+  sized column widths from `estimateWidth` — per-character-class em
+  widths × font px, bold +7 % — or a `TextMeasurer` callback
+  (`measureText`), merged cells widen their span, row heights = font px ×
+  `lineHeight`, cumulative offsets; meant for PDF too). Text is clipped
+  by a `clipPath` per column and per merged cell, so a viewer's font may
+  differ from the estimate; a merged label sits on its first row like
+  `CubeView`. Baseline = row centre + 0.35 em (no `dominant-baseline`,
+  for renderer compatibility). Number text from `NumberFormat.format`
+  (engine; html delegates to it). Tests parse with `package:xml` and
+  render with `rsvg-convert` when installed. `example/main.dart` +
+  `example/sales.csv` as in html.
 - Planned: further exporters (`tessera_pdf`, …) the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a
@@ -123,6 +139,7 @@ dart analyze                                   # at the root: all packages, must
 (cd packages/tessera_xlsx && dart test)        # xlsx package (pure Dart)
 (cd packages/tessera_ods && dart test)         # ods package (pure Dart)
 (cd packages/tessera_html && dart test)        # html package (pure Dart)
+(cd packages/tessera_svg && dart test)         # svg package (pure Dart; rsvg-convert optional)
 (cd packages/tessera_flutter && flutter test)  # widget tests
 (cd packages/tessera_flutter/example && flutter test)
 dart format packages                           # run before committing
@@ -203,7 +220,7 @@ Paths below are relative to the package (`lib/src/...` means
   `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`). The
   workbench's "Export…" menu writes the cube (all aggregates) as .xlsx
   (`XlsxCubeExporter`), .ods (`OdsCubeExporter`), .html
-  (`HtmlCubeExporter`) or CSV
+  (`HtmlCubeExporter`), .svg (`SvgCubeExporter`) or CSV
   (`CsvCubeExporter`, BOM) — `ExportFormat` — through
   `file_picker`'s `FilePicker.saveFile(bytes:)`, which writes the file
   itself — needed on Android/iOS (document Uri, no path;
