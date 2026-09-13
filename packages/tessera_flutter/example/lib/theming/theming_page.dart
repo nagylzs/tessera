@@ -25,6 +25,7 @@ class _ThemingPageState extends State<ThemingPage> {
   late final Future<DataSource> _source = _load();
   ThemePreset _preset = themePresets.first;
   String _seed = seedColors.keys.first;
+  ExcelTheme _excel = ExcelTheme.matchPreset;
   bool? _dark; // null follows the platform
 
   Future<DataSource> _load() async {
@@ -61,6 +62,7 @@ class _ThemingPageState extends State<ThemingPage> {
             title: 'Tessera — ${_preset.name}',
             progressEvery: 250,
             theme: _preset.theme,
+            xlsxTheme: excelThemeFor(_excel, _preset, seedColors[_seed]!),
             actions: (context, controller) => [_themeMenu(controller)],
             initialSpec: (facts) => CubeSpec(
               rows: CubeAxis.of([region, country]),
@@ -137,6 +139,22 @@ class _ThemingPageState extends State<ThemingPage> {
           onPressed: () => setState(() => _dark = value),
           child: Text(label),
         ),
+      const Divider(height: 1),
+      SubmenuButton(
+        menuChildren: [
+          for (final (label, choice) in [
+            ('Match the preset', ExcelTheme.matchPreset),
+            ('Brand from the seed colour', ExcelTheme.brand),
+            ('Package default', ExcelTheme.plain),
+          ])
+            MenuItemButton(
+              leadingIcon: Icon(choice == _excel ? Icons.check : null),
+              onPressed: () => setState(() => _excel = choice),
+              child: Text(label),
+            ),
+        ],
+        child: const Text('Excel export theme'),
+      ),
       const Divider(height: 1),
       for (final side in AxisSide.values)
         SubmenuButton(

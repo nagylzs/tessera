@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tessera_example/theming/presets.dart';
+import 'package:tessera_xlsx/tessera_xlsx.dart';
 
 void main() {
   testWidgets('every preset resolves under light and dark themes', (
@@ -25,5 +26,30 @@ void main() {
       );
     }
     expect(themePresets.map((p) => p.name).toSet().length, themePresets.length);
+  });
+
+  test('every preset has an Excel counterpart; brand comes from the seed', () {
+    for (final p in themePresets) {
+      expect(p.xlsxTheme.levelFills, isNotEmpty, reason: p.name);
+      expect(
+        excelThemeFor(ExcelTheme.matchPreset, p, Colors.teal),
+        same(p.xlsxTheme),
+      );
+    }
+    final brand = excelThemeFor(
+      ExcelTheme.brand,
+      themePresets.first,
+      Colors.indigo,
+    );
+    expect(brand.headerFill, Colors.indigo.toARGB32());
+    expect(brand.headerFont.color, 0xFFFFFFFF);
+    expect(
+      excelThemeFor(
+        ExcelTheme.plain,
+        themePresets.first,
+        Colors.teal,
+      ).headerFill,
+      const XlsxCubeTheme().headerFill,
+    );
   });
 }

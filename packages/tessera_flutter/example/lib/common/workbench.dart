@@ -23,6 +23,7 @@ class CubeWorkbench extends StatefulWidget {
     this.adjustSchema,
     this.progressEvery = 5000,
     this.theme = const CubeTheme(),
+    this.xlsxTheme = const XlsxCubeTheme(),
     this.actions,
   });
 
@@ -43,6 +44,9 @@ class CubeWorkbench extends StatefulWidget {
 
   /// Theme of the [CubeView].
   final CubeTheme theme;
+
+  /// Theme of the Excel export.
+  final XlsxCubeTheme xlsxTheme;
 
   /// Extra AppBar actions, placed before the built-in ones; [controller]
   /// is `null` until the import has finished.
@@ -262,8 +266,10 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
       );
       mimeType = 'text/csv';
     } else {
-      bytes = XlsxCubeExporter(strings: strings)
-          .export(layout, sheetName: base);
+      bytes = XlsxCubeExporter(
+        strings: strings,
+        theme: widget.xlsxTheme,
+      ).export(layout, sheetName: base);
       mimeType =
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     }

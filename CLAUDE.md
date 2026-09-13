@@ -166,6 +166,12 @@ Paths below are relative to the package (`lib/src/...` means
   local `Theme`. `CubeWorkbench` gained `theme` and `actions` for it.
   This is the place to demonstrate new `CubeTheme` features; each
   preset must resolve in light and dark (`test/theming_test.dart`).
+  Each preset also carries a hand-authored `xlsxTheme`; the menu's
+  "Excel export theme" picks it, `XlsxCubeTheme.brand(seed.toARGB32())`
+  or the package default (`ExcelTheme`, `excelThemeFor`) and passes it
+  as `CubeWorkbench.xlsxTheme`. No `CubeTheme → XlsxCubeTheme`
+  converter on purpose (needs a context; screen shading is too subtle
+  on paper) — Excel themes are authored.
 - "Public datasets" (`example/lib/datasets/`): six real CSVs (GitHub raw
   with Content-Length; data.wa.gov chunked without) listed in
   `publicDatasets`, cached under `systemTemp/tessera_examples/`; "Clear
