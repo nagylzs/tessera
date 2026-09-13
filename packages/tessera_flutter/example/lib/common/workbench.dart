@@ -1,6 +1,8 @@
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
+import 'package:tessera_xlsx/tessera_xlsx.dart';
 
 import '../language_menu.dart';
 import 'schema_page.dart';
@@ -231,6 +233,33 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
     return true;
   }
 
+  /// Writes the cube as shown (every aggregate of the spec) to an .xlsx
+  /// file chosen in the platform's save dialog.
+  Future<void> _export() async {
+    final controller = _controller;
+    if (controller == null) return;
+    final base = widget.source.name.replaceFirst(RegExp(r'\.[^.]*$'), '');
+    final location = await getSaveLocation(
+      suggestedName: '$base.xlsx',
+      acceptedTypeGroups: const [
+        XTypeGroup(label: 'Excel workbook', extensions: ['xlsx']),
+      ],
+    );
+    if (location == null || !mounted) return;
+    final bytes = XlsxCubeExporter(strings: TesseraLocalizations.of(context))
+        .export(controller.cube.layout, sheetName: base);
+    await XFile.fromData(
+      bytes,
+      mimeType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      name: '$base.xlsx',
+    ).saveTo(location.path);
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Saved ${location.path}')));
+    }
+  }
+
   void _showReport() {
     final report = _result!.report;
     showDialog<void>(
@@ -275,6 +304,11 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
       title: Text(widget.title),
       actions: [
         ...widget.actions,
+        IconButton(
+          icon: const Icon(Icons.file_download_outlined),
+          tooltip: 'Export to Excel…',
+          onPressed: _controller == null ? null : _export,
+        ),
         const LanguageMenu(),
         IconButton(
           icon: const Icon(Icons.table_chart_outlined),
