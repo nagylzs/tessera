@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.1.0
 
 * Initial release: `SvgCubeExporter` draws a `CubeLayout` as an SVG
   image rendered from `CubeGrid` — merged group headers, one column per

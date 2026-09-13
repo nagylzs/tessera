@@ -27,7 +27,7 @@ final class Schema {
     return null;
   }
 
-  /// Returns a schema with the column named [spec.name] replaced by [spec].
+  /// Returns a schema with the column named `spec.name` replaced by [spec].
   Schema replace(ColumnSpec spec) =>
       Schema([for (final c in columns) c.name == spec.name ? spec : c]);
 

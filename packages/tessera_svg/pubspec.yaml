@@ -1,15 +1,20 @@
 name: tessera_svg
 description: "SVG export for the tessera pivot-table engine: draws a cube as a scalable image with merged group headers, themed with CubeExportTheme. Pure Dart, no dependencies beyond tessera."
-version: 0.0.1
+version: 0.1.0
 repository: https://github.com/nagylzs/tessera/tree/main/packages/tessera_svg
 issue_tracker: https://github.com/nagylzs/tessera/issues
+topics:
+  - pivot-table
+  - svg
+  - export
+  - image
 resolution: workspace
 
 environment:
   sdk: ^3.13.3
 
 dependencies:
-  tessera: ^0.0.1
+  tessera: ^0.1.0
 
 dev_dependencies:
   lints: ^6.0.0

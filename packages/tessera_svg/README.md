@@ -25,6 +25,8 @@ final svg = SvgCubeExporter(
 ).export(cube.layout, title: 'Sales by region');
 ```
 
+`export` returns the SVG as a `String`.
+
 ## Example
 
 [`example/main.dart`](example/main.dart) reads `example/sales.csv`, builds

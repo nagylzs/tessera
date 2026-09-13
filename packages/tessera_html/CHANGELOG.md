@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.1.0
 
 * `HtmlCubeExporter`: writes a `CubeLayout` as an HTML table — merged
   "rotated L" group headers (`rowspan`/`colspan`), one column per

@@ -1,8 +1,14 @@
 name: tessera_flutter
 description: "Flutter widgets for the tessera pivot-table engine: an expandable cube grid, axis and aggregate editors, and localizations for fourteen languages."
-version: 0.0.1
+version: 0.1.0
 repository: https://github.com/nagylzs/tessera/tree/main/packages/tessera_flutter
 issue_tracker: https://github.com/nagylzs/tessera/issues
+topics:
+  - pivot-table
+  - olap
+  - aggregation
+  - widgets
+  - data-grid
 resolution: workspace
 
 environment:
@@ -12,7 +18,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  tessera: ^0.0.1
+  tessera: ^0.1.0
   two_dimensional_scrollables: ^0.5.4
 
 dev_dependencies:

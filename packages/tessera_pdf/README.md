@@ -33,6 +33,10 @@ final bytes = await PdfCubeExporter(
 ).export(cube.layout, title: 'Sales by region');
 ```
 
+`export` is asynchronous and returns the PDF as a `Future<Uint8List>`
+(font embedding in `package:pdf` is async); the other exporters are
+synchronous.
+
 ## Example
 
 [`example/main.dart`](example/main.dart) reads `example/sales.csv`, builds

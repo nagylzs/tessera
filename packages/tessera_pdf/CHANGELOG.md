@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.1.0
 
 * Initial release: `PdfCubeExporter` writes a `CubeLayout` as a paginated
   PDF rendered from `CubeGrid` — merged group headers, one column per

@@ -27,6 +27,9 @@ final ods = OdsCubeExporter(
 ).export(cube.layout);
 ```
 
+`export` returns the document as a `Uint8List`, ready to write to a file
+or hand to a download.
+
 ## Example
 
 [`example/main.dart`](example/main.dart) does the whole round trip from

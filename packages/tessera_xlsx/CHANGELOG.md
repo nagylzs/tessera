@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.1.0
 
 * `XlsxDataSource`: streams one worksheet as typed rows (shared, inline
   and formula strings, numbers, dates by style, booleans), sheet

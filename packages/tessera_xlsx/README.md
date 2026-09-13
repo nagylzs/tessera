@@ -33,6 +33,9 @@ final xlsx = XlsxCubeExporter(strings: TesseraStrings.forLanguage('hu')!)
     .export(cube.layout);
 ```
 
+`export` returns the workbook as a `Uint8List`, ready to write to a file
+or hand to a download.
+
 ## Example
 
 [`example/main.dart`](example/main.dart) does the whole round trip from

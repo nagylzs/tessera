@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.1.0
 
 * Initial release: data sources (CSV, lists), schema inference, the fact
   table importer, cubes with expandable row/column hierarchies, built-in

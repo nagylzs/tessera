@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.1.0
 
 * `OdsDataSource`: streams one sheet of an `.ods` document as typed rows
   (floats/ints, dates and date-times, booleans, strings with `text:s`

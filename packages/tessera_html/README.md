@@ -22,6 +22,9 @@ final html = HtmlCubeExporter(
 ).export(cube.layout, title: 'Sales by region');
 ```
 
+`export` returns the HTML as a `String` (a whole document, or a fragment
+with `standalone: false`).
+
 ## Example
 
 [`example/main.dart`](example/main.dart) reads `example/sales.csv`, builds

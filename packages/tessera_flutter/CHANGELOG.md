@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.1.0
 
 * Initial release: `CubeView`, `CubeController`, `AxisEditor`,
   `AggregateEditor`, the dimension and aggregate picker dialogs,

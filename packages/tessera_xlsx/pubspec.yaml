@@ -1,8 +1,14 @@
 name: tessera_xlsx
 description: "Excel (.xlsx) support for the tessera pivot-table engine: an XlsxDataSource for importing worksheets and an exporter that writes a cube as a formatted worksheet. Pure Dart."
-version: 0.0.1
+version: 0.1.0
 repository: https://github.com/nagylzs/tessera/tree/main/packages/tessera_xlsx
 issue_tracker: https://github.com/nagylzs/tessera/issues
+topics:
+  - pivot-table
+  - xlsx
+  - excel
+  - export
+  - import
 resolution: workspace
 
 environment:
@@ -10,7 +16,7 @@ environment:
 
 dependencies:
   archive: ">=4.0.7 <5.0.0"
-  tessera: ^0.0.1
+  tessera: ^0.1.0
   xml: ^7.0.1
 
 dev_dependencies:
