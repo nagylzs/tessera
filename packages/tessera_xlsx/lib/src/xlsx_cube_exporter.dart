@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:tessera/tessera.dart';
@@ -101,37 +100,44 @@ final class _Export {
         numberFormat: exporter.style.numberFormat,
         borderColor: exporter.style.borderColor,
       ),
-      rowGeometry = AxisGeometry(layout.rows),
-      columnGeometry = AxisGeometry(layout.columns);
+      grid = CubeGrid.of(
+        layout,
+        strings: exporter.strings,
+        aggregates: aggregates,
+        emptyGroupLabel: exporter.emptyGroupLabel,
+        rowSummaryLabel: exporter.rowSummaryLabel,
+        columnSummaryLabel: exporter.columnSummaryLabel,
+      );
 
   final XlsxCubeExporter exporter;
   final CubeLayout layout;
   final List<Aggregate> aggregates;
   final XlsxWriter writer;
-  final AxisGeometry rowGeometry;
-  final AxisGeometry columnGeometry;
+  final CubeGrid grid;
 
   XlsxCubeStyle get style => exporter.style;
-  TesseraStrings get strings => exporter.strings;
-  CubeSpec get spec => layout.spec;
-  int get rowDepth => spec.rows.depth;
-  int get columnDepth => spec.columns.depth;
-
-  /// Sheet columns per column entry.
-  int get perEntry => math.max(aggregates.length, 1);
-
-  int get headerColumns => math.max(rowDepth, 1);
-  int get levelRows => math.max(columnDepth, 1);
-  int get headerRows => levelRows + 1;
 
   /// Longest text per sheet column, for the widths.
   final _longest = <int, int>{};
 
   Uint8List run() {
-    _corner();
-    _columnHeaders();
-    _rowHeaders();
-    _cells();
+    for (var r = 0; r < grid.rowCount; r++) {
+      for (var c = 0; c < grid.columnCount; c++) {
+        final cell = grid.cellAt(r, c);
+        final styleIndex = _styleOf(cell);
+        if (!cell.isOrigin) {
+          writer.cell(r, c, null, styleIndex); // covered by a merge
+          continue;
+        }
+        writer.cell(r, c, cell.value, styleIndex);
+        writer.merge(r, c, cell.rowSpan, cell.columnSpan);
+        final value = cell.value;
+        if (value != null && cell.columnSpan == 1) {
+          final n = value.toString().length;
+          if (n > (_longest[c] ?? 0)) _longest[c] = n;
+        }
+      }
+    }
     for (final e in _longest.entries) {
       writer.columnWidth(
         e.key,
@@ -139,176 +145,27 @@ final class _Export {
       );
     }
     if (style.freezeHeaders) {
-      writer.freeze(rows: headerRows, columns: headerColumns);
+      writer.freeze(rows: grid.headerRows, columns: grid.headerColumns);
     }
     return writer.build();
   }
 
-  int _headerStyle({bool summary = false, bool right = false}) => writer.style(
-    summary ? style.summaryFill : style.headerFill,
-    bold: summary,
-    right: right,
-  );
-
-  void _put(int row, int column, Object? value, int styleIndex) {
-    writer.cell(row, column, value, styleIndex);
-    if (value != null) {
-      final n = value.toString().length;
-      if (n > (_longest[column] ?? 0)) _longest[column] = n;
+  /// Header cells on the header fill (summary fill when on the summary),
+  /// data cells on their level's fill; summaries bold.
+  int _styleOf(GridCell cell) {
+    if (cell.kind == GridCellKind.data) {
+      final fills = style.levelFills;
+      final fill = cell.isSummary
+          ? style.summaryFill
+          : fills.isEmpty
+          ? 0xFFFFFFFF
+          : fills[cell.level.clamp(0, fills.length - 1)];
+      return writer.style(fill, bold: cell.isSummary, right: true);
     }
+    return writer.style(
+      cell.isSummary ? style.summaryFill : style.headerFill,
+      bold: cell.isSummary,
+      right: cell.alignRight,
+    );
   }
-
-  // ---------------------------------------------------------------- corner
-
-  void _corner() {
-    final plain = _headerStyle();
-    for (var r = 0; r < levelRows; r++) {
-      if (columnDepth == 0) {
-        for (var c = 0; c < headerColumns; c++) {
-          _put(r, c, null, plain);
-        }
-        continue;
-      }
-      final title = strings.dimensionLabel(
-        spec.columns.dimensions[r].dimension,
-        layout.facts,
-      );
-      _put(r, 0, title, _headerStyle(right: true));
-      for (var c = 1; c < headerColumns; c++) {
-        _put(r, c, null, plain);
-      }
-      writer.merge(r, 0, 1, headerColumns);
-    }
-    for (var c = 0; c < headerColumns; c++) {
-      final title = rowDepth == 0
-          ? null
-          : strings.dimensionLabel(
-              spec.rows.dimensions[c].dimension,
-              layout.facts,
-            );
-      _put(levelRows, c, title, plain);
-    }
-  }
-
-  // -------------------------------------------------------- column header
-
-  void _columnHeaders() {
-    final columns = layout.columns.entries;
-    for (var j = 0; j < columns.length; j++) {
-      final entry = columns[j];
-      final start = headerColumns + j * perEntry;
-      final summary = entry.isSummary;
-      // aggregate label row
-      for (var a = 0; a < perEntry; a++) {
-        final label = aggregates.isEmpty
-            ? null
-            : strings.aggregateLabel(aggregates[a], layout.facts);
-        _put(
-          levelRows,
-          start + a,
-          label,
-          _headerStyle(summary: summary, right: true),
-        );
-      }
-      if (columnDepth == 0) {
-        _put(
-          0,
-          start,
-          _entryText(entry, isRow: false),
-          _headerStyle(summary: true),
-        );
-        for (var a = 1; a < perEntry; a++) {
-          _put(0, start + a, null, _headerStyle(summary: true));
-        }
-        writer.merge(0, start, 1, perEntry);
-        continue;
-      }
-      for (var level = 0; level < columnDepth; level++) {
-        final area = columnGeometry.areaAt(level, j);
-        final owner = layout.columns.entryFor(area.path)!;
-        final isOrigin = area.levelStart == level && area.entryStart == j;
-        final s = _headerStyle(summary: owner.isSummary);
-        for (var a = 0; a < perEntry; a++) {
-          _put(
-            level,
-            start + a,
-            isOrigin && area.isLabel && a == 0
-                ? _entryText(owner, isRow: false)
-                : null,
-            s,
-          );
-        }
-        if (isOrigin) {
-          writer.merge(level, start, area.levelSpan, area.entrySpan * perEntry);
-        }
-      }
-    }
-  }
-
-  // ------------------------------------------------------------ row header
-
-  void _rowHeaders() {
-    final rows = layout.rows.entries;
-    for (var i = 0; i < rows.length; i++) {
-      final entry = rows[i];
-      final sheetRow = headerRows + i;
-      if (rowDepth == 0) {
-        _put(
-          sheetRow,
-          0,
-          _entryText(entry, isRow: true),
-          _headerStyle(summary: true),
-        );
-        continue;
-      }
-      for (var level = 0; level < rowDepth; level++) {
-        final area = rowGeometry.areaAt(level, i);
-        final owner = layout.rows.entryFor(area.path)!;
-        final isOrigin = area.levelStart == level && area.entryStart == i;
-        _put(
-          sheetRow,
-          level,
-          isOrigin && area.isLabel ? _entryText(owner, isRow: true) : null,
-          _headerStyle(summary: owner.isSummary),
-        );
-        if (isOrigin) {
-          writer.merge(sheetRow, level, area.entrySpan, area.levelSpan);
-        }
-      }
-    }
-  }
-
-  // ------------------------------------------------------------ data cells
-
-  void _cells() {
-    final rows = layout.rows.entries;
-    final columns = layout.columns.entries;
-    final fills = style.levelFills;
-    for (var i = 0; i < rows.length; i++) {
-      for (var j = 0; j < columns.length; j++) {
-        final summary = rows[i].isSummary || columns[j].isSummary;
-        final level = rows[i].depth + columns[j].depth - 2;
-        final fill = summary
-            ? style.summaryFill
-            : fills.isEmpty
-            ? 0xFFFFFFFF
-            : fills[level.clamp(0, fills.length - 1)];
-        final s = writer.style(fill, bold: summary, right: true);
-        final cell = layout.cellAt(i, j);
-        for (var a = 0; a < perEntry; a++) {
-          final value = cell.isEmpty || aggregates.isEmpty
-              ? null
-              : cell.aggregate<Object?>(aggregates[a]);
-          _put(headerRows + i, headerColumns + j * perEntry + a, value, s);
-        }
-      }
-    }
-  }
-
-  String _entryText(HeaderEntry entry, {required bool isRow}) => entry.isSummary
-      ? (isRow ? exporter.rowSummaryLabel : exporter.columnSummaryLabel) ??
-            strings.total
-      : entry.value == null
-      ? exporter.emptyGroupLabel ?? strings.emptyGroup
-      : strings.formatValue(entry.dimension, entry.value);
 }

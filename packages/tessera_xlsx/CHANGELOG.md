@@ -10,4 +10,5 @@
   columns, frozen panes; `XlsxCubeStyle`, localized labels and overrides.
   Follows the axes' summary and subtotal positions — with both hidden the
   export is a flat table of leaf rows.
+* The exporter renders from the engine's `CubeGrid`.
 * `example/main.dart`: command-line round trip on `example/sales.xlsx`.

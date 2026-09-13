@@ -15,6 +15,10 @@
 * `CubeAxis.subtotalPosition` (`SubtotalPosition.top` / `bottom` /
   `hidden`): where an expanded group's own row goes; `AxisLayout.entryFor`
   resolves groups without a row; `HeaderArea.path`.
+* `CubeGrid`: a `CubeLayout` as a rectangular grid of typed cells with
+  merged areas, the way `CubeView` shows it — what exporters render from.
+* `CsvCubeExporter` (`CsvExportOptions`: delimiter, quote, line ending,
+  decimal separator, BOM, group labels at the origin or repeated).
 * `FactTable.withLabels` relabels columns without a re-import (data is
   shared).
 * `AxisDimension.sort` is nullable: `null` inherits the ordering of the

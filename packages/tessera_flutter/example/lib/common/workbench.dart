@@ -1,3 +1,6 @@
+import 'dart:convert' show utf8;
+import 'dart:typed_data';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
@@ -235,26 +238,44 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
     return true;
   }
 
-  /// Writes the cube as shown (every aggregate of the spec) to an .xlsx
-  /// file chosen in the platform's save dialog.
-  Future<void> _export() async {
+  /// Writes the cube as shown (every aggregate of the spec) to a file
+  /// chosen in the platform's save dialog: an .xlsx workbook, or CSV.
+  Future<void> _export({required bool csv}) async {
     final controller = _controller;
     if (controller == null) return;
     final base = widget.source.name.replaceFirst(RegExp(r'\.[^.]*$'), '');
+    final ext = csv ? 'csv' : 'xlsx';
     final location = await getSaveLocation(
-      suggestedName: '$base.xlsx',
-      acceptedTypeGroups: const [
-        XTypeGroup(label: 'Excel workbook', extensions: ['xlsx']),
+      suggestedName: '$base.$ext',
+      acceptedTypeGroups: [
+        XTypeGroup(label: csv ? 'CSV' : 'Excel workbook', extensions: [ext]),
       ],
     );
     if (location == null || !mounted) return;
-    final bytes = XlsxCubeExporter(strings: TesseraLocalizations.of(context))
-        .export(controller.cube.layout, sheetName: base);
+    final strings = TesseraLocalizations.of(context);
+    final layout = controller.cube.layout;
+    final Uint8List bytes;
+    final String mimeType;
+    if (csv) {
+      bytes = Uint8List.fromList(
+        utf8.encode(
+          CsvCubeExporter(
+            strings: strings,
+            options: const CsvExportOptions(byteOrderMark: true),
+          ).export(layout),
+        ),
+      );
+      mimeType = 'text/csv';
+    } else {
+      bytes = XlsxCubeExporter(strings: strings)
+          .export(layout, sheetName: base);
+      mimeType =
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    }
     await XFile.fromData(
       bytes,
-      mimeType:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      name: '$base.xlsx',
+      mimeType: mimeType,
+      name: '$base.$ext',
     ).saveTo(location.path);
     if (mounted) {
       ScaffoldMessenger.of(context)
@@ -306,10 +327,22 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
       title: Text(widget.title),
       actions: [
         ...?widget.actions?.call(context, _controller),
-        IconButton(
-          icon: const Icon(Icons.file_download_outlined),
-          tooltip: 'Export to Excel…',
-          onPressed: _controller == null ? null : _export,
+        MenuAnchor(
+          menuChildren: [
+            MenuItemButton(
+              onPressed: _controller == null ? null : () => _export(csv: false),
+              child: const Text('Excel workbook (.xlsx)…'),
+            ),
+            MenuItemButton(
+              onPressed: _controller == null ? null : () => _export(csv: true),
+              child: const Text('CSV (.csv)…'),
+            ),
+          ],
+          builder: (context, menu, _) => IconButton(
+            icon: const Icon(Icons.file_download_outlined),
+            tooltip: 'Export…',
+            onPressed: () => menu.isOpen ? menu.close() : menu.open(),
+          ),
         ),
         const LanguageMenu(),
         IconButton(

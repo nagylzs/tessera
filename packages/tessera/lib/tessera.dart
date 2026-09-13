@@ -19,6 +19,10 @@
 ///    [AxisGeometry] resolves the merged header cells of an axis for
 ///    renderers (the Flutter grid, exporters).
 ///
+/// [CubeGrid] lays a [CubeLayout] out as a rectangular grid (the way the
+/// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
+/// as CSV, `tessera_xlsx` as a workbook.
+///
 /// Every user-facing text and the locale-specific label and number
 /// formatting rules live in [TesseraStrings] (fourteen languages built in),
 /// so renderers agree on how a cube is labelled.
@@ -33,6 +37,8 @@ export 'src/cube/cube_spec.dart';
 export 'src/cube/dimension_path.dart';
 export 'src/cube/expansion_state.dart';
 export 'src/cube/filter.dart';
+export 'src/export/csv_cube_exporter.dart';
+export 'src/export/cube_grid.dart';
 export 'src/facts/dimension.dart';
 export 'src/facts/fact_table.dart';
 export 'src/facts/importer.dart';

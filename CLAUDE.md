@@ -11,8 +11,14 @@ the root, ignored; members carry `resolution: workspace`):
 
 - `packages/tessera` — the engine, **pure Dart** (`environment: sdk`
   only, no Flutter, no deps; `lints` + `test` for dev). Layers 1–3 plus
-  `l10n/` (`TesseraStrings`) and the pure-Dart renderer helpers
-  (`AxisGeometry`, `AggregateKind`). Tests read `test/data/sales.csv`.
+  `l10n/` (`TesseraStrings`), the pure-Dart renderer helpers
+  (`AxisGeometry`, `AggregateKind`) and `export/`: `CubeGrid` (the
+  layout as a grid of `GridCell`s — kind, value, summary/leg flags,
+  level, merge spans with origin/covered cells that repeat the value)
+  and `CsvCubeExporter` (`CsvExportOptions`; `CsvGroupLabels.origin`
+  mirrors the sheet, `.repeat` fills groups down for other tools;
+  `europeanExcel` preset). Every exporter renders from `CubeGrid`, the
+  xlsx one included. Tests read `test/data/sales.csv`.
 - `packages/tessera_flutter` — the widgets (layer 4) and
   `TesseraLocalizations` (the Flutter `LocalizationsDelegate` / `of`
   glue). Depends on `tessera` and `two_dimensional_scrollables`;
@@ -145,9 +151,9 @@ Paths below are relative to the package (`lib/src/...` means
   reads, disk cache after one full pass, HEAD Content-Length →
   `estimatedRowCount`; sendable to the import isolate; dart:io so not web);
   `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`). The
-  workbench's "Export to Excel…" action writes the cube (all aggregates)
-  through `XlsxCubeExporter` to a path from `file_selector`'s
-  `getSaveLocation` (desktop; not wired for web).
+  workbench's "Export…" menu writes the cube (all aggregates) as an
+  .xlsx (`XlsxCubeExporter`) or CSV (`CsvCubeExporter`, BOM) to a path
+  from `file_selector`'s `getSaveLocation` (desktop; not wired for web).
 - "Theming" (`example/lib/theming/`): the sales cube with an AppBar
   palette menu — `ThemePreset`s in `presets.dart` (`themePresets`:
   Material/default, Spreadsheet, Gradient, High contrast, Compact),
