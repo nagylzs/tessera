@@ -37,8 +37,18 @@ the root, ignored; members carry `resolution: workspace`):
   entry read) — known limit. Test data: `test/data/sales.xlsx` is
   `sales.csv` converted by LibreOffice (`soffice --headless --convert-to
   xlsx`); the test compares the two imports value for value. Edge cases
-  use mini workbooks built in-test with `ZipEncoder`. **Exporter still
-  throws `UnimplementedError`.**
+  use mini workbooks built in-test with `ZipEncoder`. Exporter implemented:
+  `xlsx_writer.dart` (`XlsxWriter`, a minimal package writer — shared
+  strings, style registry keyed by (fill, bold, right) with fills 0/1
+  reserved and cellXfs 0 the default so indices are offset by one,
+  thin borders, one custom numFmt 164, merges, `<cols>`, frozen pane)
+  and `_Export` in `xlsx_cube_exporter.dart` mirroring `CubeView`'s
+  geometry (`AxisGeometry` areas → merges, a column entry spans
+  `aggregates.length` sheet columns, corner titles, cell level = row
+  depth + column depth). Tests read the export back with
+  `XlsxDataSource`, check merge refs, and round-trip through
+  `soffice --convert-to csv` (skipped when soffice is missing; its csv
+  filter writes raw values, not formatted ones).
 - Planned: further exporters (`tessera_pdf`, …) the same way; HTML export
   can live in the engine (no deps).
 

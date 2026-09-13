@@ -14,7 +14,8 @@ Pure Dart, no Flutter dependency — works in Flutter apps, on servers and in
 command-line tools alike. Both directions live in one package because they
 share the same OOXML machinery.
 
-**Status: the reader (`XlsxDataSource`) works; the exporter is not implemented yet.**
+Both directions are implemented and tested (the exporter's output is
+verified by opening it with LibreOffice in the tests).
 
 ```dart
 import 'package:tessera_xlsx/tessera_xlsx.dart';
