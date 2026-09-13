@@ -160,6 +160,10 @@ package that depends on Flutter cannot be used with the standalone Dart
 SDK at all (servers, `dart:stable` images) — a Flutter-free entrypoint
 inside a Flutter package does not help.
 
+`TODO.md` at the root lists the agreed pre-publish work (API decisions,
+small fixes, publishing order, the user guide, later features); tick
+items there as they are done.
+
 ## Commands
 
 ```bash
