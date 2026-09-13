@@ -9,7 +9,8 @@
   deeper expansions), `rowsAddedByExpandingLevel` /
   `columnsAddedByExpandingLevel` count the effect beforehand;
   `ExpansionState.collapseLevel`. Strings `sortAscending`,
-  `sortDescending`, `expandAll`, `collapseAll`, `inheritSort`.
+  `sortDescending`, `expandAll`, `collapseAll`, `inheritSort`,
+  `totalsAtEnd`, `totalsAtStart`, `totalsHidden`.
 * `FactTable.withLabels` relabels columns without a re-import (data is
   shared).
 * `AxisDimension.sort` is nullable: `null` inherits the ordering of the

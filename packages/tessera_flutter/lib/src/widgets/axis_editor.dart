@@ -60,6 +60,59 @@ class AxisEditor extends StatelessWidget {
   CubeAxis _axisOf(CubeSpec spec, AxisSide s) =>
       s == AxisSide.rows ? spec.rows : spec.columns;
 
+  /// The caption ("Rows" / "Columns"); tapping it opens a menu with the
+  /// axis's summary position ([CubeAxis.summaryPosition]).
+  Widget _caption(
+    BuildContext context,
+    CubeSpec spec,
+    TesseraStrings strings,
+    ThemeData theme,
+  ) {
+    final current = _axisOf(spec, side).summaryPosition;
+    return MenuAnchor(
+      menuChildren: [
+        for (final (position, text) in [
+          (SummaryPosition.end, strings.totalsAtEnd),
+          (SummaryPosition.start, strings.totalsAtStart),
+          (SummaryPosition.hidden, strings.totalsHidden),
+        ])
+          MenuItemButton(
+            leadingIcon: Icon(position == current ? Icons.check : null),
+            onPressed: () => _setSummaryPosition(position),
+            child: Text(text),
+          ),
+      ],
+      builder: (context, menu, _) => InkWell(
+        borderRadius: BorderRadius.circular(4),
+        onTap: () => menu.isOpen ? menu.close() : menu.open(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label ??
+                    (side == AxisSide.rows ? strings.rows : strings.columns),
+                style: theme.textTheme.labelLarge,
+              ),
+              const Icon(Icons.arrow_drop_down, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _setSummaryPosition(SummaryPosition position) {
+    final spec = controller.cube.spec;
+    final axis = _axisOf(spec, side).copyWith(summaryPosition: position);
+    controller.updateSpec(
+      side == AxisSide.rows
+          ? spec.copyWith(rows: axis)
+          : spec.copyWith(columns: axis),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: controller,
@@ -88,11 +141,7 @@ class AxisEditor extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: Text(
-                  label ??
-                      (side == AxisSide.rows ? strings.rows : strings.columns),
-                  style: theme.textTheme.labelLarge,
-                ),
+                child: _caption(context, spec, strings, theme),
               ),
               Expanded(
                 child: dims.isEmpty

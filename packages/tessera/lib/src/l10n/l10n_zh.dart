@@ -148,6 +148,15 @@ final class TesseraStringsZh extends TesseraStrings {
   String get inheritSort => '与上一级相同的顺序';
 
   @override
+  String get totalsAtEnd => '总计在末尾';
+
+  @override
+  String get totalsAtStart => '总计在开头';
+
+  @override
+  String get totalsHidden => '隐藏总计';
+
+  @override
   String get expandAll => '全部展开';
 
   @override

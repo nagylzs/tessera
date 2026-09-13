@@ -99,6 +99,12 @@ abstract class TesseraStrings {
   /// Menu item that clears a level's own sort so it inherits the level
   /// above (see `AxisDimension.sort`).
   String get inheritSort;
+
+  /// Where an axis puts its summary (`CubeAxis.summaryPosition`), as
+  /// offered by the axis editor's caption menu.
+  String get totalsAtEnd;
+  String get totalsAtStart;
+  String get totalsHidden;
   String get expandAll;
   String get collapseAll;
   String largeExpansion(String label, int added, {required bool isRow});

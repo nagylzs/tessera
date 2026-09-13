@@ -890,6 +890,47 @@ void main() {
       expect(tapped!.coordinate.isEmpty, isTrue);
     });
 
+    testWidgets('summaries at the start and hidden', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: CubeAxis.of([
+            region,
+            country,
+          ], summaryPosition: SummaryPosition.start),
+          columns: CubeAxis.of([
+            category,
+          ], summaryPosition: SummaryPosition.hidden),
+          aggregates: [sumQty],
+        ),
+      ).toggleRow(europe);
+      final c = CubeController(cube);
+      await tester.pumpWidget(host(CubeView(controller: c, aggregate: sumQty)));
+      // rows: Σ, ∅, Asia, Europe, ∅, Germany, Hungary; columns: ∅, A, B
+      expect(cube.layout.rows.entries.first.isSummary, isTrue);
+      expect(cube.layout.columns.entries.any((e) => e.isSummary), isFalse);
+      expect(find.text('Total'), findsOneWidget); // the row summary only
+      expect(find.text('sum of qty'), findsNWidgets(3));
+      expect(find.text('28'), findsNothing); // no grand total column
+      expect(find.text('15'), findsOneWidget); // Σ × A
+      expect(find.text('Germany'), findsOneWidget);
+      // sorting rows by a column still works without a summary column
+      await tester.tap(find.text('sum of qty').at(1)); // under A
+      await tester.pumpAndSettle();
+      expect(c.cube.spec.rows.sortAt(0).by, SortBy.aggregate);
+      expect(c.cube.layout.rows.entries.first.isSummary, isTrue); // stays first
+      // the summary row can be selected and navigated like any other
+      await tester.tap(find.text('15'));
+      await tester.pumpAndSettle();
+      expect(c.selection!.row.isRoot, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(c.selection!.row.isRoot, isFalse);
+    });
+
     testWidgets('empty axes render a single summary cell', (tester) async {
       controller = CubeController(
         Cube(

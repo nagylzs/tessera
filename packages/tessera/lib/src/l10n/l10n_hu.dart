@@ -156,6 +156,15 @@ final class TesseraStringsHu extends TesseraStrings {
   String get inheritSort => 'Sorrend a felső szint szerint';
 
   @override
+  String get totalsAtEnd => 'Összesen a végén';
+
+  @override
+  String get totalsAtStart => 'Összesen az elején';
+
+  @override
+  String get totalsHidden => 'Összesen elrejtése';
+
+  @override
   String get expandAll => 'Összes kibontása';
 
   @override

@@ -156,6 +156,15 @@ final class TesseraStringsPt extends TesseraStrings {
   String get inheritSort => 'Mesma ordem do nível acima';
 
   @override
+  String get totalsAtEnd => 'Totais no fim';
+
+  @override
+  String get totalsAtStart => 'Totais no início';
+
+  @override
+  String get totalsHidden => 'Ocultar totais';
+
+  @override
   String get expandAll => 'Expandir tudo';
 
   @override

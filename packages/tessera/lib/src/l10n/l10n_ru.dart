@@ -156,6 +156,15 @@ final class TesseraStringsRu extends TesseraStrings {
   String get inheritSort => 'Как на уровне выше';
 
   @override
+  String get totalsAtEnd => 'Итоги в конце';
+
+  @override
+  String get totalsAtStart => 'Итоги в начале';
+
+  @override
+  String get totalsHidden => 'Скрыть итоги';
+
+  @override
   String get expandAll => 'Развернуть всё';
 
   @override

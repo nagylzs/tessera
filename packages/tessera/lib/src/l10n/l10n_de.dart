@@ -156,6 +156,15 @@ final class TesseraStringsDe extends TesseraStrings {
   String get inheritSort => 'Reihenfolge wie die Ebene darüber';
 
   @override
+  String get totalsAtEnd => 'Summen am Ende';
+
+  @override
+  String get totalsAtStart => 'Summen am Anfang';
+
+  @override
+  String get totalsHidden => 'Summen ausblenden';
+
+  @override
   String get expandAll => 'Alle ausklappen';
 
   @override

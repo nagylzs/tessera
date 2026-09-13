@@ -156,6 +156,15 @@ final class TesseraStringsNl extends TesseraStrings {
   String get inheritSort => 'Zelfde volgorde als het niveau erboven';
 
   @override
+  String get totalsAtEnd => 'Totalen aan het einde';
+
+  @override
+  String get totalsAtStart => 'Totalen aan het begin';
+
+  @override
+  String get totalsHidden => 'Totalen verbergen';
+
+  @override
   String get expandAll => 'Alles uitklappen';
 
   @override

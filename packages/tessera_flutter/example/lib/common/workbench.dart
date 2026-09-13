@@ -20,7 +20,7 @@ class CubeWorkbench extends StatefulWidget {
     this.adjustSchema,
     this.progressEvery = 5000,
     this.theme = const CubeTheme(),
-    this.actions = const [],
+    this.actions,
   });
 
   final DataSource source;
@@ -41,8 +41,10 @@ class CubeWorkbench extends StatefulWidget {
   /// Theme of the [CubeView].
   final CubeTheme theme;
 
-  /// Extra AppBar actions, placed before the built-in ones.
-  final List<Widget> actions;
+  /// Extra AppBar actions, placed before the built-in ones; [controller]
+  /// is `null` until the import has finished.
+  final List<Widget> Function(BuildContext context, CubeController? controller)?
+  actions;
 
   @override
   State<CubeWorkbench> createState() => _CubeWorkbenchState();
@@ -303,7 +305,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
     appBar: AppBar(
       title: Text(widget.title),
       actions: [
-        ...widget.actions,
+        ...?widget.actions?.call(context, _controller),
         IconButton(
           icon: const Icon(Icons.file_download_outlined),
           tooltip: 'Export to Excel…',

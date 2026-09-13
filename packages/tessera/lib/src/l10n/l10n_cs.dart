@@ -156,6 +156,15 @@ final class TesseraStringsCs extends TesseraStrings {
   String get inheritSort => 'Stejné pořadí jako úroveň výše';
 
   @override
+  String get totalsAtEnd => 'Součty na konci';
+
+  @override
+  String get totalsAtStart => 'Součty na začátku';
+
+  @override
+  String get totalsHidden => 'Skrýt součty';
+
+  @override
   String get expandAll => 'Rozbalit vše';
 
   @override

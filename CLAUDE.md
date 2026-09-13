@@ -117,7 +117,11 @@ Paths below are relative to the package (`lib/src/...` means
   editors; delete icon removes; `+` opens the picker) and
   `showDimensionPicker` / `DimensionPickerDialog`
   (`widgets/dimension_picker.dart`; searchable, used dimensions disabled).
-  Both verified on Linux desktop.
+  Both verified on Linux desktop. The caption ("Rows"/"Columns") is a
+  `MenuAnchor` setting `CubeAxis.summaryPosition` (end/start/hidden;
+  strings `totalsAtEnd` …); the theming example offers the same in its
+  palette menu (`CubeWorkbench.actions` is a builder receiving the
+  controller).
 - Implemented: `AggregateEditor` (`widgets/aggregate_editor.dart`; chips
   with delete — never the last one; removing resets any `AxisSort` that
   used it; `selected`/`onSelected` let the app choose what `CubeView`

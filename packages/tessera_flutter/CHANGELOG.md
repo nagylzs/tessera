@@ -14,6 +14,8 @@
 * Column widths are measured with the theme's text styles merged onto the
   ambient `DefaultTextStyle`, as `Text` renders them, so styles without a
   font family or size no longer produce truncated columns.
+* `AxisEditor`: the caption ("Rows" / "Columns") opens a menu with the
+  axis's summary position (end / start / hidden).
 * `CubeTheme.headerIconColor`: header icons default to the header text
   colour instead of the ambient icon colour.
 * Current cell: `CubeController.selection` / `currentCell`, `CellAddress`;

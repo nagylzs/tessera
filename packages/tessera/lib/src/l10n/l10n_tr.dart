@@ -156,6 +156,15 @@ final class TesseraStringsTr extends TesseraStrings {
   String get inheritSort => 'Üst düzeyle aynı sıralama';
 
   @override
+  String get totalsAtEnd => 'Toplamlar sonda';
+
+  @override
+  String get totalsAtStart => 'Toplamlar başta';
+
+  @override
+  String get totalsHidden => 'Toplamları gizle';
+
+  @override
   String get expandAll => 'Tümünü genişlet';
 
   @override

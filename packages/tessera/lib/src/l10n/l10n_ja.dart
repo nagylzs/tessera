@@ -148,6 +148,15 @@ final class TesseraStringsJa extends TesseraStrings {
   String get inheritSort => '上の階層と同じ順序';
 
   @override
+  String get totalsAtEnd => '合計を末尾に';
+
+  @override
+  String get totalsAtStart => '合計を先頭に';
+
+  @override
+  String get totalsHidden => '合計を非表示';
+
+  @override
   String get expandAll => 'すべて展開';
 
   @override

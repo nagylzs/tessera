@@ -84,6 +84,35 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('the caption menu sets the summary position', (tester) async {
+    await tester.pumpWidget(host());
+    await tester.tap(find.text('Rows'));
+    await tester.pumpAndSettle();
+    expect(find.text('Totals at the end'), findsOneWidget);
+    await tester.tap(find.text('Totals at the start'));
+    await tester.pumpAndSettle();
+    expect(controller.cube.spec.rows.summaryPosition, SummaryPosition.start);
+    expect(controller.cube.spec.columns.summaryPosition, SummaryPosition.end);
+    await tester.tap(find.text('Columns'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hide totals'));
+    await tester.pumpAndSettle();
+    expect(
+      controller.cube.spec.columns.summaryPosition,
+      SummaryPosition.hidden,
+    );
+    expect(
+      controller.cube.layout.columns.entries.any((e) => e.isSummary),
+      isFalse,
+    );
+    // dimensions and sorts untouched
+    expect(controller.cube.spec.rows.dimensions.length, 2);
+    expect(
+      controller.cube.spec.rows.dimensions[0].sort!.direction,
+      SortDirection.descending,
+    );
+  });
+
   testWidgets('shows captions and one chip per dimension', (tester) async {
     await tester.pumpWidget(host());
     expect(find.text('Rows'), findsOneWidget);

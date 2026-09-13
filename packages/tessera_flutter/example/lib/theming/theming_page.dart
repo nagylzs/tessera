@@ -61,7 +61,7 @@ class _ThemingPageState extends State<ThemingPage> {
             title: 'Tessera — ${_preset.name}',
             progressEvery: 250,
             theme: _preset.theme,
-            actions: [_themeMenu()],
+            actions: (context, controller) => [_themeMenu(controller)],
             initialSpec: (facts) => CubeSpec(
               rows: CubeAxis.of([region, country]),
               columns: CubeAxis.of([year, quarter]),
@@ -87,8 +87,17 @@ class _ThemingPageState extends State<ThemingPage> {
     );
   }
 
-  /// Presets, seed colours and brightness in one AppBar menu.
-  Widget _themeMenu() => MenuAnchor(
+  /// Presets, seed colours, brightness and — spec state rather than
+  /// theme, but a visual choice — the summary position of each axis, in
+  /// one AppBar menu.
+  Widget _themeMenu(CubeController? controller) => controller == null
+      ? _menu(null)
+      : ListenableBuilder(
+          listenable: controller,
+          builder: (context, _) => _menu(controller),
+        );
+
+  Widget _menu(CubeController? controller) => MenuAnchor(
     builder: (context, menu, _) => IconButton(
       icon: const Icon(Icons.palette_outlined),
       tooltip: 'Theme',
@@ -128,6 +137,49 @@ class _ThemingPageState extends State<ThemingPage> {
           onPressed: () => setState(() => _dark = value),
           child: Text(label),
         ),
+      const Divider(height: 1),
+      for (final side in AxisSide.values)
+        SubmenuButton(
+          menuChildren: [
+            for (final (label, position) in [
+              ('At the end', SummaryPosition.end),
+              ('At the start', SummaryPosition.start),
+              ('Hidden', SummaryPosition.hidden),
+            ])
+              MenuItemButton(
+                leadingIcon: Icon(
+                  controller != null &&
+                          _positionOf(controller, side) == position
+                      ? Icons.check
+                      : null,
+                ),
+                onPressed: controller == null
+                    ? null
+                    : () => _setPosition(controller, side, position),
+                child: Text(label),
+              ),
+          ],
+          child: Text(side == AxisSide.rows ? 'Row totals' : 'Column totals'),
+        ),
     ],
   );
+
+  static SummaryPosition _positionOf(CubeController c, AxisSide side) =>
+      (side == AxisSide.rows ? c.cube.spec.rows : c.cube.spec.columns)
+          .summaryPosition;
+
+  static void _setPosition(
+    CubeController c,
+    AxisSide side,
+    SummaryPosition position,
+  ) {
+    final spec = c.cube.spec;
+    c.updateSpec(
+      side == AxisSide.rows
+          ? spec.copyWith(rows: spec.rows.copyWith(summaryPosition: position))
+          : spec.copyWith(
+              columns: spec.columns.copyWith(summaryPosition: position),
+            ),
+    );
+  }
 }
