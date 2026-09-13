@@ -30,9 +30,9 @@ through these in order, then publish.
 
 ## Repository and publishing
 
-- [ ] Push the repository to `github.com/nagylzs/tessera` first; every
+- [x] Push the repository to `github.com/nagylzs/tessera` first; every
       pubspec's `repository` points there and pub.dev verifies the link.
-- [ ] Fix the GitHub repository description: it promises TSV, Excel and
+- [x] Fix the GitHub repository description: it promises TSV, Excel and
       JSONL input. TSV works through `CsvOptions` (tab delimiter), Excel
       through `tessera_xlsx`, JSONL does not exist (see below).
 - [ ] Optional: a short, neutral "Alternatives" section in the root README
