@@ -13,6 +13,7 @@ import 'src/xlsx_cube_exporter.dart';
 import 'src/xlsx_data_source.dart';
 
 export 'src/xlsx_cube_exporter.dart';
+export 'src/xlsx_cube_theme.dart';
 export 'src/xlsx_data_source.dart';
 export 'src/xlsx_workbook.dart' show XlsxWorkbook, XlsxSheet;
 

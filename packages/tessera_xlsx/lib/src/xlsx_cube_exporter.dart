@@ -2,44 +2,8 @@ import 'dart:typed_data';
 
 import 'package:tessera/tessera.dart';
 
+import 'xlsx_cube_theme.dart';
 import 'xlsx_writer.dart';
-
-/// Colours and formats of an exported worksheet. Colours are ARGB ints
-/// (`0xFFEEEEEE`), so no Flutter type is needed.
-final class XlsxCubeStyle {
-  const XlsxCubeStyle({
-    this.headerFill = 0xFFEEEEEE,
-    this.summaryFill = 0xFFDDDDDD,
-    this.levelFills = const [0xFFFFFFFF, 0xFFF3F8F7, 0xFFE3EFEC, 0xFFD0E5E0],
-    this.borderColor = 0xFFBBBBBB,
-    this.numberFormat = '#,##0.00',
-    this.freezeHeaders = true,
-    this.minColumnWidth = 8,
-    this.maxColumnWidth = 60,
-  });
-
-  /// Background of the header band and the row header.
-  final int headerFill;
-
-  /// Background of summary rows/columns (headers and cells).
-  final int summaryFill;
-
-  /// Backgrounds of data cells by level: row depth + column depth, from
-  /// `0`; the last entry repeats for deeper cells.
-  final List<int> levelFills;
-
-  final int borderColor;
-
-  /// Excel number format applied to numeric cells.
-  final String numberFormat;
-
-  /// Freeze panes at the corner, so headers stay visible while scrolling.
-  final bool freezeHeaders;
-
-  /// Bounds of the content-sized column widths, in characters.
-  final double minColumnWidth;
-  final double maxColumnWidth;
-}
 
 /// Writes a [CubeLayout] — the rows and columns exactly as expanded — as a
 /// formatted worksheet.
@@ -54,14 +18,14 @@ final class XlsxCubeStyle {
 final class XlsxCubeExporter {
   const XlsxCubeExporter({
     this.strings = const TesseraStringsEn(),
-    this.style = const XlsxCubeStyle(),
+    this.theme = const XlsxCubeTheme(),
     this.emptyGroupLabel,
     this.rowSummaryLabel,
     this.columnSummaryLabel,
   });
 
   final TesseraStrings strings;
-  final XlsxCubeStyle style;
+  final XlsxCubeTheme theme;
 
   /// Overrides of the localized header texts, as on `CubeView`.
   final String? emptyGroupLabel;
@@ -97,8 +61,8 @@ final class _Export {
   _Export(this.exporter, this.layout, this.aggregates, String sheetName)
     : writer = XlsxWriter(
         sheetName: sheetName,
-        numberFormat: exporter.style.numberFormat,
-        borderColor: exporter.style.borderColor,
+        numberFormat: exporter.theme.numberFormat,
+        borderColor: exporter.theme.borderColor,
       ),
       grid = CubeGrid.of(
         layout,
@@ -115,7 +79,7 @@ final class _Export {
   final XlsxWriter writer;
   final CubeGrid grid;
 
-  XlsxCubeStyle get style => exporter.style;
+  XlsxCubeTheme get theme => exporter.theme;
 
   /// Longest text per sheet column, for the widths.
   final _longest = <int, int>{};
@@ -141,30 +105,35 @@ final class _Export {
     for (final e in _longest.entries) {
       writer.columnWidth(
         e.key,
-        (e.value * 1.1 + 2).clamp(style.minColumnWidth, style.maxColumnWidth),
+        (e.value * 1.1 + 2).clamp(theme.minColumnWidth, theme.maxColumnWidth),
       );
     }
-    if (style.freezeHeaders) {
+    if (theme.freezeHeaders) {
       writer.freeze(rows: grid.headerRows, columns: grid.headerColumns);
     }
     return writer.build();
   }
 
-  /// Header cells on the header fill (summary fill when on the summary),
-  /// data cells on their level's fill; summaries bold.
+  /// Header cells on the header fill in the header font, data cells on
+  /// their level's fill in the cell font; anything on a summary row or
+  /// column takes the summary fill and font.
   int _styleOf(GridCell cell) {
     if (cell.kind == GridCellKind.data) {
-      final fills = style.levelFills;
+      final fills = theme.levelFills;
       final fill = cell.isSummary
-          ? style.summaryFill
+          ? theme.summaryFill
           : fills.isEmpty
           ? 0xFFFFFFFF
           : fills[cell.level.clamp(0, fills.length - 1)];
-      return writer.style(fill, bold: cell.isSummary, right: true);
+      return writer.style(
+        fill,
+        font: cell.isSummary ? theme.summaryFont : theme.cellFont,
+        right: true,
+      );
     }
     return writer.style(
-      cell.isSummary ? style.summaryFill : style.headerFill,
-      bold: cell.isSummary,
+      cell.isSummary ? theme.summaryFill : theme.headerFill,
+      font: cell.isSummary ? theme.summaryFont : theme.headerFont,
       right: cell.alignRight,
     );
   }

@@ -29,8 +29,10 @@ the root, ignored; members carry `resolution: workspace`):
   `xml`. Both directions in one package (same OOXML machinery, one
   format = one package): `XlsxDataSource` (streams one worksheet's rows,
   typed cells, `fromData`/`fromBytes`, `XlsxOptions`) and
-  `XlsxCubeExporter` (renders a `CubeLayout` with `AxisGeometry` merges,
-  `XlsxCubeStyle` with ARGB ints, `TesseraStrings` labels). Own OOXML
+  `XlsxCubeExporter` (renders a `CubeLayout` from `CubeGrid`,
+  `XlsxCubeTheme` — fills, border, `XlsxFont` per role (cell/header/
+  summary) with colour, number format, `brand(primary:)` preset,
+  `gradient`/`mix` helpers; ARGB ints only — `TesseraStrings` labels). Own OOXML
   code on `archive` + `xml`, no third-party spreadsheet layer.
   Reader implemented: `xlsx_workbook.dart` (`XlsxWorkbook.parse`: zip →
   sheets via workbook rels, shared strings incl. rich runs, `cellXfs` →

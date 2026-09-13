@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 
+import 'xlsx_cube_theme.dart';
+
 /// A minimal `.xlsx` package writer: one worksheet, shared strings, a
 /// style registry (fills, bold, alignment, one number format, thin
 /// borders), merged cells, column widths and frozen panes. Internal to
@@ -20,6 +22,7 @@ final class XlsxWriter {
   final _sharedStrings = <String>[];
   final _sharedIndex = <String, int>{};
   final _fills = <int>[];
+  final _fonts = <XlsxFont>[];
   final _styles = <_Xf>[];
   final _styleIndex = <_Xf, int>{};
   final _rows = <int, StringBuffer>{};
@@ -28,15 +31,20 @@ final class XlsxWriter {
   int _lastRow = 0, _lastColumn = 0;
   ({int rows, int columns})? _freeze;
 
-  /// Style index for a cell with [fill] (ARGB), bold or not, right- or
+  /// Style index for a cell with [fill] (ARGB) and [font], right- or
   /// left-aligned; registered on first use.
-  int style(int fill, {bool bold = false, bool right = false}) {
+  int style(int fill, {XlsxFont font = const XlsxFont(), bool right = false}) {
     var fillId = _fills.indexOf(fill);
     if (fillId < 0) {
       _fills.add(fill);
       fillId = _fills.length - 1;
     }
-    final xf = _Xf(fillId, bold, right);
+    var fontId = _fonts.indexOf(font);
+    if (fontId < 0) {
+      _fonts.add(font);
+      fontId = _fonts.length - 1;
+    }
+    final xf = _Xf(fillId, fontId, right);
     return _styleIndex.putIfAbsent(xf, () {
       _styles.add(xf);
       return _styles.length - 1;
@@ -168,10 +176,18 @@ final class XlsxWriter {
     b.write(
       '<numFmts count="1"><numFmt numFmtId="164" formatCode="${escape(numberFormat)}"/></numFmts>',
     );
-    b.write(
-      '<fonts count="2"><font><sz val="10"/><name val="Arial"/></font>'
-      '<font><b/><sz val="10"/><name val="Arial"/></font></fonts>',
-    );
+    // font 0 is the workbook default; the registered ones follow
+    b.write('<fonts count="${_fonts.length + 1}">');
+    b.write('<font><sz val="10"/><name val="Arial"/></font>');
+    for (final f in _fonts) {
+      b.write(
+        '<font>${f.bold ? '<b/>' : ''}${f.italic ? '<i/>' : ''}'
+        '<sz val="${f.size == f.size.truncateToDouble() ? f.size.toInt() : f.size}"/>'
+        '<color rgb="${_argb(f.color)}"/>'
+        '<name val="${escape(f.family)}"/></font>',
+      );
+    }
+    b.write('</fonts>');
     // fill 0 (none) and 1 (gray125) are reserved by Excel
     b.write('<fills count="${_fills.length + 2}">');
     b.write('<fill><patternFill patternType="none"/></fill>');
@@ -196,7 +212,7 @@ final class XlsxWriter {
     b.write('<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>');
     for (final s in _styles) {
       b.write(
-        '<xf numFmtId="164" fontId="${s.bold ? 1 : 0}" fillId="${s.fillId + 2}" '
+        '<xf numFmtId="164" fontId="${s.fontId + 1}" fillId="${s.fillId + 2}" '
         'borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" '
         'applyBorder="1" applyAlignment="1">'
         '<alignment horizontal="${s.right ? 'right' : 'left'}" vertical="center"/></xf>',
@@ -267,19 +283,19 @@ final class XlsxWriter {
 }
 
 final class _Xf {
-  const _Xf(this.fillId, this.bold, this.right);
+  const _Xf(this.fillId, this.fontId, this.right);
 
   final int fillId;
-  final bool bold;
+  final int fontId;
   final bool right;
 
   @override
   bool operator ==(Object other) =>
       other is _Xf &&
       other.fillId == fillId &&
-      other.bold == bold &&
+      other.fontId == fontId &&
       other.right == right;
 
   @override
-  int get hashCode => Object.hash(fillId, bold, right);
+  int get hashCode => Object.hash(fillId, fontId, right);
 }

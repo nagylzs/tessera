@@ -264,6 +264,50 @@ void main() {
     expect(flatGrid.any((r) => r.contains('Total')), isFalse);
   });
 
+  test('theme: fonts, fills, brand preset and gradient', () async {
+    // a column axis, so there are data cells off the summary column
+    final cube = Cube(
+      facts: f,
+      spec: CubeSpec(
+        rows: CubeAxis.of([region]),
+        columns: CubeAxis.of([category]),
+        aggregates: [sumQty],
+      ),
+    );
+    final theme = XlsxCubeTheme.brand(
+      primary: 0xFF1A73E8,
+      fontFamily: 'Calibri',
+      levels: 3,
+    );
+    expect(theme.headerFill, 0xFF1A73E8);
+    expect(theme.headerFont.color, 0xFFFFFFFF);
+    expect(theme.levelFills.length, 3);
+    expect(theme.levelFills.first, 0xFFFFFFFF);
+    expect(XlsxCubeTheme.mix(0xFF000000, 0xFFFFFFFF, 0.5), 0xFF808080);
+    expect(XlsxCubeTheme.gradient(0xFF000000, 0xFF0000FF, 3), [
+      0xFF000000,
+      0xFF000080,
+      0xFF0000FF,
+    ]);
+    expect(XlsxCubeTheme.gradient(0xFF123456, 0xFF000000, 1), [0xFF123456]);
+    final xlsx = XlsxCubeExporter(
+      theme: theme.copyWith(
+        cellFont: const XlsxFont(family: 'Georgia', size: 12, italic: true),
+      ),
+    ).export(cube.layout);
+    final styles = utf8.decode(
+      ZipDecoder().decodeBytes(xlsx).find('xl/styles.xml')!.content,
+    );
+    expect(styles, contains('<fgColor rgb="FF1A73E8"/>'));
+    expect(styles, contains('<name val="Calibri"/>'));
+    expect(styles, contains('<i/><sz val="12"/>'));
+    expect(styles, contains('<name val="Georgia"/>'));
+    expect(styles, contains('<b/>')); // summary font
+    expect(styles, contains('<color rgb="FFFFFFFF"/>')); // header text
+    // still a valid grid
+    expect((await grid(xlsx)).last.first, 'Total');
+  });
+
   test('LibreOffice opens the export and reads the same grid', () async {
     if (Process.runSync('which', ['soffice']).exitCode != 0) {
       markTestSkipped('soffice not installed');
