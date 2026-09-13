@@ -19,9 +19,17 @@ the root, ignored; members carry `resolution: workspace`):
   `lib/tessera_flutter.dart` re-exports `package:tessera/tessera.dart`
   so apps need one import. Its `example/` is the demo app (a workspace
   member too; pub.dev's Example tab picks it up from here).
-- Planned: exporters (`tessera_xlsx`, `tessera_pdf`, …) as further
-  pure-Dart packages that render a `CubeLayout`; HTML export can live in
-  the engine (no deps).
+- `packages/tessera_xlsx` — pure Dart, depends on `tessera`, `archive`,
+  `xml`. Both directions in one package (same OOXML machinery, one
+  format = one package): `XlsxDataSource` (streams one worksheet's rows,
+  typed cells, `fromData`/`fromBytes`, `XlsxOptions`) and
+  `XlsxCubeExporter` (renders a `CubeLayout` with `AxisGeometry` merges,
+  `XlsxCubeStyle` with ARGB ints, `TesseraStrings` labels). **Scaffold
+  only: every method throws `UnimplementedError`.** Plan: own OOXML code
+  on `archive` + `xml` (streaming reader; the `excel` package
+  materialises whole workbooks), not a third-party layer.
+- Planned: further exporters (`tessera_pdf`, …) the same way; HTML export
+  can live in the engine (no deps).
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a
 package that depends on Flutter cannot be used with the standalone Dart
@@ -34,6 +42,7 @@ inside a Flutter package does not help.
 dart pub get                                   # at the root: resolves all members
 dart analyze                                   # at the root: all packages, must be clean
 (cd packages/tessera && dart test)             # engine tests (package:test, no Flutter)
+(cd packages/tessera_xlsx && dart test)        # xlsx package (pure Dart)
 (cd packages/tessera_flutter && flutter test)  # widget tests
 (cd packages/tessera_flutter/example && flutter test)
 dart format packages                           # run before committing
