@@ -240,7 +240,7 @@ void main() {
 
     testWidgets('renders headers, values and blanks', (tester) async {
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       // corner: dimension titles
       expect(find.text('category'), findsOneWidget);
@@ -270,7 +270,7 @@ void main() {
         host(
           CubeView(
             controller: controller,
-            aggregate: sumQty,
+            aggregates: [sumQty],
             emptyGroupLabel: '—',
             rowSummaryLabel: 'All rows',
             columnSummaryLabel: 'All columns',
@@ -299,7 +299,7 @@ void main() {
         host(
           CubeView(
             controller: controller,
-            aggregate: sumQty,
+            aggregates: [sumQty],
             theme: const CubeTheme(
               headerTextStyle: TextStyle(color: Colors.purple),
             ),
@@ -311,7 +311,7 @@ void main() {
         host(
           CubeView(
             controller: controller,
-            aggregate: sumQty,
+            aggregates: [sumQty],
             theme: const CubeTheme(
               headerTextStyle: TextStyle(color: Colors.purple),
               headerIconColor: Colors.orange,
@@ -322,7 +322,7 @@ void main() {
       expect(iconColor(), Colors.orange);
       // by default: the ambient text colour, not the ambient icon colour
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       final scheme = Theme.of(tester.element(find.text('Asia'))).colorScheme;
       expect(iconColor(), isNot(scheme.onSurfaceVariant));
@@ -334,7 +334,7 @@ void main() {
 
     testWidgets('expanding a row group through the icon', (tester) async {
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       expect(find.text('Germany'), findsNothing);
       await tester.tap(toggleIconOf('Europe'));
@@ -356,7 +356,7 @@ void main() {
         host(
           CubeView(
             controller: controller,
-            aggregate: sumQty,
+            aggregates: [sumQty],
             expansionLimit: 2,
             confirmExpansion: (context, entry, {required isRow}) async {
               asked.add('${entry.label}:${entry.childCount}:$isRow');
@@ -384,7 +384,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       expect(find.byIcon(Icons.arrow_upward), findsNWidgets(3));
       await tester.tap(find.text('region'));
@@ -422,7 +422,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       // columns: ∅, A, B, Σ → the second "sum of qty" is under A
       await tester.tap(find.text('sum of qty').at(1));
@@ -461,7 +461,11 @@ void main() {
     testWidgets('sortable: false ignores taps', (tester) async {
       await tester.pumpWidget(
         host(
-          CubeView(controller: controller, aggregate: sumQty, sortable: false),
+          CubeView(
+            controller: controller,
+            aggregates: [sumQty],
+            sortable: false,
+          ),
         ),
       );
       await tester.tap(find.text('region'));
@@ -477,7 +481,7 @@ void main() {
       addTearDown(tester.view.reset);
       controller.cube = controller.cube.toggleRow(europe);
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       AxisSort? own() => controller.cube.spec.rows.dimensions[1].sort;
       List<String> europeChildren() => [
@@ -526,7 +530,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       // long press opens the menu
       await tester.longPress(find.text('region'));
@@ -556,7 +560,7 @@ void main() {
 
     testWidgets('the title menu sets the sort direction', (tester) async {
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       // secondary click opens the menu
       await tester.tap(find.text('region'), buttons: kSecondaryButton);
@@ -588,7 +592,11 @@ void main() {
     ) async {
       await tester.pumpWidget(
         host(
-          CubeView(controller: controller, aggregate: sumQty, sortable: false),
+          CubeView(
+            controller: controller,
+            aggregates: [sumQty],
+            sortable: false,
+          ),
         ),
       );
       await tester.tap(menuButtonOf('region'));
@@ -604,7 +612,7 @@ void main() {
         host(
           CubeView(
             controller: controller,
-            aggregate: sumQty,
+            aggregates: [sumQty],
             expansionLimit: 2,
             confirmLevelExpansion:
                 (context, dimension, added, {required isRow}) async {
@@ -631,7 +639,7 @@ void main() {
         host(
           CubeView(
             controller: CubeController(controller.cube.collapseRowLevel(0)),
-            aggregate: sumQty,
+            aggregates: [sumQty],
             expansionLimit: 2,
           ),
         ),
@@ -668,7 +676,7 @@ void main() {
         host(
           CubeView(
             controller: CubeController(cube.toggleRow(europe).toggleColumn(a)),
-            aggregate: sumQty,
+            aggregates: [sumQty],
             theme: CubeTheme(
               levelColor: (level) {
                 seen.add((level.depth, level.maxDepth));
@@ -706,7 +714,7 @@ void main() {
       final a = DimensionPath([const DimensionValue(category, 'A')]);
       final controller = CubeController(cube);
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       expect(
         borders().every((b) => b.rightFrom == 0 && b.bottomFrom == 0),
@@ -800,7 +808,7 @@ void main() {
         host(
           CubeView(
             controller: controller,
-            aggregate: sumQty,
+            aggregates: [sumQty],
             onCellTap: tapped.add,
           ),
         ),
@@ -818,7 +826,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         controller.selection,
-        CellAddress(row: europe, column: DimensionPath.root),
+        CellAddress(row: europe, column: DimensionPath.root, aggregate: sumQty),
       );
       expect(controller.currentCell!.factCount, 4);
       expect(tapped.single.factCount, 4);
@@ -862,7 +870,7 @@ void main() {
         host(
           CubeView(
             controller: controller,
-            aggregate: sumQty,
+            aggregates: [sumQty],
             selectable: false,
             onCellTap: tapped.add,
           ),
@@ -880,7 +888,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       // rows: ∅, Asia, Europe, Σ; columns: ∅, A, B, Σ
       final asia = DimensionPath([const DimensionValue(region, 'Asia')]);
@@ -949,7 +957,7 @@ void main() {
               height: 120,
               child: CubeView(
                 controller: controller,
-                aggregate: sumQty,
+                aggregates: [sumQty],
                 autofocus: true,
               ),
             ),
@@ -986,7 +994,7 @@ void main() {
         host(
           CubeView(
             controller: controller,
-            aggregate: sumQty,
+            aggregates: [sumQty],
             onCellTap: (c) => tapped = c,
           ),
         ),
@@ -1015,7 +1023,9 @@ void main() {
         ),
       ).toggleRow(europe);
       final c = CubeController(cube);
-      await tester.pumpWidget(host(CubeView(controller: c, aggregate: sumQty)));
+      await tester.pumpWidget(
+        host(CubeView(controller: c, aggregates: [sumQty])),
+      );
       // rows: Σ, ∅, Asia, Europe, ∅, Germany, Hungary; columns: ∅, A, B
       expect(cube.layout.rows.entries.first.isSummary, isTrue);
       expect(cube.layout.columns.entries.any((e) => e.isSummary), isFalse);
@@ -1062,7 +1072,9 @@ void main() {
       var c = CubeController(
         cube(SubtotalPosition.bottom, SubtotalPosition.bottom),
       );
-      await tester.pumpWidget(host(CubeView(controller: c, aggregate: sumQty)));
+      await tester.pumpWidget(
+        host(CubeView(controller: c, aggregates: [sumQty])),
+      );
       final rowsBelow = c.cube.layout.rows.entries.map((e) => e.label).toList();
       expect(
         rowsBelow.indexOf('Europe'),
@@ -1075,7 +1087,9 @@ void main() {
       c = CubeController(
         cube(SubtotalPosition.hidden, SubtotalPosition.hidden),
       );
-      await tester.pumpWidget(host(CubeView(controller: c, aggregate: sumQty)));
+      await tester.pumpWidget(
+        host(CubeView(controller: c, aggregates: [sumQty])),
+      );
       expect(c.cube.layout.rows.indexOf(europe), -1);
       expect(find.text('Europe'), findsOneWidget);
       expect(find.text('Germany'), findsOneWidget);
@@ -1088,6 +1102,90 @@ void main() {
       expect(c.cube.layout.rows.indexOf(europe), greaterThanOrEqualTo(0));
     });
 
+    testWidgets('several aggregates: one column each under every entry', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(2200, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final count = Aggregate.count;
+      final c = CubeController(
+        Cube(
+          facts: f,
+          spec: CubeSpec(
+            rows: CubeAxis.of([region]),
+            columns: CubeAxis.of([category]),
+            aggregates: [sumQty, count],
+          ),
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 2100,
+              height: 700,
+              child: CubeView(controller: c), // null → both, spec order
+            ),
+          ),
+        ),
+      );
+      // columns ∅, A, B, Σ → 4 × 2 aggregate labels
+      expect(find.text('sum of qty'), findsNWidgets(4));
+      expect(find.text('count'), findsNWidgets(4));
+      // each entry's label is one merged cell over its two value columns:
+      // the label text appears once, and the grid has 1 + 8 columns
+      expect(find.text('A'), findsOneWidget);
+      int columnCount() =>
+          (tester.widget<TableView>(find.byType(TableView)).delegate
+                  as TableCellBuilderDelegate)
+              .columnCount!;
+      expect(columnCount(), 1 + 4 * 2);
+      // Europe × A: sum 8, count 2; Σ × Σ: sum 28, count 8
+      expect(find.text('8'), findsNWidgets(2)); // Europe×A sum, Σ×Σ count
+      expect(find.text('28'), findsOneWidget);
+      // sorting by the count under A: only that value column is the key
+      await tester.tap(find.text('count').at(1));
+      await tester.pumpAndSettle();
+      final sort = c.cube.spec.rows.sortAt(0);
+      expect(sort.by, SortBy.aggregate);
+      expect(sort.aggregate, count);
+      expect(
+        sort.keyPath,
+        DimensionPath([const DimensionValue(category, 'A')]),
+      );
+      expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
+      // selection names the aggregate; arrows walk the value columns
+      await tester.tap(find.text('28'));
+      await tester.pumpAndSettle();
+      expect(c.selection!.aggregate, sumQty);
+      expect(c.selection!.column.isRoot, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(c.selection!.aggregate, count);
+      expect(c.selection!.column.isRoot, isTrue); // same entry, next column
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(c.selection!.aggregate, count);
+      expect(c.selection!.column.isRoot, isFalse); // B's count
+      // a subset in a chosen order
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 2100,
+              height: 700,
+              child: CubeView(controller: c, aggregates: [count]),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('sum of qty'), findsNothing);
+      expect(find.text('count'), findsNWidgets(4));
+      expect(columnCount(), 1 + 4);
+    });
+
     testWidgets('empty axes render a single summary cell', (tester) async {
       controller = CubeController(
         Cube(
@@ -1096,7 +1194,7 @@ void main() {
         ),
       );
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       expect(find.text('Total'), findsNWidgets(2));
       expect(find.text('28'), findsOneWidget);
@@ -1115,7 +1213,7 @@ void main() {
         ).toggleColumn(DimensionPath([const DimensionValue(category, 'A')])),
       );
       await tester.pumpWidget(
-        host(CubeView(controller: controller, aggregate: sumQty)),
+        host(CubeView(controller: controller, aggregates: [sumQty])),
       );
       expect(find.text('A'), findsOneWidget);
       expect(find.text('Germany'), findsOneWidget);
@@ -1166,7 +1264,7 @@ void main() {
               ),
             ),
           ),
-          aggregate: aggregate,
+          aggregates: [aggregate],
           theme: theme,
         );
 
@@ -1294,7 +1392,7 @@ void main() {
           host(
             CubeView(
               controller: controller,
-              aggregate: sumAmount,
+              aggregates: [sumAmount],
               keepColumnWidths: keep,
             ),
           ),

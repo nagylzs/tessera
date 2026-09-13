@@ -22,7 +22,7 @@ concepts (data sources, schema inference, fact tables, cube specs).
 | `CubeController` | The single mutable object: holds the current `Cube`, applies expand/collapse, sort and spec changes, notifies listeners. |
 | `CubeView` | The grid. Built on `TableView` from `two_dimensional_scrollables`: lazy cells, pinned and merged group headers, expand/collapse icons, sort by tapping headers. |
 | `AxisEditor` | Chips for the dimensions of one axis; drag-and-drop within and between axes, delete, `+` opens `showDimensionPicker`. |
-| `AggregateEditor` | Chips for the aggregates; `+` opens `showAggregatePicker`; `selected`/`onSelected` let the app choose what `CubeView` shows. |
+| `AggregateEditor` | Chips for the aggregates; `+` opens `showAggregatePicker`; `selected`/`onSelectedChanged` let the app choose which of them `CubeView` shows. |
 | `CubeTheme` | Colours, sizes and text styles; defaults to the ambient Material theme. |
 | `TesseraLocalizations` | `delegate`, `supportedLocales` and `of(context)` for the engine's `TesseraStrings`. |
 
@@ -41,7 +41,9 @@ Column(
     Expanded(
       child: CubeView(
         controller: controller,
-        aggregate: Aggregate.sum(const Measure('total')),
+        // one value column per aggregate under each column entry;
+        // omit to show every aggregate of the spec
+        aggregates: [Aggregate.sum(const Measure('total')), Aggregate.count],
         formatCell: (cell, value) => myNumberFormat.format(value),
       ),
     ),
@@ -50,8 +52,8 @@ Column(
 ```
 
 Expand and collapse groups with the `+`/`−` icons; tap a dimension name to
-sort that level by value, or the aggregate name under a column to sort the
-rows by that column. A level without a sort of its own follows the level
+sort that level by value, or an aggregate name under a column to sort the
+rows by that value column. A level without a sort of its own follows the level
 above (`AxisDimension.sort == null`), so a deeper level's name cycles
 through the opposite direction, the same direction, and inheriting again.
 Every dimension name also has a menu (its `▾` button, a long press, or a

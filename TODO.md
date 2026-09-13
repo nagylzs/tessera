@@ -5,12 +5,10 @@ through these in order, then publish.
 
 ## API decisions (cheap now, expensive after the first release)
 
-- [ ] `CubeView` shows one aggregate per cell while every exporter renders
-      all selected aggregates side by side. Decide: support several
-      aggregates in the widget (`aggregate` → `aggregates`, one column per
-      aggregate under each column entry, `AggregateEditor` selection
-      becomes a set), or keep the single-aggregate view for 0.1 and
-      document the difference in the README.
+- [x] `CubeView` shows one aggregate per cell while every exporter renders
+      all selected aggregates side by side. Decided: several aggregates in
+      the widget (`aggregates`, one column per aggregate under each column
+      entry, `AggregateEditor` selection is a set).
 - [x] Exporters return `String` (csv, html, svg), `Uint8List` (xlsx, ods)
       or `Future<Uint8List>` (pdf, forced by `package:pdf`). Keep, but say
       so in each README.

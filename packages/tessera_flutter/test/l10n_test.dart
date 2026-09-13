@@ -124,7 +124,7 @@ void main() {
                 Expanded(
                   child: CubeView(
                     controller: controller,
-                    aggregate: Aggregate.sum(total),
+                    aggregates: [Aggregate.sum(total)],
                   ),
                 ),
               ],
@@ -149,7 +149,7 @@ void main() {
           home: Scaffold(
             body: CubeView(
               controller: controller,
-              aggregate: Aggregate.sum(total),
+              aggregates: [Aggregate.sum(total)],
               rowSummaryLabel: 'Mind',
             ),
           ),

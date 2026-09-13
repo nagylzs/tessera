@@ -33,10 +33,12 @@ final class ColumnWidthMeasurer {
   static const _measured = 4;
 
   /// Widths of the `headerColumns` row-header columns followed by one per
-  /// column entry, each clamped to the theme's bounds.
+  /// column entry and aggregate (entry-major: all of the first entry's
+  /// aggregates, then the second entry's, …; at least one per entry), each
+  /// clamped to the theme's bounds.
   ///
-  /// [formatCell] formats a cell's value for [aggregate], whose header text
-  /// is [aggregateLabel]; [rowLabel] / [columnLabel] render a header
+  /// [formatCell] formats a cell's value for an aggregate, whose header
+  /// text is [aggregateLabel]; [rowLabel] / [columnLabel] render a header
   /// entry's text and [titleLabel] a dimension's title.
   /// [iconWidth] is the room for the expand/sort icons next to a text;
   /// titles get twice that, for the sort icon and the menu button.
@@ -44,8 +46,8 @@ final class ColumnWidthMeasurer {
   List<double> measure({
     required CubeLayout layout,
     required int headerColumns,
-    required Aggregate? aggregate,
-    required String aggregateLabel,
+    required List<Aggregate> aggregates,
+    required String Function(Aggregate aggregate) aggregateLabel,
     required String Function(CubeCell cell, Object? value, bool summary)
     formatCell,
     required String Function(HeaderEntry entry) rowLabel,
@@ -98,12 +100,14 @@ final class ColumnWidthMeasurer {
     }
 
     // -------------------------------------------------------- data columns
-    final data = List.generate(columns.length, (_) => _Candidates());
+    final perEntry = math.max(aggregates.length, 1);
+    final data = List.generate(columns.length * perEntry, (_) => _Candidates());
     for (var j = 0; j < columns.length; j++) {
       final e = columns[j];
-      // Expanded parents span their children, so only labels that stay in
-      // one column count.
-      if (layout.columns.descendantCount(j) == 0) {
+      // Expanded parents span their children, and an entry with several
+      // aggregates spans their columns, so only labels that stay in one
+      // column count.
+      if (layout.columns.descendantCount(j) == 0 && perEntry == 1) {
         data[j].add(
           columnLabel(e),
           header: true,
@@ -112,10 +116,18 @@ final class ColumnWidthMeasurer {
         );
       }
     }
-    if (aggregate != null) {
-      for (final c in data) {
-        c.add(aggregateLabel, header: true, bold: false, extra: iconWidth);
+    for (var a = 0; a < aggregates.length; a++) {
+      final label = aggregateLabel(aggregates[a]);
+      for (var j = 0; j < columns.length; j++) {
+        data[j * perEntry + a].add(
+          label,
+          header: true,
+          bold: false,
+          extra: iconWidth,
+        );
       }
+    }
+    if (aggregates.isNotEmpty) {
       var visited = 0;
       for (var i = 0; i < rows.length; i++) {
         final rowEntry = rows[i];
@@ -124,12 +136,14 @@ final class ColumnWidthMeasurer {
           final cell = layout.cellAt(i, j);
           if (cell.isEmpty) continue;
           final summary = rowEntry.isSummary || columns[j].isSummary;
-          data[j].add(
-            formatCell(cell, cell.aggregate<Object?>(aggregate), summary),
-            header: false,
-            bold: summary,
-            extra: 0,
-          );
+          for (var a = 0; a < aggregates.length; a++) {
+            data[j * perEntry + a].add(
+              formatCell(cell, cell.aggregate<Object?>(aggregates[a]), summary),
+              header: false,
+              bold: summary,
+              extra: 0,
+            );
+          }
         }
       }
     }

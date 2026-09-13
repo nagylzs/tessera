@@ -51,7 +51,7 @@ typedef LevelExpansionConfirmation = Future<bool> Function(
 ///
 /// Interaction: `+`/`−` on a group toggles it via the [controller]; tapping
 /// a dimension name sorts that level by value (tap again to flip); tapping
-/// the aggregate name under a column sorts the rows by that column's values
+/// an aggregate name under a column sorts the rows by that value column
 /// (tap again to flip). A level without a sort of its own follows the level
 /// above ([AxisDimension.sort]); tapping a deeper level's name cycles
 /// through the opposite direction, the same direction, and inheriting
@@ -73,12 +73,14 @@ typedef LevelExpansionConfirmation = Future<bool> Function(
 /// the [CubeTheme]'s bounds. Once widened, a column keeps its width for the
 /// life of the view (see [keepColumnWidths]). Rows have a fixed height.
 ///
-/// v1 shows a single [aggregate] per cell. Needs a [Material] ancestor.
+/// Every column entry has one value column per aggregate in [aggregates]
+/// (the same layout the exporters write), so the aggregate names under a
+/// column entry read "sum of total | count". Needs a [Material] ancestor.
 class CubeView extends StatelessWidget {
   const CubeView({
     super.key,
     required this.controller,
-    required this.aggregate,
+    this.aggregates,
     this.theme = const CubeTheme(),
     this.formatCell,
     this.styleCell,
@@ -99,10 +101,11 @@ class CubeView extends StatelessWidget {
 
   final CubeController controller;
 
-  /// Which of the spec's aggregates to show in the cells. If it is not
-  /// among them (e.g. it was just removed), the spec's first aggregate is
-  /// shown instead; with no aggregates at all, cells stay blank.
-  final Aggregate aggregate;
+  /// Which of the spec's aggregates to show, in this order, one value
+  /// column per aggregate under each column entry. `null` shows every
+  /// aggregate of the spec. Entries not in the spec (e.g. just removed)
+  /// are skipped; with none left, cells stay blank.
+  final List<Aggregate>? aggregates;
 
   final CubeTheme theme;
 
@@ -200,9 +203,24 @@ class _CubeGridState extends State<_CubeGrid> {
   FocusNode get _focusNode =>
       view.focusNode ?? (_ownFocusNode ??= FocusNode(debugLabel: 'CubeView'));
 
-  /// Indices of the current cell in [layout], or `-1` (set in [build]).
+  /// Indices of the current cell in [layout] (entry and aggregate), or
+  /// `-1`; set in [build] and before handling a key, so key repeats that
+  /// arrive before the next frame see the selection they just moved.
   int _selectedRow = -1;
   int _selectedColumn = -1;
+  int _selectedAggregate = -1;
+
+  void _resolveSelection() {
+    final selection = view.selectable ? view.controller.selection : null;
+    _selectedRow = selection == null ? -1 : layout.rows.indexOf(selection.row);
+    _selectedColumn = selection == null
+        ? -1
+        : layout.columns.indexOf(selection.column);
+    // an address without an aggregate (or one no longer shown) means the
+    // entry's first value column
+    final a = selection?.aggregate;
+    _selectedAggregate = a == null ? 0 : math.max(shown.indexOf(a), 0);
+  }
 
   @override
   void dispose() {
@@ -223,10 +241,22 @@ class _CubeGridState extends State<_CubeGrid> {
 
   CubeSpec get spec => layout.spec;
 
-  /// The aggregate actually displayed (see [CubeView.aggregate]).
-  Aggregate? get shown => spec.aggregates.contains(view.aggregate)
-      ? view.aggregate
-      : spec.aggregates.firstOrNull;
+  /// The aggregates actually displayed (see [CubeView.aggregates]).
+  List<Aggregate> get shown {
+    final wanted = view.aggregates;
+    if (wanted == null) return spec.aggregates;
+    return [
+      for (final a in wanted)
+        if (spec.aggregates.contains(a)) a,
+    ];
+  }
+
+  /// Grid columns per column entry.
+  int get perEntry => math.max(shown.length, 1);
+
+  /// Grid column (0-based among the data columns) of column entry [j]'s
+  /// [a]-th aggregate.
+  int _dataColumn(int j, int a) => j * perEntry + a;
   int get rowDepth => spec.rows.depth;
   int get columnDepth => spec.columns.depth;
 
@@ -252,9 +282,10 @@ class _CubeGridState extends State<_CubeGrid> {
   Object? _widthsKey;
 
   /// Widest width seen per row-header column (by dimension id) and per data
-  /// column (by path) under [_memoryKey]; see [CubeView.keepColumnWidths].
+  /// column (by path and aggregate) under [_memoryKey]; see
+  /// [CubeView.keepColumnWidths].
   final _rememberedHeader = <String, double>{};
-  final _rememberedData = <DimensionPath, double>{};
+  final _rememberedData = <(DimensionPath, Aggregate?), double>{};
   Object? _memoryKey;
 
   /// One width per grid column, measured from the content of [layout] and
@@ -269,7 +300,7 @@ class _CubeGridState extends State<_CubeGrid> {
     final cellStyle = defaultStyle.merge(theme.cellTextStyle);
     final headerStyle = defaultStyle.merge(theme.headerTextStyle);
     final memoryKey = (
-      shown,
+      Object.hashAll(shown),
       strings,
       view.formatCell,
       view.measuredRows,
@@ -288,7 +319,6 @@ class _CubeGridState extends State<_CubeGrid> {
     );
     final key = (layout, memoryKey);
     if (_widths != null && _widthsKey == key) return _widths!;
-    final aggregate = shown;
     _widthsKey = key;
     final widths =
         ColumnWidthMeasurer(
@@ -300,10 +330,8 @@ class _CubeGridState extends State<_CubeGrid> {
         ).measure(
           layout: layout,
           headerColumns: headerColumns,
-          aggregate: aggregate,
-          aggregateLabel: aggregate == null
-              ? ''
-              : strings.aggregateLabel(aggregate, layout.facts),
+          aggregates: shown,
+          aggregateLabel: (a) => strings.aggregateLabel(a, layout.facts),
           formatCell: (cell, value, _) =>
               (view.formatCell ?? _defaultFormat)(cell, value),
           rowLabel: (entry) => _entryText(entry, isRow: true),
@@ -334,21 +362,24 @@ class _CubeGridState extends State<_CubeGrid> {
       _rememberedHeader[id] = widths[c];
     }
     final columns = layout.columns.entries;
+    final aggregates = shown;
     for (var j = 0; j < columns.length; j++) {
-      final path = columns[j].path;
-      final w = math.max(widths[headerColumns + j], _rememberedData[path] ?? 0);
-      widths[headerColumns + j] = _rememberedData[path] = w;
+      for (var a = 0; a < perEntry; a++) {
+        final key = (
+          columns[j].path,
+          a < aggregates.length ? aggregates[a] : null,
+        );
+        final c = headerColumns + _dataColumn(j, a);
+        final w = math.max(widths[c], _rememberedData[key] ?? 0);
+        widths[c] = _rememberedData[key] = w;
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final widths = _columnWidths(context);
-    final selection = view.selectable ? view.controller.selection : null;
-    _selectedRow = selection == null ? -1 : layout.rows.indexOf(selection.row);
-    _selectedColumn = selection == null
-        ? -1
-        : layout.columns.indexOf(selection.column);
+    _resolveSelection();
     return Focus(
       focusNode: _focusNode,
       autofocus: view.autofocus && view.selectable,
@@ -372,7 +403,7 @@ class _CubeGridState extends State<_CubeGrid> {
       verticalDetails: ScrollableDetails.vertical(controller: _vertical),
       horizontalDetails: ScrollableDetails.horizontal(controller: _horizontal),
       rowCount: headerRows + layout.rows.length,
-      columnCount: headerColumns + layout.columns.length,
+      columnCount: headerColumns + layout.columns.length * perEntry,
       pinnedRowCount: headerRows,
       pinnedColumnCount: headerColumns,
       columnBuilder: (index) =>
@@ -387,11 +418,12 @@ class _CubeGridState extends State<_CubeGrid> {
         if (r < headerRows && c < headerColumns) {
           return _corner(context, r, c);
         }
+        final d = c - headerColumns;
         if (r < headerRows) {
-          return _columnHeader(context, r, c - headerColumns);
+          return _columnHeader(context, r, d ~/ perEntry, d % perEntry);
         }
         if (c < headerColumns) return _rowHeader(context, r - headerRows, c);
-        return _dataCell(context, r - headerRows, c - headerColumns);
+        return _dataCell(context, r - headerRows, d ~/ perEntry, d % perEntry);
       },
     );
   }
@@ -550,25 +582,30 @@ class _CubeGridState extends State<_CubeGrid> {
 
   // --------------------------------------------------------- column header
 
-  TableViewCell _columnHeader(BuildContext context, int r, int j) {
+  /// Header cell of column entry [j]'s [a]-th value column.
+  TableViewCell _columnHeader(BuildContext context, int r, int j, int a) {
     final entry = layout.columns.entries[j];
+    final aggregates = shown;
     if (r == levelRows) {
-      final isKey = _isSortKeyColumn(entry);
+      final aggregate = a < aggregates.length ? aggregates[a] : null;
+      final isKey = aggregate != null && _isSortKeyColumn(entry, aggregate);
       return TableViewCell(
         child: _box(
           color: entry.isSummary
               ? theme.summaryColor
               : theme.headerLevelColor(_headerLevel(false, entry.depth - 1)),
           alignment: Alignment.centerRight,
-          onTap: view.sortable ? () => _sortRowsByColumn(entry) : null,
+          onTap: view.sortable && aggregate != null
+              ? () => _sortRowsByColumn(entry, aggregate)
+              : null,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(
                 child: Text(
-                  shown == null
+                  aggregate == null
                       ? ''
-                      : strings.aggregateLabel(shown!, layout.facts),
+                      : strings.aggregateLabel(aggregate, layout.facts),
                   style: theme.headerTextStyle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -580,8 +617,13 @@ class _CubeGridState extends State<_CubeGrid> {
         ),
       );
     }
+    // Group labels span the entry's value columns; a merged cell is built
+    // once, from its first grid column.
+    final mergeStart = headerColumns + _dataColumn(j, 0);
     if (columnDepth == 0) {
       return TableViewCell(
+        columnMergeStart: perEntry > 1 ? mergeStart : null,
+        columnMergeSpan: perEntry > 1 ? perEntry : null,
         child: _box(
           color: theme.summaryColor,
           alignment: Alignment.topLeft,
@@ -591,13 +633,14 @@ class _CubeGridState extends State<_CubeGrid> {
     }
     final area = columnGeometry.areaAt(r, j);
     final owner = layout.columns.entryFor(area.path)!;
+    final span = area.entrySpan * perEntry;
     return TableViewCell(
       rowMergeStart: area.levelSpan > 1 ? area.levelStart : null,
       rowMergeSpan: area.levelSpan > 1 ? area.levelSpan : null,
-      columnMergeStart: area.entrySpan > 1
-          ? headerColumns + area.entryStart
+      columnMergeStart: span > 1
+          ? headerColumns + _dataColumn(area.entryStart, 0)
           : null,
-      columnMergeSpan: area.entrySpan > 1 ? area.entrySpan : null,
+      columnMergeSpan: span > 1 ? span : null,
       child: _box(
         // the label and, when expanded, its leg: the whole rotated L
         color: _headerColor(
@@ -607,9 +650,7 @@ class _CubeGridState extends State<_CubeGrid> {
         ),
         alignment: Alignment.topLeft,
         // an expanded group's label and the leg below it form one area
-        bottomBorderFrom: _legAt(area) == 0
-            ? _widths![headerColumns + area.entryStart]
-            : 0,
+        bottomBorderFrom: _legAt(area) == 0 ? _entryWidth(area.entryStart) : 0,
         bottomBorderUntil: _legAt(area) == area.entrySpan - 1
             ? _spanWidth(area, area.entrySpan - 1)
             : double.infinity,
@@ -671,7 +712,16 @@ class _CubeGridState extends State<_CubeGrid> {
   double _spanWidth(HeaderArea area, int count) {
     var w = 0.0;
     for (var k = 0; k < count; k++) {
-      w += _widths![headerColumns + area.entryStart + k];
+      w += _entryWidth(area.entryStart + k);
+    }
+    return w;
+  }
+
+  /// Width of column entry [j]: its value columns together.
+  double _entryWidth(int j) {
+    var w = 0.0;
+    for (var a = 0; a < perEntry; a++) {
+      w += _widths![headerColumns + _dataColumn(j, a)];
     }
     return w;
   }
@@ -745,7 +795,8 @@ class _CubeGridState extends State<_CubeGrid> {
 
   // ------------------------------------------------------------ data cells
 
-  TableViewCell _dataCell(BuildContext context, int i, int j) {
+  /// Data cell of row entry [i] × column entry [j], [a]-th aggregate.
+  TableViewCell _dataCell(BuildContext context, int i, int j, int a) {
     final rowEntry = layout.rows.entries[i];
     final colEntry = layout.columns.entries[j];
     final cell = layout.cellAt(i, j);
@@ -761,11 +812,12 @@ class _CubeGridState extends State<_CubeGrid> {
               columnLevels: columnDepth,
             ),
           );
-    if (_isSortKeyColumn(colEntry)) {
+    final aggregates = shown;
+    final aggregate = a < aggregates.length ? aggregates[a] : null;
+    if (aggregate != null && _isSortKeyColumn(colEntry, aggregate)) {
       color = Color.alphaBlend(theme.sortKeyColor, color);
     }
     Widget child = const SizedBox();
-    final aggregate = shown;
     if (!cell.isEmpty && aggregate != null) {
       final value = cell.aggregate<Object?>(aggregate);
       final text = (view.formatCell ?? _defaultFormat)(cell, value);
@@ -782,7 +834,8 @@ class _CubeGridState extends State<_CubeGrid> {
       );
     }
     final onTap = view.onCellTap;
-    final selected = i == _selectedRow && j == _selectedColumn;
+    final selected =
+        i == _selectedRow && j == _selectedColumn && a == _selectedAggregate;
     return TableViewCell(
       child: Semantics(
         selected: selected,
@@ -797,6 +850,7 @@ class _CubeGridState extends State<_CubeGrid> {
                     view.controller.selection = CellAddress(
                       row: rowEntry.path,
                       column: colEntry.path,
+                      aggregate: aggregate,
                     );
                   }
                   onTap?.call(cell);
@@ -872,35 +926,43 @@ class _CubeGridState extends State<_CubeGrid> {
                 .floor(),
           )
         : 10;
+    _resolveSelection();
     final key = _navigationKey(event);
     if (key == LogicalKeyboardKey.escape) {
       view.controller.selection = null;
       return KeyEventResult.handled;
     }
+    // horizontal movement walks the value columns: entry × aggregate
+    final dataColumns = columns * perEntry;
     final i = _selectedRow < 0 ? 0 : _selectedRow;
-    final j = _selectedColumn < 0 ? 0 : _selectedColumn;
+    final d = _selectedColumn < 0
+        ? 0
+        : _dataColumn(_selectedColumn, _selectedAggregate);
     final ctrl = HardwareKeyboard.instance.isControlPressed;
     final (int, int)? target = switch (key) {
-      LogicalKeyboardKey.arrowUp => (i - 1, j),
-      LogicalKeyboardKey.arrowDown => (i + 1, j),
-      LogicalKeyboardKey.arrowLeft => (i, j - 1),
-      LogicalKeyboardKey.arrowRight => (i, j + 1),
-      LogicalKeyboardKey.home => ctrl ? (0, j) : (i, 0),
-      LogicalKeyboardKey.end => ctrl ? (rows - 1, j) : (i, columns - 1),
-      LogicalKeyboardKey.pageUp => (i - page, j),
-      LogicalKeyboardKey.pageDown => (i + page, j),
+      LogicalKeyboardKey.arrowUp => (i - 1, d),
+      LogicalKeyboardKey.arrowDown => (i + 1, d),
+      LogicalKeyboardKey.arrowLeft => (i, d - 1),
+      LogicalKeyboardKey.arrowRight => (i, d + 1),
+      LogicalKeyboardKey.home => ctrl ? (0, d) : (i, 0),
+      LogicalKeyboardKey.end => ctrl ? (rows - 1, d) : (i, dataColumns - 1),
+      LogicalKeyboardKey.pageUp => (i - page, d),
+      LogicalKeyboardKey.pageDown => (i + page, d),
       _ => null,
     };
     if (target != null) {
       // with nothing selected, any movement key selects the first cell
-      final (ti, tj) = _selectedRow < 0 || _selectedColumn < 0
+      final (ti, td) = _selectedRow < 0 || _selectedColumn < 0
           ? (0, 0)
-          : (target.$1.clamp(0, rows - 1), target.$2.clamp(0, columns - 1));
+          : (target.$1.clamp(0, rows - 1), target.$2.clamp(0, dataColumns - 1));
+      final tj = td ~/ perEntry, ta = td % perEntry;
+      final aggregates = shown;
       view.controller.selection = CellAddress(
         row: layout.rows.entries[ti].path,
         column: layout.columns.entries[tj].path,
+        aggregate: ta < aggregates.length ? aggregates[ta] : null,
       );
-      _scrollIntoView(ti, tj);
+      _scrollIntoView(ti, td);
       return KeyEventResult.handled;
     }
     if ((key == LogicalKeyboardKey.enter ||
@@ -935,10 +997,11 @@ class _CubeGridState extends State<_CubeGrid> {
     LogicalKeyboardKey.numpad9: LogicalKeyboardKey.pageUp,
   };
 
-  /// Scrolls so that data cell ([i], [j]) is not hidden by the viewport
-  /// edges or the pinned headers. Every extent is fixed, so the offsets
-  /// are arithmetic on the row heights and [_widths].
-  void _scrollIntoView(int i, int j) {
+  /// Scrolls so that the data cell at row [i], grid data column [d] is not
+  /// hidden by the viewport edges or the pinned headers. Every extent is
+  /// fixed, so the offsets are arithmetic on the row heights and
+  /// [_widths].
+  void _scrollIntoView(int i, int d) {
     final widths = _widths;
     if (widths == null) return;
     if (_vertical.hasClients) {
@@ -956,14 +1019,14 @@ class _CubeGridState extends State<_CubeGrid> {
         pinned += widths[c];
       }
       var start = pinned;
-      for (var c = 0; c < j; c++) {
+      for (var c = 0; c < d; c++) {
         start += widths[headerColumns + c];
       }
       _reveal(
         _horizontal,
         pinned: pinned,
         start: start,
-        extent: widths[headerColumns + j],
+        extent: widths[headerColumns + d],
       );
     }
   }
@@ -1078,10 +1141,12 @@ class _CubeGridState extends State<_CubeGrid> {
     ),
   );
 
-  bool _isSortKeyColumn(HeaderEntry column) {
+  /// Whether [column]'s [aggregate] value column is what the rows are
+  /// sorted by.
+  bool _isSortKeyColumn(HeaderEntry column, Aggregate aggregate) {
     for (var i = 0; i < spec.rows.depth; i++) {
       final s = spec.rows.sortAt(i);
-      if (s.by != SortBy.aggregate || s.aggregate != shown) continue;
+      if (s.by != SortBy.aggregate || s.aggregate != aggregate) continue;
       final key = s.keyPath;
       if (key == null ? column.isSummary : key == column.path) return true;
     }
@@ -1146,11 +1211,10 @@ class _CubeGridState extends State<_CubeGrid> {
     );
   }
 
-  /// Sorts the first row level by [column]'s aggregate (tap again to flip)
-  /// and lets the deeper levels inherit it.
-  void _sortRowsByColumn(HeaderEntry column) {
-    final aggregate = shown;
-    if (aggregate == null || spec.rows.depth == 0) return;
+  /// Sorts the first row level by [column]'s [aggregate] (tap again to
+  /// flip) and lets the deeper levels inherit it.
+  void _sortRowsByColumn(HeaderEntry column, Aggregate aggregate) {
+    if (spec.rows.depth == 0) return;
     final keyPath = column.isSummary ? null : column.path;
     final first = spec.rows.sortAt(0);
     final same =

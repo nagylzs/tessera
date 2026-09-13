@@ -11,16 +11,16 @@ import 'cube_controller.dart';
 ///   be removed. Any [AxisSort] that used the removed aggregate falls back
 ///   to sorting by value.
 /// * The `+` button opens [showAggregatePicker].
-/// * With [onSelected] set, chips are selectable and [selected] is shown as
-///   selected — the way to let the user choose which aggregate a
-///   [CubeView] displays. When the selected aggregate is removed,
-///   [onSelected] is called with the first remaining one.
+/// * With [onSelectedChanged] set, chips toggle membership in [selected] —
+///   the way to let the user choose which aggregates a [CubeView] displays
+///   (in the spec's order). The last selected one cannot be deselected;
+///   removing a selected aggregate reports the remaining selection.
 class AggregateEditor extends StatelessWidget {
   const AggregateEditor({
     super.key,
     required this.controller,
     this.selected,
-    this.onSelected,
+    this.onSelectedChanged,
     this.measures,
     this.dimensions,
     this.label,
@@ -29,10 +29,12 @@ class AggregateEditor extends StatelessWidget {
 
   final CubeController controller;
 
-  /// The aggregate to show as selected.
-  final Aggregate? selected;
+  /// The aggregates shown as selected.
+  final Set<Aggregate>? selected;
 
-  final ValueChanged<Aggregate>? onSelected;
+  /// Called with the new selection when a chip is toggled (or a selected
+  /// aggregate removed); the set is in the spec's order.
+  final ValueChanged<List<Aggregate>>? onSelectedChanged;
 
   /// Measures offered by the picker; defaults to the numeric columns.
   final List<Measure>? measures;
@@ -79,10 +81,10 @@ class AggregateEditor extends StatelessWidget {
                   for (final a in aggregates)
                     InputChip(
                       label: Text(strings.aggregateLabel(a, cube.facts)),
-                      selected: a == selected,
-                      onSelected: onSelected == null
+                      selected: selected?.contains(a) ?? false,
+                      onSelected: onSelectedChanged == null
                           ? null
-                          : (_) => onSelected!(a),
+                          : (on) => _toggle(a, on),
                       onDeleted: aggregates.length > 1
                           ? () => _remove(a)
                           : null,
@@ -101,6 +103,18 @@ class AggregateEditor extends StatelessWidget {
       );
     },
   );
+
+  /// The current selection in the spec's order, with [a] added or removed;
+  /// the last one stays.
+  void _toggle(Aggregate a, bool on) {
+    final current = selected ?? const <Aggregate>{};
+    if (!on && current.length <= 1) return;
+    final next = [
+      for (final x in controller.cube.spec.aggregates)
+        if (x == a ? on : current.contains(x)) x,
+    ];
+    onSelectedChanged?.call(next);
+  }
 
   Future<void> _pick(BuildContext context) async {
     final cube = controller.cube;
@@ -139,8 +153,15 @@ class AggregateEditor extends StatelessWidget {
               : d,
       ],
     );
-    // Let the owner switch the displayed aggregate before the cube changes.
-    if (aggregate == selected) onSelected?.call(remaining.first);
+    // Let the owner drop the removed aggregate from its selection before
+    // the cube changes (falling back to the first remaining one).
+    if (selected?.contains(aggregate) ?? false) {
+      final next = [
+        for (final x in remaining)
+          if (selected!.contains(x)) x,
+      ];
+      onSelectedChanged?.call(next.isEmpty ? [remaining.first] : next);
+    }
     controller.updateSpec(
       spec.copyWith(
         aggregates: remaining,

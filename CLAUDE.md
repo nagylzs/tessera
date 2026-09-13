@@ -238,12 +238,22 @@ Paths below are relative to the package (`lib/src/...` means
   controller).
 - Implemented: `AggregateEditor` (`widgets/aggregate_editor.dart`; chips
   with delete — never the last one; removing resets any `AxisSort` that
-  used it; `selected`/`onSelected` let the app choose what `CubeView`
-  shows) and `showAggregatePicker` / `AggregatePickerDialog` /
+  used it; `selected: Set` / `onSelectedChanged(List)` toggle which
+  aggregates `CubeView` shows, never below one, reported in spec order)
+  and `showAggregatePicker` / `AggregatePickerDialog` /
   `standardMeasures` (`widgets/aggregate_picker.dart`); `AggregateKind`
   is in the engine (`cube/aggregate_kind.dart`).
-  `CubeView` falls back to the spec's first aggregate when its `aggregate`
-  is not in the spec. Example uses the editor instead of a dropdown.
+  `CubeView.aggregates` (`null` = all of the spec's; unknown ones are
+  skipped, none left = blank cells): one value column per aggregate under
+  each column entry, `perEntry = max(shown.length, 1)`, grid data column
+  `j * perEntry + a`; group labels merge over `entrySpan × perEntry`
+  columns; the aggregate-label row carries one name per value column and
+  tapping it sorts by *that* aggregate; `sortKeyColor` tints one value
+  column; widths are measured per value column (`ColumnWidthMeasurer`
+  takes `aggregates`); `CellAddress.aggregate` names the current value
+  column and arrows walk value columns (`_resolveSelection()` runs before
+  each key so repeats before the next frame see the moved selection).
+  The example workbench keeps `_shown: List<Aggregate>?`.
 - Example app: `example/lib/main.dart` is a launcher (`LauncherPage`)
   listing the entries of `example/lib/examples.dart`; each example lives in
   its own folder under `example/lib/` (kept as one project so pub.dev's
@@ -421,7 +431,7 @@ Four layers, one directory each under `lib/src/` (1–3 in
    one `ExpansionState` per axis → `Cube` (immutable, `late final layout`)
    → `CubeLayout` / `AxisLayout` / `HeaderEntry` / `CubeCell`.
 4. `widgets/` — `CubeController extends ChangeNotifier` holds the cube;
-   `CubeView` renders one aggregate per cell.
+   `CubeView` renders the cube with one value column per shown aggregate.
 
 Layers 1–3 must not import Flutter — enforced now by the package split
 (the engine's pubspec has no Flutter dependency).

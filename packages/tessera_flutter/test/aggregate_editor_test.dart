@@ -54,20 +54,22 @@ void main() {
 
   List<String> ids() => [for (final a in controller.cube.spec.aggregates) a.id];
 
-  Widget host({Aggregate? selected, ValueChanged<Aggregate>? onSelected}) =>
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 800,
-            height: 300,
-            child: AggregateEditor(
-              controller: controller,
-              selected: selected,
-              onSelected: onSelected,
-            ),
-          ),
+  Widget host({
+    Set<Aggregate>? selected,
+    ValueChanged<List<Aggregate>>? onSelected,
+  }) => MaterialApp(
+    home: Scaffold(
+      body: SizedBox(
+        width: 800,
+        height: 300,
+        child: AggregateEditor(
+          controller: controller,
+          selected: selected,
+          onSelectedChanged: onSelected,
         ),
-      );
+      ),
+    ),
+  );
 
   testWidgets('shows one chip per aggregate', (tester) async {
     await tester.pumpWidget(host());
@@ -79,16 +81,16 @@ void main() {
   testWidgets('removing resets sorts that used it; the last one cannot go', (
     tester,
   ) async {
-    Aggregate? switched;
+    List<Aggregate>? switched;
     await tester.pumpWidget(
-      host(selected: sumQty, onSelected: (a) => switched = a),
+      host(selected: {sumQty}, onSelected: (a) => switched = a),
     );
     final chip = find.widgetWithText(InputChip, 'sum of qty');
     expect(tester.widget<InputChip>(chip).selected, isTrue);
     await tester.tap(find.descendant(of: chip, matching: find.byType(Icon)));
     await tester.pumpAndSettle();
     expect(ids(), ['avg(price)']);
-    expect(switched, avgPrice);
+    expect(switched, [avgPrice]);
     final sort = controller.cube.spec.rows.dimensions.single.sort!;
     expect(sort.by, SortBy.value);
     expect(sort.direction, SortDirection.descending);
@@ -101,14 +103,27 @@ void main() {
     expect(last.onDeleted, isNull);
   });
 
-  testWidgets('selecting a chip reports it', (tester) async {
-    Aggregate? selected;
+  testWidgets('chips toggle the selection, never below one', (tester) async {
+    List<Aggregate>? selected;
     await tester.pumpWidget(
-      host(selected: sumQty, onSelected: (a) => selected = a),
+      host(selected: {sumQty}, onSelected: (a) => selected = a),
     );
+    // adding: reported in the spec's order
     await tester.tap(find.widgetWithText(InputChip, 'avg of price'));
     await tester.pumpAndSettle();
-    expect(selected, avgPrice);
+    expect(selected, [sumQty, avgPrice]);
+    // the only selected one cannot be deselected
+    selected = null;
+    await tester.tap(find.widgetWithText(InputChip, 'sum of qty'));
+    await tester.pumpAndSettle();
+    expect(selected, isNull);
+    // with two selected, deselecting one works
+    await tester.pumpWidget(
+      host(selected: {sumQty, avgPrice}, onSelected: (a) => selected = a),
+    );
+    await tester.tap(find.widgetWithText(InputChip, 'sum of qty'));
+    await tester.pumpAndSettle();
+    expect(selected, [avgPrice]);
   });
 
   testWidgets('the picker adds a measure aggregate and disables used ones', (
@@ -165,23 +180,28 @@ void main() {
     expect(standardMeasures(f).map((m) => m.id), ['qty', 'price']);
   });
 
-  testWidgets('CubeView falls back when its aggregate is gone', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 800,
-            height: 400,
-            child: CubeView(
-              controller: controller,
-              aggregate: Aggregate.max(qty),
-            ),
-          ),
+  testWidgets('CubeView skips aggregates the spec lacks', (tester) async {
+    Widget host(List<Aggregate>? aggregates) => MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 800,
+          height: 400,
+          child: CubeView(controller: controller, aggregates: aggregates),
         ),
       ),
     );
-    // first aggregate shown instead
+    // an unknown one is dropped, the known one stays
+    await tester.pumpWidget(host([Aggregate.max(qty), avgPrice]));
+    expect(find.text('sum of qty'), findsNothing);
+    expect(find.text('avg of price'), findsWidgets);
+    expect(find.text('max of qty'), findsNothing);
+    // only unknown ones: blank cells, the header row stays
+    await tester.pumpWidget(host([Aggregate.max(qty)]));
+    expect(find.text('sum of qty'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    // null: every aggregate of the spec, side by side
+    await tester.pumpWidget(host(null));
     expect(find.text('sum of qty'), findsWidgets);
-    expect(find.text('3'), findsOneWidget);
+    expect(find.text('avg of price'), findsWidgets);
   });
 }

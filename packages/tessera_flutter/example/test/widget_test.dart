@@ -17,6 +17,10 @@ Future<void> waitFor(WidgetTester tester, Finder finder) async {
 
 void main() {
   testWidgets('loads sales.csv and shows the cube', (tester) async {
+    // three aggregates side by side: wider than the default test surface
+    tester.view.physicalSize = const Size(2000, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.runAsync(() async {
       await tester.pumpWidget(const TesseraExampleApp());
       expect(find.text('Tessera examples'), findsOneWidget);
@@ -29,7 +33,10 @@ void main() {
     });
     expect(find.text('Europe'), findsOneWidget);
     expect(find.text('Total'), findsNWidgets(2));
+    // every aggregate of the spec is shown, three names per column entry
     expect(find.widgetWithText(InputChip, 'sum of total'), findsOneWidget);
+    expect(find.text('sum of total'), findsNWidgets(1 + 3)); // chip + 3 entries
+    expect(find.text('count'), findsNWidgets(1 + 3));
   });
 
   testWidgets('schema page: a label edit applies on back without re-import', (

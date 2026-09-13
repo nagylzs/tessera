@@ -70,7 +70,9 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
   ImportResult? _result;
   CubeController? _controller;
   List<Dimension> _dimensions = const [];
-  Aggregate? _shown;
+
+  /// The aggregates the view shows; `null` = all.
+  List<Aggregate>? _shown;
   Object? _error;
   ImportProgress? _progress;
   String _stage = 'Reading the first rows…';
@@ -112,9 +114,11 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
     final spec = old == null
         ? (widget.initialSpec?.call(facts) ?? _defaultSpec(facts))
         : _prune(old.spec, facts);
-    final shown = _shown != null && spec.aggregates.contains(_shown)
-        ? _shown!
-        : spec.aggregates.first;
+    final kept = [
+      for (final a in _shown ?? const <Aggregate>[])
+        if (spec.aggregates.contains(a)) a,
+    ];
+    final shown = _shown == null || kept.isEmpty ? null : kept;
     final cube = Cube(
       facts: facts,
       spec: spec,
@@ -426,7 +430,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
         }
         final facts = controller.cube.facts; // relabelled in place, maybe
         final report = result.report;
-        final shown = _shown ?? controller.cube.spec.aggregates.first;
+        final shown = _shown ?? controller.cube.spec.aggregates;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -471,8 +475,8 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: AggregateEditor(
                 controller: controller,
-                selected: shown,
-                onSelected: (a) => setState(() => _shown = a),
+                selected: shown.toSet(),
+                onSelectedChanged: (a) => setState(() => _shown = a),
                 dimensions: _dimensions,
               ),
             ),
@@ -480,7 +484,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             Expanded(
               child: CubeView(
                 controller: controller,
-                aggregate: shown,
+                aggregates: shown,
                 theme: widget.theme,
               ),
             ),

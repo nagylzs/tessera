@@ -7,22 +7,29 @@ import 'package:tessera/tessera.dart';
 /// that widgets (and the example app's configuration UI) talk to.
 /// A data cell named by its row and column groups rather than by indices,
 /// so a selection survives sorting, expanding other groups and spec
-/// changes; resolve it with [CubeController.currentCell].
+/// changes; resolve it with [CubeController.currentCell]. [aggregate]
+/// names the value column under the column group when a `CubeView` shows
+/// several aggregates side by side (`null`: not specific to one).
 final class CellAddress {
-  const CellAddress({required this.row, required this.column});
+  const CellAddress({required this.row, required this.column, this.aggregate});
 
   final DimensionPath row;
   final DimensionPath column;
+  final Aggregate? aggregate;
 
   @override
   bool operator ==(Object other) =>
-      other is CellAddress && other.row == row && other.column == column;
+      other is CellAddress &&
+      other.row == row &&
+      other.column == column &&
+      other.aggregate == aggregate;
 
   @override
-  int get hashCode => Object.hash(row, column);
+  int get hashCode => Object.hash(row, column, aggregate);
 
   @override
-  String toString() => 'CellAddress($row × $column)';
+  String toString() =>
+      'CellAddress($row × $column${aggregate == null ? '' : ', ${aggregate!.id}'})';
 }
 
 class CubeController extends ChangeNotifier {

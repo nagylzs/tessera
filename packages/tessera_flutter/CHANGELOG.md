@@ -1,5 +1,11 @@
 ## 0.1.0
 
+* `CubeView` shows several aggregates side by side — one value column per
+  aggregate under each column entry, the same layout the exporters write.
+  `aggregate` became `aggregates` (`null` = all of the spec's);
+  `AggregateEditor.selected` is a set with `onSelectedChanged`;
+  `CellAddress.aggregate` names the value column of the current cell.
+
 * Initial release: `CubeView`, `CubeController`, `AxisEditor`,
   `AggregateEditor`, the dimension and aggregate picker dialogs,
   `CubeTheme` and `TesseraLocalizations`.

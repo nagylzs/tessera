@@ -48,7 +48,7 @@ void main() {
               AxisEditor(controller: controller, side: AxisSide.columns),
               AggregateEditor(controller: controller),
               Expanded(
-                child: CubeView(controller: controller, aggregate: sumTotal),
+                child: CubeView(controller: controller, aggregates: [sumTotal]),
               ),
             ],
           ),
