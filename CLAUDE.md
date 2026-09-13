@@ -37,7 +37,10 @@ the root, ignored; members carry `resolution: workspace`):
   entry read) — known limit. Test data: `test/data/sales.xlsx` is
   `sales.csv` converted by LibreOffice (`soffice --headless --convert-to
   xlsx`); the test compares the two imports value for value. Edge cases
-  use mini workbooks built in-test with `ZipEncoder`. Exporter implemented:
+  use mini workbooks built in-test with `ZipEncoder`. `example/main.dart`
+  (+ `example/sales.xlsx`, a copy of the test workbook) is the pure-Dart
+  round trip — read, infer, cube with regions expanded, export —
+  run by `test/example_test.dart` through `dart run`. Exporter implemented:
   `xlsx_writer.dart` (`XlsxWriter`, a minimal package writer — shared
   strings, style registry keyed by (fill, bold, right) with fills 0/1
   reserved and cellXfs 0 the default so indices are offset by one,

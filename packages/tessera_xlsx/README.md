@@ -27,6 +27,17 @@ final xlsx = XlsxCubeExporter(strings: TesseraStrings.forLanguage('hu')!)
     .export(cube.layout);
 ```
 
+## Example
+
+[`example/main.dart`](example/main.dart) does the whole round trip from
+the command line — read `example/sales.xlsx`, infer and import, build a
+region/country × year/quarter cube with every region expanded, write it
+as `sales_pivot.xlsx`:
+
+```
+dart run example/main.dart [input.xlsx] [output.xlsx]
+```
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Author: László Zsolt Nagy.
