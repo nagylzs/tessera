@@ -1,5 +1,5 @@
 name: tessera_ods
-description: "OpenDocument Spreadsheet (.ods) support for the tessera pivot-table engine: an OdsDataSource for importing sheets and an exporter that writes a cube as a formatted sheet. Pure Dart."
+description: "OpenDocument (.ods) support for the tessera pivot-table engine: import a sheet as a data source, export a cube as a formatted sheet. Pure Dart."
 version: 0.1.0
 repository: https://github.com/nagylzs/tessera/tree/main/packages/tessera_ods
 issue_tracker: https://github.com/nagylzs/tessera/issues

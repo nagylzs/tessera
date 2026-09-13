@@ -182,6 +182,8 @@ dart analyze                                   # at the root: all packages, must
 dart format packages                           # run before committing
 (cd packages/tessera && flutter pub publish --dry-run)          # keep at 0 warnings
 (cd packages/tessera_flutter && flutter pub publish --dry-run)  # (uncommitted files count)
+(cd packages/<p> && pana --no-warning .)       # pub.dev score; needs libwebp-utils (cwebp) for the screenshot check;
+                                               # dependent packages score low until tessera itself is on pub.dev
 cd packages/tessera_flutter/example && dart run tool/gen_sales_csv.dart   # regenerates assets/sales.csv AND packages/tessera/test/data/sales.csv (seeded)
 cd packages/tessera_flutter/example && flutter run -d linux   # run the example (X11: xdotool + `import -window` for screenshots; i3 tiles it)
 # find the window with `xdotool search --class tessera_example`; stop with

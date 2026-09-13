@@ -39,7 +39,7 @@ through these in order, then publish.
       (what tessera is for, what it deliberately is not: charts, editing,
       server-side data) with links to the packages that cover those; no
       metrics or judgements, so it cannot go stale.
-- [ ] Optional: `dart pub global activate pana` and run it on each package
+- [x] Optional: `dart pub global activate pana` and run it on each package
       for the score pub.dev will show.
 - [ ] Publish order: `tessera`, then `tessera_xlsx`, `tessera_ods`,
       `tessera_html`, `tessera_svg`, `tessera_pdf`, then `tessera_flutter`
