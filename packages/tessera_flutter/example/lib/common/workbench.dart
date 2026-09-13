@@ -23,7 +23,7 @@ class CubeWorkbench extends StatefulWidget {
     this.adjustSchema,
     this.progressEvery = 5000,
     this.theme = const CubeTheme(),
-    this.xlsxTheme = const XlsxCubeTheme(),
+    this.xlsxTheme = const CubeExportTheme(),
     this.actions,
   });
 
@@ -46,7 +46,7 @@ class CubeWorkbench extends StatefulWidget {
   final CubeTheme theme;
 
   /// Theme of the Excel export.
-  final XlsxCubeTheme xlsxTheme;
+  final CubeExportTheme xlsxTheme;
 
   /// Extra AppBar actions, placed before the built-in ones; [controller]
   /// is `null` until the import has finished.

@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-
-import 'xlsx_cube_theme.dart';
+import 'package:tessera/tessera.dart';
 
 /// A minimal `.xlsx` package writer: one worksheet, shared strings, a
 /// style registry (fills, bold, alignment, one number format, thin
@@ -22,7 +21,7 @@ final class XlsxWriter {
   final _sharedStrings = <String>[];
   final _sharedIndex = <String, int>{};
   final _fills = <int>[];
-  final _fonts = <XlsxFont>[];
+  final _fonts = <ExportFont>[];
   final _styles = <_Xf>[];
   final _styleIndex = <_Xf, int>{};
   final _rows = <int, StringBuffer>{};
@@ -33,7 +32,11 @@ final class XlsxWriter {
 
   /// Style index for a cell with [fill] (ARGB) and [font], right- or
   /// left-aligned; registered on first use.
-  int style(int fill, {XlsxFont font = const XlsxFont(), bool right = false}) {
+  int style(
+    int fill, {
+    ExportFont font = const ExportFont(),
+    bool right = false,
+  }) {
     var fillId = _fills.indexOf(fill);
     if (fillId < 0) {
       _fills.add(fill);

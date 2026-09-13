@@ -7,9 +7,9 @@
 * `XlsxCubeExporter`: writes a `CubeLayout` as a worksheet — merged
   "rotated L" group headers, one column per exported aggregate, level
   fills, bold summaries, thin borders, number format, content-sized
-  columns, frozen panes; `XlsxCubeTheme` (fills, border, fonts per role
-  with colour, number format; `brand(primary:)`, `gradient`, `mix` — all
-  ARGB ints, no Flutter), localized labels and overrides.
+  columns, frozen panes; themed with the engine's `CubeExportTheme`
+  (`numberFormatCode`, `freezeHeaders` and the width bounds are exporter
+  options), localized labels and overrides.
   Follows the axes' summary and subtotal positions — with both hidden the
   export is a flat table of leaf rows.
 * The exporter renders from the engine's `CubeGrid`.

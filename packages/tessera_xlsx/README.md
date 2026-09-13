@@ -8,10 +8,13 @@ Excel (`.xlsx`) support for the [tessera](../tessera) pivot-table engine:
 * `XlsxCubeExporter` — writes a `CubeLayout` (the expanded rows and
   columns exactly as shown) as a formatted worksheet: merged group headers
   in the "rotated L" shape, level shading, bold summaries, frozen headers,
-  localized labels through `TesseraStrings`. `XlsxCubeTheme` sets fills,
-  borders, fonts and the number format with plain ARGB ints — no Flutter
-  types; `XlsxCubeTheme.brand(primary: 0xFF00695C)` derives a whole theme
-  from one company colour, `gradient` builds level fills.
+  localized labels through `TesseraStrings`. The engine's
+  `CubeExportTheme` (shared with the other exporters) sets fills, borders,
+  fonts and the number format with plain ARGB ints — no Flutter types;
+  `CubeExportTheme.brand(primary: 0xFF00695C)` derives a whole theme from
+  one company colour, `gradient` builds level fills. Excel-only choices
+  (`numberFormatCode`, `freezeHeaders`, column-width bounds) are on the
+  exporter.
 
 Pure Dart, no Flutter dependency — works in Flutter apps, on servers and in
 command-line tools alike. Both directions live in one package because they

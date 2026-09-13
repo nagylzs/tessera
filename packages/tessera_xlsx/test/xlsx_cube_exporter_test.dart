@@ -274,7 +274,7 @@ void main() {
         aggregates: [sumQty],
       ),
     );
-    final theme = XlsxCubeTheme.brand(
+    final theme = CubeExportTheme.brand(
       primary: 0xFF1A73E8,
       fontFamily: 'Calibri',
       levels: 3,
@@ -283,16 +283,16 @@ void main() {
     expect(theme.headerFont.color, 0xFFFFFFFF);
     expect(theme.levelFills.length, 3);
     expect(theme.levelFills.first, 0xFFFFFFFF);
-    expect(XlsxCubeTheme.mix(0xFF000000, 0xFFFFFFFF, 0.5), 0xFF808080);
-    expect(XlsxCubeTheme.gradient(0xFF000000, 0xFF0000FF, 3), [
+    expect(CubeExportTheme.mix(0xFF000000, 0xFFFFFFFF, 0.5), 0xFF808080);
+    expect(CubeExportTheme.gradient(0xFF000000, 0xFF0000FF, 3), [
       0xFF000000,
       0xFF000080,
       0xFF0000FF,
     ]);
-    expect(XlsxCubeTheme.gradient(0xFF123456, 0xFF000000, 1), [0xFF123456]);
+    expect(CubeExportTheme.gradient(0xFF123456, 0xFF000000, 1), [0xFF123456]);
     final xlsx = XlsxCubeExporter(
       theme: theme.copyWith(
-        cellFont: const XlsxFont(family: 'Georgia', size: 12, italic: true),
+        cellFont: const ExportFont(family: 'Georgia', size: 12, italic: true),
       ),
     ).export(cube.layout);
     final styles = utf8.decode(

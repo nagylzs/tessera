@@ -102,6 +102,44 @@ void main() {
     });
   });
 
+  group('CubeExportTheme', () {
+    test('brand, gradient, mix, level fills, number format', () {
+      final theme = CubeExportTheme.brand(
+        primary: 0xFF1A73E8,
+        fontFamily: 'Calibri',
+        levels: 3,
+      );
+      expect(theme.headerFill, 0xFF1A73E8);
+      expect(theme.headerFont.color, 0xFFFFFFFF);
+      expect(theme.headerFont.family, 'Calibri');
+      expect(theme.levelFills.length, 3);
+      expect(theme.levelFills.first, 0xFFFFFFFF);
+      expect(theme.levelFill(0), 0xFFFFFFFF);
+      expect(theme.levelFill(99), theme.levelFills.last);
+      expect(theme.levelFill(1, summary: true), theme.summaryFill);
+      expect(const CubeExportTheme(levelFills: []).levelFill(0), 0xFFFFFFFF);
+      expect(CubeExportTheme.mix(0xFF000000, 0xFFFFFFFF, 0.5), 0xFF808080);
+      expect(CubeExportTheme.gradient(0xFF000000, 0xFF0000FF, 3), [
+        0xFF000000,
+        0xFF000080,
+        0xFF0000FF,
+      ]);
+      expect(CubeExportTheme.gradient(0xFF123456, 0xFF000000, 1), [0xFF123456]);
+      expect(const NumberFormat(), const NumberFormat(decimals: 2));
+      expect(
+        theme
+            .copyWith(numberFormat: const NumberFormat(decimals: 0))
+            .numberFormat
+            .decimals,
+        0,
+      );
+      expect(
+        const ExportFont().copyWith(bold: true),
+        const ExportFont(bold: true),
+      );
+    });
+  });
+
   group('CsvCubeExporter', () {
     test('writes the grid with labels at the origin', () {
       final csv = const CsvCubeExporter(

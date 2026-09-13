@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tessera_example/theming/presets.dart';
-import 'package:tessera_xlsx/tessera_xlsx.dart';
+import 'package:tessera_flutter/tessera_flutter.dart';
 
 void main() {
   testWidgets('every preset resolves under light and dark themes', (
@@ -49,7 +49,7 @@ void main() {
         themePresets.first,
         Colors.teal,
       ).headerFill,
-      const XlsxCubeTheme().headerFill,
+      const CubeExportTheme().headerFill,
     );
   });
 }

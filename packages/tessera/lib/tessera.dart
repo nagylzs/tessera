@@ -38,6 +38,7 @@ export 'src/cube/dimension_path.dart';
 export 'src/cube/expansion_state.dart';
 export 'src/cube/filter.dart';
 export 'src/export/csv_cube_exporter.dart';
+export 'src/export/cube_export_theme.dart';
 export 'src/export/cube_grid.dart';
 export 'src/facts/dimension.dart';
 export 'src/facts/fact_table.dart';

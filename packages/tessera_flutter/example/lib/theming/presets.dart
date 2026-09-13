@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
-import 'package:tessera_xlsx/tessera_xlsx.dart';
 
 /// A named [CubeTheme] for the theming example.
 ///
@@ -20,10 +19,10 @@ final class ThemePreset {
   final CubeTheme theme;
 
   /// The Excel counterpart, designed to look like [theme] on paper: an
-  /// `XlsxCubeTheme` is authored with plain ARGB ints and fonts, not
+  /// `CubeExportTheme` is authored with plain ARGB ints and fonts, not
   /// converted from the Flutter theme (which needs a context to resolve
   /// and whose on-screen shading is too subtle for a sheet).
-  final XlsxCubeTheme xlsxTheme;
+  final CubeExportTheme xlsxTheme;
 }
 
 /// The presets offered by the theme menu, first is the default.
@@ -32,7 +31,7 @@ final themePresets = <ThemePreset>[
     name: 'Material',
     description: 'Everything derived from the app theme (the default).',
     theme: CubeTheme(),
-    xlsxTheme: XlsxCubeTheme(),
+    xlsxTheme: CubeExportTheme(),
   ),
   ThemePreset(
     name: 'Spreadsheet',
@@ -52,13 +51,13 @@ final themePresets = <ThemePreset>[
       headerTextStyle: const TextStyle(fontSize: 12, color: Colors.black),
       cellPadding: const EdgeInsets.symmetric(horizontal: 4),
     ),
-    xlsxTheme: const XlsxCubeTheme(
+    xlsxTheme: const CubeExportTheme(
       headerFill: 0xFFEEEEEE,
       summaryFill: 0xFFE0E0E0,
       levelFills: [0xFFFFFFFF],
       borderColor: 0xFF9E9E9E,
-      cellFont: XlsxFont(family: 'Courier New'),
-      summaryFont: XlsxFont(family: 'Courier New', bold: true),
+      cellFont: ExportFont(family: 'Courier New'),
+      summaryFont: ExportFont(family: 'Courier New', bold: true),
     ),
   ),
   ThemePreset(
@@ -84,12 +83,12 @@ final themePresets = <ThemePreset>[
         color: Colors.black87,
       ),
     ),
-    xlsxTheme: XlsxCubeTheme(
+    xlsxTheme: CubeExportTheme(
       headerFill: 0xFFB2DFDB, // teal 100
       summaryFill: 0xFFB2DFDB,
-      levelFills: XlsxCubeTheme.gradient(0xFFE0F2F1, 0xFF26A69A, 4),
+      levelFills: CubeExportTheme.gradient(0xFFE0F2F1, 0xFF26A69A, 4),
       borderColor: 0xFF00796B,
-      headerFont: const XlsxFont(bold: true),
+      headerFont: const ExportFont(bold: true),
     ),
   ),
   const ThemePreset(
@@ -104,11 +103,11 @@ final themePresets = <ThemePreset>[
       selectionColor: Colors.red,
       cellPadding: EdgeInsets.symmetric(horizontal: 8),
     ),
-    xlsxTheme: XlsxCubeTheme(
+    xlsxTheme: CubeExportTheme(
       borderColor: 0xFF000000,
-      cellFont: XlsxFont(size: 12),
-      headerFont: XlsxFont(size: 12, bold: true),
-      summaryFont: XlsxFont(size: 12, bold: true),
+      cellFont: ExportFont(size: 12),
+      headerFont: ExportFont(size: 12, bold: true),
+      summaryFont: ExportFont(size: 12, bold: true),
     ),
   ),
   const ThemePreset(
@@ -123,21 +122,20 @@ final themePresets = <ThemePreset>[
       minRowHeaderWidth: 80,
       cellPadding: EdgeInsets.symmetric(horizontal: 3),
     ),
-    xlsxTheme: XlsxCubeTheme(
-      cellFont: XlsxFont(size: 8),
-      headerFont: XlsxFont(size: 8),
-      summaryFont: XlsxFont(size: 8, bold: true),
-      minColumnWidth: 6,
+    xlsxTheme: CubeExportTheme(
+      cellFont: ExportFont(size: 8),
+      headerFont: ExportFont(size: 8),
+      summaryFont: ExportFont(size: 8, bold: true),
     ),
   ),
 ];
 
-/// Which `XlsxCubeTheme` the Export menu uses.
+/// Which `CubeExportTheme` the Export menu uses.
 enum ExcelTheme {
   /// The preset's own [ThemePreset.xlsxTheme].
   matchPreset,
 
-  /// `XlsxCubeTheme.brand` from the app's seed colour — the whole bridge
+  /// `CubeExportTheme.brand` from the app's seed colour — the whole bridge
   /// from a Flutter `Color` is `toARGB32()`.
   brand,
 
@@ -146,14 +144,14 @@ enum ExcelTheme {
 }
 
 /// Resolves [choice] for [preset] and the app's [seed] colour.
-XlsxCubeTheme excelThemeFor(
+CubeExportTheme excelThemeFor(
   ExcelTheme choice,
   ThemePreset preset,
   Color seed,
 ) => switch (choice) {
   ExcelTheme.matchPreset => preset.xlsxTheme,
-  ExcelTheme.brand => XlsxCubeTheme.brand(primary: seed.toARGB32()),
-  ExcelTheme.plain => const XlsxCubeTheme(),
+  ExcelTheme.brand => CubeExportTheme.brand(primary: seed.toARGB32()),
+  ExcelTheme.plain => const CubeExportTheme(),
 };
 
 /// Seed colours offered for the app's [ColorScheme].

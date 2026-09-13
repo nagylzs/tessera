@@ -5,7 +5,7 @@ void main() {
   test('defaults', () {
     const exporter = XlsxCubeExporter();
     expect(exporter.strings.languageCode, 'en');
-    expect(exporter.theme.freezeHeaders, isTrue);
+    expect(exporter.freezeHeaders, isTrue);
     expect(const XlsxOptions().hasHeader, isTrue);
   });
 }

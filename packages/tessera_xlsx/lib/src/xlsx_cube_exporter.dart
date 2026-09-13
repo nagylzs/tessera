@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:tessera/tessera.dart';
 
-import 'xlsx_cube_theme.dart';
 import 'xlsx_writer.dart';
 
 /// Writes a [CubeLayout] — the rows and columns exactly as expanded — as a
@@ -18,14 +17,31 @@ import 'xlsx_writer.dart';
 final class XlsxCubeExporter {
   const XlsxCubeExporter({
     this.strings = const TesseraStringsEn(),
-    this.theme = const XlsxCubeTheme(),
+    this.theme = const CubeExportTheme(),
+    this.numberFormatCode,
+    this.freezeHeaders = true,
+    this.minColumnWidth = 8,
+    this.maxColumnWidth = 60,
     this.emptyGroupLabel,
     this.rowSummaryLabel,
     this.columnSummaryLabel,
   });
 
   final TesseraStrings strings;
-  final XlsxCubeTheme theme;
+
+  /// Colours, fonts and number format; shared with the other exporters.
+  final CubeExportTheme theme;
+
+  /// An Excel format code (`0.0%`, `#,##0`) applied to numeric cells
+  /// instead of the one derived from [CubeExportTheme.numberFormat].
+  final String? numberFormatCode;
+
+  /// Freeze panes at the corner, so headers stay visible while scrolling.
+  final bool freezeHeaders;
+
+  /// Bounds of the content-sized column widths, in characters.
+  final double minColumnWidth;
+  final double maxColumnWidth;
 
   /// Overrides of the localized header texts, as on `CubeView`.
   final String? emptyGroupLabel;
@@ -50,6 +66,12 @@ final class XlsxCubeExporter {
     return _Export(this, layout, aggs, _sheetName(sheetName)).run();
   }
 
+  /// The Excel format code for [format]: `#,##0.00`, `0`, ….
+  static String formatCode(NumberFormat format) {
+    final integer = format.grouping ? '#,##0' : '0';
+    return format.decimals == 0 ? integer : '$integer.${'0' * format.decimals}';
+  }
+
   static String _sheetName(String name) {
     final cleaned = name.replaceAll(RegExp(r'[\[\]:*?/\\]'), ' ').trim();
     final short = cleaned.length > 31 ? cleaned.substring(0, 31) : cleaned;
@@ -61,7 +83,9 @@ final class _Export {
   _Export(this.exporter, this.layout, this.aggregates, String sheetName)
     : writer = XlsxWriter(
         sheetName: sheetName,
-        numberFormat: exporter.theme.numberFormat,
+        numberFormat:
+            exporter.numberFormatCode ??
+            XlsxCubeExporter.formatCode(exporter.theme.numberFormat),
         borderColor: exporter.theme.borderColor,
       ),
       grid = CubeGrid.of(
@@ -79,7 +103,7 @@ final class _Export {
   final XlsxWriter writer;
   final CubeGrid grid;
 
-  XlsxCubeTheme get theme => exporter.theme;
+  CubeExportTheme get theme => exporter.theme;
 
   /// Longest text per sheet column, for the widths.
   final _longest = <int, int>{};
@@ -105,10 +129,13 @@ final class _Export {
     for (final e in _longest.entries) {
       writer.columnWidth(
         e.key,
-        (e.value * 1.1 + 2).clamp(theme.minColumnWidth, theme.maxColumnWidth),
+        (e.value * 1.1 + 2).clamp(
+          exporter.minColumnWidth,
+          exporter.maxColumnWidth,
+        ),
       );
     }
-    if (theme.freezeHeaders) {
+    if (exporter.freezeHeaders) {
       writer.freeze(rows: grid.headerRows, columns: grid.headerColumns);
     }
     return writer.build();
@@ -119,14 +146,8 @@ final class _Export {
   /// column takes the summary fill and font.
   int _styleOf(GridCell cell) {
     if (cell.kind == GridCellKind.data) {
-      final fills = theme.levelFills;
-      final fill = cell.isSummary
-          ? theme.summaryFill
-          : fills.isEmpty
-          ? 0xFFFFFFFF
-          : fills[cell.level.clamp(0, fills.length - 1)];
       return writer.style(
-        fill,
+        theme.levelFill(cell.level, summary: cell.isSummary),
         font: cell.isSummary ? theme.summaryFont : theme.cellFont,
         right: true,
       );

@@ -64,7 +64,7 @@ Future<void> main(List<String> args) async {
   //    The theme is pure Dart: a brand colour, fonts, fills as ARGB ints.
   final bytes = XlsxCubeExporter(
     strings: TesseraStrings.forLanguage('en')!,
-    theme: XlsxCubeTheme.brand(primary: 0xFF00695C, fontFamily: 'Calibri'),
+    theme: CubeExportTheme.brand(primary: 0xFF00695C, fontFamily: 'Calibri'),
   ).export(layout, sheetName: 'Sales by region');
   await output.writeAsBytes(bytes);
   print('Wrote ${output.path} (${bytes.length} bytes)');

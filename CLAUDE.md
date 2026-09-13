@@ -17,8 +17,12 @@ the root, ignored; members carry `resolution: workspace`):
   level, merge spans with origin/covered cells that repeat the value)
   and `CsvCubeExporter` (`CsvExportOptions`; `CsvGroupLabels.origin`
   mirrors the sheet, `.repeat` fills groups down for other tools;
-  `europeanExcel` preset). Every exporter renders from `CubeGrid`, the
-  xlsx one included. Tests read `test/data/sales.csv`.
+  `europeanExcel` preset) and `CubeExportTheme` (+ `ExportFont`,
+  `NumberFormat`): the format-neutral look every exporter takes —
+  fills, border, fonts per role, decimals/grouping; `brand(primary:)`,
+  `gradient`, `mix`. Format-specific behaviour (frozen panes, widths,
+  native number-format codes, page size) stays on each exporter. Every
+  exporter renders from `CubeGrid`, the xlsx one included. Tests read `test/data/sales.csv`.
 - `packages/tessera_flutter` — the widgets (layer 4) and
   `TesseraLocalizations` (the Flutter `LocalizationsDelegate` / `of`
   glue). Depends on `tessera` and `two_dimensional_scrollables`;
@@ -30,9 +34,8 @@ the root, ignored; members carry `resolution: workspace`):
   format = one package): `XlsxDataSource` (streams one worksheet's rows,
   typed cells, `fromData`/`fromBytes`, `XlsxOptions`) and
   `XlsxCubeExporter` (renders a `CubeLayout` from `CubeGrid`,
-  `XlsxCubeTheme` — fills, border, `XlsxFont` per role (cell/header/
-  summary) with colour, number format, `brand(primary:)` preset,
-  `gradient`/`mix` helpers; ARGB ints only — `TesseraStrings` labels). Own OOXML
+  the engine's `CubeExportTheme`; `numberFormatCode`, `freezeHeaders`
+  and the width bounds are exporter options — `TesseraStrings` labels). Own OOXML
   code on `archive` + `xml`, no third-party spreadsheet layer.
   Reader implemented: `xlsx_workbook.dart` (`XlsxWorkbook.parse`: zip →
   sheets via workbook rels, shared strings incl. rich runs, `cellXfs` →
@@ -166,10 +169,11 @@ Paths below are relative to the package (`lib/src/...` means
   local `Theme`. `CubeWorkbench` gained `theme` and `actions` for it.
   This is the place to demonstrate new `CubeTheme` features; each
   preset must resolve in light and dark (`test/theming_test.dart`).
-  Each preset also carries a hand-authored `xlsxTheme`; the menu's
-  "Excel export theme" picks it, `XlsxCubeTheme.brand(seed.toARGB32())`
+  Each preset also carries a hand-authored `xlsxTheme`
+  (`CubeExportTheme`); the menu's "Excel export theme" picks it,
+  `CubeExportTheme.brand(seed.toARGB32())`
   or the package default (`ExcelTheme`, `excelThemeFor`) and passes it
-  as `CubeWorkbench.xlsxTheme`. No `CubeTheme → XlsxCubeTheme`
+  as `CubeWorkbench.xlsxTheme`. No `CubeTheme → CubeExportTheme`
   converter on purpose (needs a context; screen shading is too subtle
   on paper) — Excel themes are authored.
 - "Public datasets" (`example/lib/datasets/`): six real CSVs (GitHub raw
