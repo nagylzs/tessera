@@ -46,7 +46,7 @@ blank instead of showing `0`.
 | **CubeSpec** | Row axis, column axis (each an ordered list of dimensions), the aggregates to compute, and an optional filter. |
 | **CubeGrid** | A layout as a rectangular grid of cells (labels, values, merged areas) — what exporters render. |
 | **CubeExportTheme** | Fills, fonts and number format of an exported document, as plain ints — shared by the CSV/XLSX/… exporters. |
-| **CsvCubeExporter** | Writes a layout as CSV; `tessera_xlsx` does the same for Excel. |
+| **CsvCubeExporter** | Writes a layout as CSV text (`export` returns a `String`; `writeTo` streams into a sink). The `tessera_xlsx`, `tessera_ods`, `tessera_html`, `tessera_svg` and `tessera_pdf` packages do the same for their formats. |
 | **ExpansionState** | Which groups are expanded on an axis. The summary is the root; the first level is visible when the root is expanded. `Cube.expandRowLevel` / `collapseRowLevel` (and the column twins) open or close a whole level. |
 | **CubeLayout** | The visible rows, columns and cells derived from facts + spec + expansion state. |
 | **AxisGeometry** | The merged header cells of an axis, for renderers (grids, exporters). |
@@ -118,6 +118,17 @@ final result = await loadFactsInIsolate(
 The source is sent to the worker isolate, so it must be sendable — plain
 data (`CsvDataSource.fromData(bytes)`) or a `File` work; a live stream does
 not.
+
+## Example
+
+[`example/main.dart`](example/main.dart) is the engine end to end from the
+command line: read `example/sales.csv`, infer and import, build a
+region/country × year/quarter cube with every region expanded, print it,
+and write it back as `sales_pivot.csv`:
+
+```
+dart run example/main.dart [input.csv] [output.csv]
+```
 
 ## Contributing
 

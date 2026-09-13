@@ -30,7 +30,9 @@ the root, ignored; members carry `resolution: workspace`):
   `columnLevel` besides the summed `level`. Format-specific behaviour
   (frozen panes, widths, native number-format codes, page size) stays
   on each exporter. Every exporter renders from `CubeGrid`, the xlsx one
-  included. Tests read `test/data/sales.csv`.
+  included. Tests read `test/data/sales.csv`. `example/main.dart` (+
+  `example/sales.csv`) is the CSV → cube → CSV round trip, run by
+  `test/example_test.dart` like the other packages' examples.
 - `packages/tessera_flutter` — the widgets (layer 4) and
   `TesseraLocalizations` (the Flutter `LocalizationsDelegate` / `of`
   glue). Depends on `tessera` and `two_dimensional_scrollables`;

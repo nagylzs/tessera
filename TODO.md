@@ -11,19 +11,19 @@ through these in order, then publish.
       aggregate under each column entry, `AggregateEditor` selection
       becomes a set), or keep the single-aggregate view for 0.1 and
       document the difference in the README.
-- [ ] Exporters return `String` (csv, html, svg), `Uint8List` (xlsx, ods)
+- [x] Exporters return `String` (csv, html, svg), `Uint8List` (xlsx, ods)
       or `Future<Uint8List>` (pdf, forced by `package:pdf`). Keep, but say
       so in each README.
 
 ## Small fixes
 
-- [ ] Dartdoc: `[spec.name]` in `Schema` (`packages/tessera/lib/src/schema/schema.dart`)
+- [x] Dartdoc: `[spec.name]` in `Schema` (`packages/tessera/lib/src/schema/schema.dart`)
       is not a resolvable reference; write it as `` `spec.name` ``.
-- [ ] `example/main.dart` for the engine (`packages/tessera`), the only
+- [x] `example/main.dart` for the engine (`packages/tessera`), the only
       package without an example; a CSV → cube → CSV export round trip.
-- [ ] Versions 0.0.1 → 0.1.0 in every package (and the inter-package
+- [x] Versions 0.0.1 → 0.1.0 in every package (and the inter-package
       constraints `tessera: ^0.1.0` etc.).
-- [ ] `topics:` in every pubspec (pivot-table, olap, aggregation, csv,
+- [x] `topics:` in every pubspec (pivot-table, olap, aggregation, csv,
       xlsx, ods, html, svg, pdf, export as they apply).
 - [ ] A screenshot of `CubeView` in the `tessera_flutter` README (pub.dev
       resolves relative image links against `repository`) and
