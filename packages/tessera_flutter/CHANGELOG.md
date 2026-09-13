@@ -7,3 +7,5 @@
   secondary click) with the sort direction and "expand all" / "collapse
   all" for that level; `confirmLevelExpansion` guards large ones.
   `CubeController.expandRowLevel` and friends.
+* `CubeView`: a data cell's level (for `CubeTheme.levelColor`) is the sum
+  of its row and column depths, not the maximum.

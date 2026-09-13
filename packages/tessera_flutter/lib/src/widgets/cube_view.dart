@@ -585,11 +585,13 @@ class _CubeGridState extends State<_CubeGrid> {
     final colEntry = layout.columns.entries[j];
     final cell = layout.cellAt(i, j);
     final summary = rowEntry.isSummary || colEntry.isSummary;
+    // A cell's level is the number of dimension values pinning it, i.e.
+    // the row and column depths added; non-summary cells have both >= 1.
     var color = summary
         ? theme.summaryColor
         : theme.levelColor(
-            math.max(rowEntry.depth, colEntry.depth) - 1,
-            math.max(rowDepth, columnDepth) - 1,
+            rowEntry.depth + colEntry.depth - 2,
+            rowDepth + columnDepth - 2,
           );
     if (_isSortKeyColumn(colEntry)) {
       color = Color.alphaBlend(theme.sortKeyColor, color);

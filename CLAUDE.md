@@ -136,7 +136,8 @@ Paths below are relative to the package (`lib/src/...` means
   label row; row header = one column per row dimension; top-left corner
   shows column-dimension names.
 - Hooks: `CellFormatter`, `CellStyler` (zero/negative colours),
-  `CubeTheme.levelColor(depth, maxDepth)` + `CubeTheme.gradient(colors)`,
+  `CubeTheme.levelColor(depth, maxDepth)` (cell depth = row depth +
+  column depth, from 0) + `CubeTheme.gradient(colors)`,
   separate row/column summary labels, `expansionLimit` +
   `confirmExpansion` (default: AlertDialog), `onCellTap`. Sort UI rule:
   tapping a dimension title toggles value sort on that level; tapping the

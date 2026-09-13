@@ -468,6 +468,39 @@ void main() {
       expect(find.text('Germany'), findsOneWidget);
     });
 
+    testWidgets('cell levels add the row and column depths', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final seen = <(int, int)>{};
+      const qtyDim = ColumnDimension('qty');
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: CubeAxis.of([region, country]),
+          columns: CubeAxis.of([category, qtyDim]),
+          aggregates: [sumQty],
+        ),
+      );
+      final a = DimensionPath([const DimensionValue(category, 'A')]);
+      await tester.pumpWidget(
+        host(
+          CubeView(
+            controller: CubeController(cube.toggleRow(europe).toggleColumn(a)),
+            aggregate: sumQty,
+            theme: CubeTheme(
+              levelColor: (depth, maxDepth) {
+                seen.add((depth, maxDepth));
+                return Colors.transparent;
+              },
+            ),
+          ),
+        ),
+      );
+      // Europe × A = 0, Germany × A = 1, Europe × A/1 = 1, Germany × A/1 = 2
+      expect(seen, {(0, 2), (1, 2), (2, 2)});
+    });
+
     testWidgets('cell taps report the cell', (tester) async {
       // Measured columns are wider than the default 800 px test window.
       tester.view.physicalSize = const Size(1600, 900);

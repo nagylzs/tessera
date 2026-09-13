@@ -2,8 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Background colour for cells at [depth] of [maxDepth] nesting levels
-/// (`0` = top level).
+/// Background colour for data cells at [depth] of [maxDepth] nesting
+/// levels. A cell's depth is the row group's depth plus the column group's
+/// depth, counted from `0` for the cells of the first row level × the
+/// first column level; [maxDepth] is the deepest possible cell (every level
+/// of both axes open). Summary cells use `summaryColor` instead.
 typedef LevelColor = Color Function(int depth, int maxDepth);
 
 /// Colours, text styles and dimensions of a [CubeView].
