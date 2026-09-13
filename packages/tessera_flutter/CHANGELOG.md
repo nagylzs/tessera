@@ -11,6 +11,8 @@
   lets the others inherit; a deeper level's title cycles through the
   opposite direction, the same direction and inheriting, and its menu has
   "same order as the level above".
+* `CubeTheme.headerIconColor`: header icons default to the header text
+  colour instead of the ambient icon colour.
 * Current cell: `CubeController.selection` / `currentCell`, `CellAddress`;
   `CubeView.selectable`, `focusNode`, `autofocus`, keyboard navigation and
   `CubeTheme.selectionColor`.

@@ -24,6 +24,7 @@ final class CubeTheme {
     this.borderColor,
     this.cellTextStyle,
     this.headerTextStyle,
+    this.headerIconColor,
     this.rowHeight = 28,
     this.headerRowHeight = 28,
     this.minColumnWidth = 72,
@@ -55,6 +56,12 @@ final class CubeTheme {
 
   final TextStyle? cellTextStyle;
   final TextStyle? headerTextStyle;
+
+  /// Colour of the icons in the headers (expand/collapse, sort arrows, the
+  /// title menu button). Defaults to [headerTextStyle]'s colour, so icons
+  /// stay legible on a header whose colours are pinned regardless of the
+  /// app's brightness.
+  final Color? headerIconColor;
 
   final double rowHeight;
   final double headerRowHeight;
@@ -92,6 +99,7 @@ final class CubeTheme {
     Color? borderColor,
     TextStyle? cellTextStyle,
     TextStyle? headerTextStyle,
+    Color? headerIconColor,
     double? rowHeight,
     double? headerRowHeight,
     double? minColumnWidth,
@@ -108,6 +116,7 @@ final class CubeTheme {
     borderColor: borderColor ?? this.borderColor,
     cellTextStyle: cellTextStyle ?? this.cellTextStyle,
     headerTextStyle: headerTextStyle ?? this.headerTextStyle,
+    headerIconColor: headerIconColor ?? this.headerIconColor,
     rowHeight: rowHeight ?? this.rowHeight,
     headerRowHeight: headerRowHeight ?? this.headerRowHeight,
     minColumnWidth: minColumnWidth ?? this.minColumnWidth,
@@ -122,6 +131,8 @@ final class CubeTheme {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final base = theme.textTheme.bodySmall ?? const TextStyle(fontSize: 12);
+    final headerStyle =
+        headerTextStyle ?? base.copyWith(fontWeight: FontWeight.w500);
     return ResolvedCubeTheme(
       levelColor:
           levelColor ??
@@ -137,8 +148,9 @@ final class CubeTheme {
       selectionColor: selectionColor ?? scheme.primary,
       borderColor: borderColor ?? scheme.outlineVariant,
       cellTextStyle: cellTextStyle ?? base,
-      headerTextStyle:
-          headerTextStyle ?? base.copyWith(fontWeight: FontWeight.w500),
+      headerTextStyle: headerStyle,
+      headerIconColor:
+          headerIconColor ?? headerStyle.color ?? scheme.onSurfaceVariant,
       rowHeight: rowHeight,
       headerRowHeight: headerRowHeight,
       minColumnWidth: minColumnWidth,
@@ -161,6 +173,7 @@ final class ResolvedCubeTheme {
     required this.borderColor,
     required this.cellTextStyle,
     required this.headerTextStyle,
+    required this.headerIconColor,
     required this.rowHeight,
     required this.headerRowHeight,
     required this.minColumnWidth,
@@ -178,6 +191,7 @@ final class ResolvedCubeTheme {
   final Color borderColor;
   final TextStyle cellTextStyle;
   final TextStyle headerTextStyle;
+  final Color headerIconColor;
   final double rowHeight;
   final double headerRowHeight;
   final double minColumnWidth;

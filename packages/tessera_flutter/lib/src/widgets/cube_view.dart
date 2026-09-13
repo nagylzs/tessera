@@ -353,6 +353,15 @@ class _CubeGridState extends State<_CubeGrid> {
   }
 
   Widget _table(List<double> widths) {
+    // Header icons (the only icons in the grid) take the theme's colour;
+    // the title menus open in an overlay and keep the app's.
+    return IconTheme.merge(
+      data: IconThemeData(color: theme.headerIconColor),
+      child: _tableView(widths),
+    );
+  }
+
+  Widget _tableView(List<double> widths) {
     return TableView.builder(
       verticalDetails: ScrollableDetails.vertical(controller: _vertical),
       horizontalDetails: ScrollableDetails.horizontal(controller: _horizontal),

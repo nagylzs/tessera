@@ -145,6 +145,8 @@ Paths below are relative to the package (`lib/src/...` means
 - Hooks: `CellFormatter`, `CellStyler` (zero/negative colours),
   `CubeTheme.levelColor(depth, maxDepth)` (cell depth = row depth +
   column depth, from 0) + `CubeTheme.gradient(colors)`,
+  `CubeTheme.headerIconColor` (default: `headerTextStyle.color`, applied
+  with an `IconTheme.merge` around the `TableView`),
   separate row/column summary labels, `expansionLimit` +
   `confirmExpansion` (default: AlertDialog), `onCellTap`. Sort UI rule:
   `AxisDimension.sort` is nullable — `null` inherits the level above

@@ -215,6 +215,46 @@ void main() {
       expect(text.style?.fontWeight, FontWeight.bold);
     });
 
+    testWidgets('header icons follow the header text colour', (tester) async {
+      Color? iconColor() =>
+          IconTheme.of(tester.element(find.byIcon(Icons.add).first)).color;
+      await tester.pumpWidget(
+        host(
+          CubeView(
+            controller: controller,
+            aggregate: sumQty,
+            theme: const CubeTheme(
+              headerTextStyle: TextStyle(color: Colors.purple),
+            ),
+          ),
+        ),
+      );
+      expect(iconColor(), Colors.purple);
+      await tester.pumpWidget(
+        host(
+          CubeView(
+            controller: controller,
+            aggregate: sumQty,
+            theme: const CubeTheme(
+              headerTextStyle: TextStyle(color: Colors.purple),
+              headerIconColor: Colors.orange,
+            ),
+          ),
+        ),
+      );
+      expect(iconColor(), Colors.orange);
+      // by default: the ambient text colour, not the ambient icon colour
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregate: sumQty)),
+      );
+      final scheme = Theme.of(tester.element(find.text('Asia'))).colorScheme;
+      expect(iconColor(), isNot(scheme.onSurfaceVariant));
+      expect(
+        iconColor(),
+        Theme.of(tester.element(find.text('Asia'))).textTheme.bodySmall?.color,
+      );
+    });
+
     testWidgets('expanding a row group through the icon', (tester) async {
       await tester.pumpWidget(
         host(CubeView(controller: controller, aggregate: sumQty)),
