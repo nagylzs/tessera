@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tessera_flutter/src/widgets/cell_border.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
 
 const region = ColumnDimension('region');
@@ -499,6 +500,64 @@ void main() {
       );
       // Europe × A = 0, Germany × A = 1, Europe × A/1 = 1, Germany × A/1 = 2
       expect(seen, {(0, 2), (1, 2), (2, 2)});
+    });
+
+    testWidgets('no hairline between an expanded label and its leg', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      List<CellBorder> borders() => [
+        for (final w in tester.widgetList<CustomPaint>(
+          find.byType(CustomPaint),
+        ))
+          if (w.foregroundPainter case final CellBorder b) b,
+      ];
+      const qtyDim = ColumnDimension('qty');
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: CubeAxis.of([region, country]),
+          columns: CubeAxis.of([category, qtyDim]),
+          aggregates: [sumQty],
+        ),
+      );
+      final a = DimensionPath([const DimensionValue(category, 'A')]);
+      final controller = CubeController(cube);
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregate: sumQty)),
+      );
+      expect(
+        borders().every((b) => b.rightFrom == 0 && b.bottomFrom == 0),
+        isTrue,
+      );
+      controller.cube = cube.toggleRow(europe).toggleColumn(a);
+      await tester.pumpAndSettle();
+      // Europe's label skips its own row; A's label skips its own column
+      expect(borders().where((b) => b.rightFrom > 0).length, 1);
+      expect(borders().where((b) => b.bottomFrom > 0).length, 1);
+      final europeBox = find.ancestor(
+        of: find.text('Europe'),
+        matching: find.byType(CustomPaint),
+      );
+      final europeBorder =
+          tester.widget<CustomPaint>(europeBox.first).foregroundPainter
+              as CellBorder;
+      expect(europeBorder.rightFrom, const CubeTheme().rowHeight);
+      expect(europeBorder.bottomFrom, 0);
+      final aBox = find.ancestor(
+        of: find.text('A'),
+        matching: find.byType(CustomPaint),
+      );
+      final aBorder =
+          tester.widget<CustomPaint>(aBox.first).foregroundPainter
+              as CellBorder;
+      expect(aBorder.rightFrom, 0);
+      // the leg's column is the first of A's span, which is 4 columns wide
+      final aWidth = tester.getSize(aBox.first).width;
+      expect(aBorder.bottomFrom, greaterThan(0));
+      expect(aBorder.bottomFrom, lessThan(aWidth));
     });
 
     testWidgets('cell taps report the cell', (tester) async {

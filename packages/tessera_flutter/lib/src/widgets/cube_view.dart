@@ -5,6 +5,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'cell_border.dart';
 import 'column_widths.dart';
 import 'cube_controller.dart';
 import 'cube_theme.dart';
@@ -497,6 +498,10 @@ class _CubeGridState extends State<_CubeGrid> {
       child: _box(
         color: owner.isSummary ? theme.summaryColor : theme.headerColor,
         alignment: Alignment.topLeft,
+        // an expanded group's label and the leg below it form one area
+        bottomBorderFrom: area.isLabel && area.entrySpan > 1
+            ? _widths![headerColumns + area.entryStart]
+            : 0,
         child: area.isLabel
             ? _entryLabel(context, owner, isRow: false)
             : const SizedBox(),
@@ -527,6 +532,10 @@ class _CubeGridState extends State<_CubeGrid> {
       child: _box(
         color: owner.isSummary ? theme.summaryColor : theme.headerColor,
         alignment: Alignment.topLeft,
+        // an expanded group's label and the leg beside it form one area
+        rightBorderFrom: area.isLabel && area.entrySpan > 1
+            ? theme.rowHeight
+            : 0,
         child: area.isLabel
             ? _entryLabel(context, owner, isRow: true)
             : const SizedBox(),
@@ -640,23 +649,28 @@ class _CubeGridState extends State<_CubeGrid> {
 
   // ------------------------------------------------------------- behaviour
 
+  /// A cell: background, padding and its right/bottom hairlines (see
+  /// [CellBorder] for [rightBorderFrom] / [bottomBorderFrom]).
   Widget _box({
     required Color color,
     required Widget child,
     Alignment alignment = Alignment.centerLeft,
     VoidCallback? onTap,
+    double rightBorderFrom = 0,
+    double bottomBorderFrom = 0,
   }) {
-    final box = Container(
-      decoration: BoxDecoration(
-        color: color,
-        border: Border(
-          right: BorderSide(color: theme.borderColor),
-          bottom: BorderSide(color: theme.borderColor),
-        ),
+    final box = CustomPaint(
+      foregroundPainter: CellBorder(
+        color: theme.borderColor,
+        rightFrom: rightBorderFrom,
+        bottomFrom: bottomBorderFrom,
       ),
-      padding: theme.cellPadding,
-      alignment: alignment,
-      child: child,
+      child: Container(
+        color: color,
+        padding: theme.cellPadding + const EdgeInsets.only(right: 1, bottom: 1),
+        alignment: alignment,
+        child: child,
+      ),
     );
     return onTap == null ? box : InkWell(onTap: onTap, child: box);
   }
