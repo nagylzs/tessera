@@ -689,6 +689,12 @@ void main() {
           .where((w) => w.color == c);
       expect(withColor(tintedHeader).length, 1);
       expect(withColor(tintedSummary).length, 1);
+      // expanded: the label and its leg, the whole rotated L, are tinted
+      controller.toggleRow(europe);
+      await tester.pumpAndSettle();
+      expect(withColor(tintedHeader).length, 2);
+      controller.toggleRow(europe);
+      await tester.pumpAndSettle();
       expect(
         find.descendant(
           of: find.byWidgetPredicate(

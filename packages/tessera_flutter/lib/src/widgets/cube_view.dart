@@ -582,9 +582,10 @@ class _CubeGridState extends State<_CubeGrid> {
           : null,
       columnMergeSpan: area.entrySpan > 1 ? area.entrySpan : null,
       child: _box(
+        // the label and, when expanded, its leg: the whole rotated L
         color: _headerColor(
           owner,
-          selected: area.isLabel && area.entryIndex == _selectedColumn,
+          selected: area.entryIndex == _selectedColumn,
         ),
         alignment: Alignment.topLeft,
         // an expanded group's label and the leg below it form one area
@@ -619,10 +620,7 @@ class _CubeGridState extends State<_CubeGrid> {
       rowMergeStart: area.entrySpan > 1 ? headerRows + area.entryStart : null,
       rowMergeSpan: area.entrySpan > 1 ? area.entrySpan : null,
       child: _box(
-        color: _headerColor(
-          owner,
-          selected: area.isLabel && area.entryIndex == _selectedRow,
-        ),
+        color: _headerColor(owner, selected: area.entryIndex == _selectedRow),
         alignment: Alignment.topLeft,
         // an expanded group's label and the leg beside it form one area
         rightBorderFrom: area.isLabel && area.entrySpan > 1
