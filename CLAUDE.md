@@ -24,10 +24,21 @@ the root, ignored; members carry `resolution: workspace`):
   format = one package): `XlsxDataSource` (streams one worksheet's rows,
   typed cells, `fromData`/`fromBytes`, `XlsxOptions`) and
   `XlsxCubeExporter` (renders a `CubeLayout` with `AxisGeometry` merges,
-  `XlsxCubeStyle` with ARGB ints, `TesseraStrings` labels). **Scaffold
-  only: every method throws `UnimplementedError`.** Plan: own OOXML code
-  on `archive` + `xml` (streaming reader; the `excel` package
-  materialises whole workbooks), not a third-party layer.
+  `XlsxCubeStyle` with ARGB ints, `TesseraStrings` labels). Own OOXML
+  code on `archive` + `xml`, no third-party spreadsheet layer.
+  Reader implemented: `xlsx_workbook.dart` (`XlsxWorkbook.parse`: zip →
+  sheets via workbook rels, shared strings incl. rich runs, `cellXfs` →
+  date-style flags from built-in ids + `isDateFormat(code)`, `date1904`,
+  `dateOf(serial)` with the 1900 gap) and `xlsx_sheet_reader.dart`
+  (`readSheetRows`: `parseEvents` over the sheet XML, no DOM; typed
+  cells, ints when written integral so inference matches CSV; rows keyed
+  by sheet row number so blank title rows count for `skipRows`). The
+  whole decompressed sheet XML is in memory (archive has no streaming
+  entry read) — known limit. Test data: `test/data/sales.xlsx` is
+  `sales.csv` converted by LibreOffice (`soffice --headless --convert-to
+  xlsx`); the test compares the two imports value for value. Edge cases
+  use mini workbooks built in-test with `ZipEncoder`. **Exporter still
+  throws `UnimplementedError`.**
 - Planned: further exporters (`tessera_pdf`, …) the same way; HTML export
   can live in the engine (no deps).
 

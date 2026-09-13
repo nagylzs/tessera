@@ -14,6 +14,7 @@ import 'src/xlsx_data_source.dart';
 
 export 'src/xlsx_cube_exporter.dart';
 export 'src/xlsx_data_source.dart';
+export 'src/xlsx_workbook.dart' show XlsxWorkbook, XlsxSheet;
 
 // Referenced for the doc comment above.
 // ignore: unused_element
