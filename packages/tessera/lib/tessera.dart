@@ -35,6 +35,11 @@
 /// as JSON data and decodes it again, with [JsonAdapter]s for
 /// application-defined aggregates, dimensions and filters.
 ///
+/// [TesseraSnapshot] writes a [FactTable] (and a [CubeConfig]) as one
+/// buffer of bytes that loads back without parsing — a cache, or a table
+/// built on a server and sent to clients; the format is documented in
+/// `docs/snapshot.md`.
+///
 /// [CubeGrid] lays a [CubeLayout] out as a rectangular grid (the way the
 /// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
 /// as CSV, `tessera_xlsx` as a workbook. [CubeExportTheme] is the
@@ -86,6 +91,7 @@ export 'src/schema/column_spec.dart';
 export 'src/schema/column_type.dart';
 export 'src/schema/schema.dart';
 export 'src/schema/value_parsing.dart';
+export 'src/snapshot/tessera_snapshot.dart';
 export 'src/source/csv_data_source.dart';
 export 'src/source/data_source.dart';
 export 'src/source/list_data_source.dart';

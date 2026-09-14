@@ -101,4 +101,17 @@ Future<void> main(List<String> args) async {
     ),
   ).layout;
   print('expr aggregate: ${sw.elapsedMilliseconds} ms  (cube)');
+
+  // Snapshot: the imported table as bytes and back.
+  sw = Stopwatch()..start();
+  final bytes = const TesseraSnapshot().encode(facts);
+  print(
+    'snapshot encode: ${sw.elapsedMilliseconds} ms  '
+    '(${(bytes.length / 1e6).toStringAsFixed(1)} MB)',
+  );
+  sw = Stopwatch()..start();
+  final restored = const TesseraSnapshot().decode(bytes).facts;
+  print(
+    'snapshot decode: ${sw.elapsedMilliseconds} ms  (${restored.rowCount} rows)',
+  );
 }

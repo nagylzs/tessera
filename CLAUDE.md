@@ -222,6 +222,24 @@ the root, ignored; members carry `resolution: workspace`):
   (PredicateFilter, MappedDimension, custom aggregate without adapter);
   `ColumnSpec.parser` is dropped silently (documented). Tests:
   `test/cube_json_test.dart`.
+- Snapshot (`packages/tessera/lib/src/snapshot/tessera_snapshot.dart`,
+  spec `docs/snapshot.md`): `TesseraSnapshot({codec})` with
+  `encode(facts, {config}) → Uint8List` and `decode(bytes) →
+  SnapshotContents(facts, config?)`. Layout: `TSNP`, uint32 version (1),
+  uint32 header length, UTF-8 JSON header (`rows`, `schema` via
+  `CubeJson.encodeSchema`, `columns` with per-column section descriptors
+  `{encoding, offset, length}`, optional `config` via `encodeConfig`),
+  then the data area at the next multiple of 8 with every section 8-byte
+  aligned: `f64` for numbers/dates (NaN = null), `u8` booleans (2 =
+  null), text as a dictionary section (uint32 lengths then UTF-8 bytes)
+  plus codes in `i8`/`i16`/`i32` (-1 = null, narrowest that fits).
+  Decode copies sections into fresh typed lists (so an unaligned buffer
+  works) and validates magic, version (rejects newer), every offset/
+  length/alignment, code range, boolean range and UTF-8; extra header
+  keys are ignored. Non-`FactTableImpl` tables are copied through
+  `ColumnBuilder` first. Little-endian hosts only. Tests:
+  `test/snapshot_test.dart` (incl. a file assembled by hand from the
+  spec); `bench.dart` prints encode/decode time and size.
 - Planned: further exporters the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a
@@ -606,6 +624,7 @@ Layers 1–3 must not import Flutter — enforced now by the package split
   materialize + cube 0.71 s, `ExpressionDimension` materialize + cube
   0.77 s, `Aggregate.expression` cube 0.62 s — i.e. 0.2–0.4 s per
   expression pass, paid once and cached (`bench.dart` prints them).
+  Snapshot of the same table: 106 MB, encode 41 ms, decode 63 ms.
   Isolate import of 2 M rows: 9.9 s, i.e. no measurable overhead; the CSV
   row estimate was 5 % high (fraction is capped at 0.99 anyway). Import conversion has headroom (regex per numeric cell) — a
   tryParse fast path is a known TODO. Cube layout still runs on the caller.

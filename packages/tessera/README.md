@@ -53,6 +53,7 @@ blank instead of showing `0`.
 | **CubeLayout** | The visible rows, columns and cells derived from facts + spec + expansion state. |
 | **AxisGeometry** | The merged header cells of an axis, for renderers (grids, exporters). |
 | **CubeJson / CubeConfig** | JSON form of a pivot configuration (spec, expansion states, schema) for saving and restoring a layout; adapters for custom members. |
+| **TesseraSnapshot** | A fact table (and a configuration) as bytes: cache an import or ship a server-built table to clients; format in `docs/snapshot.md`. |
 | **TesseraStrings** | Localized texts and label/number formatting rules; fourteen languages built in. |
 
 ### Layers
@@ -231,6 +232,31 @@ aggregates, dimensions and filters plug in through a `JsonAdapter`; a
 `PredicateFilter`, a `MappedDimension` or a `ColumnSpec.parser` is a Dart
 function and cannot be stored: the first two throw without an adapter, the
 parser is dropped.
+
+## Snapshots
+
+`TesseraSnapshot` writes an imported fact table — and optionally a
+`CubeConfig` — as one buffer of bytes that loads back in a copy, with no
+parsing and no inference. Use it to cache an import, or to import on a
+server and send the table to clients so they never see the source file:
+
+```dart
+// server, or first open
+final bytes = const TesseraSnapshot().encode(facts, config: CubeConfig.of(cube));
+
+// client, or next open
+final contents = const TesseraSnapshot().decode(bytes);
+final cube = contents.config!.toCube(contents.facts);
+```
+
+On the 2 M-row benchmark set the snapshot is 106 MB, encodes in about
+40 ms and decodes in about 60 ms, where parsing and importing the CSV take
+8 s. The format is a JSON header followed by the raw little-endian column
+arrays, documented in [docs/snapshot.md](https://github.com/nagylzs/tessera/blob/main/docs/snapshot.md) so other
+software can write it; nothing is compressed — leave that to the transport
+(`Content-Encoding: gzip`) or the file layer. `decode` validates every
+section and throws `FormatException` on malformed input, including a
+snapshot newer than the library.
 
 ## Example
 

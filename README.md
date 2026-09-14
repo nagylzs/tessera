@@ -59,6 +59,11 @@ packages cover them:
   with formulas, charts and many sheets use
   [`excel`](https://pub.dev/packages/excel).
 
+## Documentation
+
+- [docs/snapshot.md](docs/snapshot.md) — the binary snapshot format
+  (`TesseraSnapshot`), for writing snapshots from other software.
+
 ## Development
 
 ```bash

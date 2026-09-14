@@ -1,5 +1,12 @@
 ## Unreleased
 
+* `TesseraSnapshot`: a `FactTable` (and optionally a `CubeConfig`) as one
+  `Uint8List` — magic, version, JSON header, raw little-endian column
+  arrays at 8-byte offsets, text codes in the narrowest width — that
+  `decode` loads back in a copy after validating every section
+  (`FormatException` otherwise, also for a newer format version).
+  Documented in `docs/snapshot.md` for other writers. 2 M rows: 106 MB,
+  ~40 ms to encode, ~60 ms to decode.
 * `CubeJson`: JSON encoding and decoding of `CubeConfig` (a new bundle of
   `CubeSpec`, both `ExpansionState`s and the `Schema`; `CubeConfig.of(cube)`,
   `toCube(facts)`), and of every part on its own — axes, sorts,

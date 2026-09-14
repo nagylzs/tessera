@@ -149,6 +149,15 @@ the facts into a database only pays off if the whole cube moved there.
 
 ## Features users will ask for next (after the first release)
 
+- [x] Snapshot format (decided and done 2026-09-14): `TesseraSnapshot`
+      encodes a fact table plus an optional `CubeConfig` as bytes (JSON
+      header + raw little-endian columns, spec in `docs/snapshot.md`); a
+      cache for reopening, and a server-to-client transport that offloads
+      parsing and import. Uncompressed by design (HTTP content encoding /
+      gzip at the file layer). Follow-ups: a `SnapshotDataSource`-style
+      hook in the example app (load a `.tsnp` file), and narrower number
+      encodings (int32, day numbers) if size matters.
+
 - [ ] A filter editor widget: the engine has the filter model
       (`FactFilter`, `ValueFilter`, `AndFilter`, …) but no UI for it.
       Builds on the structured filters and `ExpressionFilter` above: a
