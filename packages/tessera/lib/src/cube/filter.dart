@@ -175,11 +175,21 @@ String? _join(List<FactFilter> filters, String op, String empty) {
   if (filters.isEmpty) return empty;
   final parts = <String>[];
   for (final f in filters) {
-    final s = f.toExpressionSource();
+    final s = _operand(f);
     if (s == null) return null;
     parts.add(s);
   }
   return parts.length == 1 ? parts.single : '(${parts.join(' $op ')})';
+}
+
+/// [f] as an operand of `and` / `or` / `not`: a free-form expression is
+/// parenthesized so its own `or` cannot bind differently in the
+/// combination; the structured filters render atoms or already
+/// parenthesized groups.
+String? _operand(FactFilter f) {
+  final s = f.toExpressionSource();
+  if (s == null) return null;
+  return f is ExpressionFilter ? '($s)' : s;
 }
 
 final class NotFilter extends FactFilter {
@@ -197,7 +207,7 @@ final class NotFilter extends FactFilter {
 
   @override
   String? toExpressionSource() {
-    final s = filter.toExpressionSource();
+    final s = _operand(filter);
     return s == null ? null : 'not $s';
   }
 

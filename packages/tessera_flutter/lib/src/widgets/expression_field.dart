@@ -94,7 +94,11 @@ class _ExpressionFieldState extends State<ExpressionField> {
         isDense: true,
         labelText: widget.label ?? strings.expression,
         hintText: widget.hintText,
-        errorText: _error == null ? null : strings.expressionError(_error!),
+        // An empty field is invalid but not yet wrong: no message until
+        // the user has typed something.
+        errorText: _error == null || _controller.text.isEmpty
+            ? null
+            : strings.expressionError(_error!),
         errorMaxLines: 3,
       ),
       onChanged: _changed,

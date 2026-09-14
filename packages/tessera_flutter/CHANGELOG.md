@@ -1,5 +1,6 @@
 ## Unreleased
 
+* `ExpressionField` shows no error message while the field is empty.
 * `ExpressionField` (with `ExpressionTextController`, moved out of the
   filter editor): an expression text field with live validation.
 * Aggregate picker: a "Formula" function for cell formulas

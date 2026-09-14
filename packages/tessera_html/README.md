@@ -25,6 +25,8 @@ final html = HtmlCubeExporter(
 `export` returns the HTML as a `String` (a whole document, or a fragment
 with `standalone: false`).
 
+> **User guide:** [github.com/nagylzs/tessera/docs](https://github.com/nagylzs/tessera/blob/main/docs/README.md) — data sources, schema, cubes, aggregates, filters, the expression language, widgets, theming, export, localization, saving, large data.
+
 ## Example
 
 [`example/main.dart`](example/main.dart) reads `example/sales.csv`, builds

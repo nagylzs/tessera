@@ -61,6 +61,10 @@ packages cover them:
 
 ## Documentation
 
+- [User guide](docs/README.md) — fourteen chapters with screenshots: data
+  sources, schema and import, facts, the cube, aggregates, filters, the
+  expression language, the widgets, theming, export, localization,
+  saving and restoring, large data.
 - [docs/snapshot.md](docs/snapshot.md) — the binary snapshot format
   (`TesseraSnapshot`), for writing snapshots from other software.
 

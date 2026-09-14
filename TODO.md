@@ -50,11 +50,15 @@ through these in order, then publish.
 
 ## User guide (repository only, not uploaded)
 
-- [ ] `docs/` at the repository root: a guide for new users in logical
+- [x] `docs/` at the repository root: a guide for new users in logical
       order, more detailed than the READMEs (data sources and schema
       inference, the fact table, dimensions and measures, building a cube,
       expansion and sorting, filters, the widgets, theming, export
       formats, localization, large data). Link it from every README.
+      Done 2026-09-14: 14 chapters + the snapshot spec, 33 screenshots
+      in `docs/images/` (English UI; Hungarian once, for the
+      localization chapter), linked from the root README and every
+      package README.
 
 ## Expression language (decided 2026-09-14, do before the filter editor and calculated aggregates)
 
@@ -137,10 +141,10 @@ the facts into a database only pays off if the whole cube moved there.
       rule and error), null truth tables, closure compiler vs. a naive
       interpreter on `sales.csv`, and a benchmark on the 2 M-row set
       (`example/tool/bench.dart`) to confirm the once-per-build cost.
-- [ ] Docs: a chapter in the user guide with the grammar, the function list
-      and the null rules (the guide does not exist yet); the `tessera`
-      README has an "Expressions" section (done), `tessera_flutter`'s
-      mentions the filter editor (done).
+- [x] Docs: a chapter in the user guide with the grammar, the function list
+      and the null rules (`docs/08-expressions.md`); the `tessera`
+      README has an "Expressions" section, `tessera_flutter`'s
+      mentions the filter editor.
 - [x] Localized error messages: `ExpressionError` carries `kind`,
       `arguments` and an English `message`; add
       `TesseraStrings.expressionError(ExpressionError)` with the 14

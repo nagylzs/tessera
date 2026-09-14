@@ -267,6 +267,15 @@ package that depends on Flutter cannot be used with the standalone Dart
 SDK at all (servers, `dart:stable` images) — a Flutter-free entrypoint
 inside a Flutter package does not help.
 
+`docs/` at the root is the user guide (14 chapters, `docs/README.md` the
+index, `docs/snapshot.md` the format spec, `docs/images/` the screenshots
+at 1600 px width, re-encoded as 8-bit palette PNGs (`magick -depth 8 -colors 255`, 16 MB → 4.7 MB), taken from the example app in English — run the release
+bundle with `LANG=en_US.UTF-8` since the machine's locale is Hungarian,
+make the window floating with `i3-msg '[id=…] floating enable, resize
+set 2600 1500'`, capture with `import -window`; the debug build shows the
+banner). Every README links to the guide; keep the chapters in step with
+API changes the same way the READMEs are.
+
 `TODO.md` at the root lists the agreed work (the pre-publish items are
 done; the user guide and later features remain); tick items there as they
 are done. Versioning: every feature commit adds its bullet under a `## Unreleased`

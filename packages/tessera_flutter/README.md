@@ -10,6 +10,8 @@ languages.
 > **Status: 0.1.x.** Everything works end to end and is covered by widget
 > tests; the API may still change before 1.0 (see the CHANGELOG).
 
+> **User guide:** [github.com/nagylzs/tessera/docs](https://github.com/nagylzs/tessera/blob/main/docs/README.md) — data sources, schema, cubes, aggregates, filters, the expression language, widgets, theming, export, localization, saving, large data.
+
 This package re-exports `package:tessera/tessera.dart`, so a single import
 gives you both the engine and the widgets. Read the engine's README for the
 concepts (data sources, schema inference, fact tables, cube specs).

@@ -30,6 +30,8 @@ final ods = OdsCubeExporter(
 `export` returns the document as a `Uint8List`, ready to write to a file
 or hand to a download.
 
+> **User guide:** [github.com/nagylzs/tessera/docs](https://github.com/nagylzs/tessera/blob/main/docs/README.md) — data sources, schema, cubes, aggregates, filters, the expression language, widgets, theming, export, localization, saving, large data.
+
 ## Example
 
 [`example/main.dart`](example/main.dart) does the whole round trip from

@@ -226,6 +226,19 @@ void main() {
         NotFilter(EmptyFilter('qty')).toExpressionSource(),
         'not qty is empty',
       );
+      // a free-form expression keeps its own precedence in a combination
+      expect(
+        AndFilter([
+          EmptyFilter('qty'),
+          ExpressionFilter('price > 1 or qty > 1'),
+        ]).toExpressionSource(),
+        '(qty is empty and (price > 1 or qty > 1))',
+      );
+      expect(
+        NotFilter(ExpressionFilter('price > 1 or qty > 1'))
+            .toExpressionSource(),
+        'not (price > 1 or qty > 1)',
+      );
       expect(const AndFilter([]).toExpressionSource(), 'true');
       expect(const OrFilter([]).toExpressionSource(), 'false');
       expect(

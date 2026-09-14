@@ -1,5 +1,7 @@
 ## Unreleased
 
+* `FactFilter.toExpressionSource()` parenthesizes an `ExpressionFilter`
+  inside `and` / `or` / `not`, so its own `or` keeps its precedence.
 * `ValueDisplay`: the ready-made "show values as" choices (`apply(base)`,
   `of(aggregate)`, `plainOf`); strings `showValuesAs`,
   `valueDisplayName`, `formula`, `labelField` in every locale.
