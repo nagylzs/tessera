@@ -1,27 +1,31 @@
-## Unreleased
+## 0.2.0
 
-* `ExpressionField` shows no error message while the field is empty.
-* `ExpressionField` (with `ExpressionTextController`, moved out of the
-  filter editor): an expression text field with live validation.
-* Aggregate picker: a "Formula" function for cell formulas
-  (`ExpressionAggregate`) and an "Expression…" entry under every measure
-  function for calculated measures (`Measure.expression`), each with a
-  label field; `AggregatePickerDialog.facts` / `functions`,
-  `showAggregatePicker(functions:)`, `AggregateEditor.functions`.
-* `AggregateEditor`: a long press or secondary click on a chip opens
-  "Show values as" with the `ValueDisplay` choices; the wrapped aggregate
-  replaces the chip in the spec, in sorts and in the selection.
+Requires `tessera` 0.2.0 (the expression language, statistical and
+layout-relative aggregates, structured filters, JSON and snapshots).
+
 * `FilterEditor`, `FilterEditorDialog`, `showFilterEditor` and
   `FilterEditorResult` / `FilterEditorValue`: a filter editor with
   all-of / any-of / not groups, typed condition rows (including "is one
   of" from the column's distinct values and a date picker), expression
-  rows with live validation (`ExpressionTextController` underlines the
-  error range) and read-only rows for filters without an editable form.
-  The example workbench has a "Filter…" action and shows the active
-  filter under the grid.
+  rows with live validation and read-only rows for filters without an
+  editable form.
+* `ExpressionField` (with `ExpressionTextController`, which underlines the
+  error range): an expression text field validated on every keystroke,
+  the message in the current language; no message while the field is
+  still empty.
+* Aggregate picker: a "Formula" function for cell formulas
+  (`Aggregate.expression`) and an "Expression…" entry under every measure
+  function for calculated measures (`Measure.expression`), each with a
+  label field; the new statistical kinds; `AggregatePickerDialog.facts` /
+  `functions`, `showAggregatePicker(functions:)`,
+  `AggregateEditor.functions`. The function dropdown expands to the
+  dialog width and ellipsizes long names.
+* `AggregateEditor`: a long press or secondary click on a chip opens
+  "Show values as" with the `ValueDisplay` choices; the wrapped aggregate
+  replaces the chip in the spec, in sorts and in the selection.
 * `AxisSide` now comes from the engine (re-exported, no import change).
-* The aggregate picker's function dropdown expands to the dialog width
-  and ellipsizes long names (the new variance family labels).
+* Example app: a "Filter…" action, the active filter shown under the
+  grid, "records" instead of "facts" in the status line.
 
 ## 0.1.1
 

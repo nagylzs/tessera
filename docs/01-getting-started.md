@@ -13,7 +13,7 @@ Tessera is a set of packages on pub.dev. Pick what you need:
 
 ```yaml
 dependencies:
-  tessera_flutter: ^0.1.0   # or tessera: ^0.1.0 for a Dart-only project
+  tessera_flutter: ^0.2.0   # or tessera: ^0.2.0 for a Dart-only project
 ```
 
 ## From a CSV file to a grid

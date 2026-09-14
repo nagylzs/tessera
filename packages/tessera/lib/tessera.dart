@@ -77,7 +77,7 @@ export 'src/export/cube_grid.dart';
 export 'src/export/grid_metrics.dart';
 export 'src/export/grid_pagination.dart';
 export 'src/expr/ast.dart';
-export 'src/expr/checker.dart';
+export 'src/expr/checker.dart' show CheckedExpression, ExpressionScope;
 export 'src/expr/compiler.dart'
     show BoolFn, CompiledExpression, NumberFn, TextFn, datePartOf;
 export 'src/expr/expr_type.dart';

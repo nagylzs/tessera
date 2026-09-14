@@ -7,7 +7,7 @@ pivot-table engine: an expandable cube grid, drag-and-drop axis and
 aggregate editors, picker dialogs, and localizations for fourteen
 languages.
 
-> **Status: 0.1.x.** Everything works end to end and is covered by widget
+> **Status: 0.2.x.** Everything works end to end and is covered by widget
 > tests; the API may still change before 1.0 (see the CHANGELOG).
 
 > **User guide:** [github.com/nagylzs/tessera/docs](https://github.com/nagylzs/tessera/blob/main/docs/README.md) — data sources, schema, cubes, aggregates, filters, the expression language, widgets, theming, export, localization, saving, large data.

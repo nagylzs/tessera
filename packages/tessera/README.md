@@ -10,7 +10,7 @@ This package has no Flutter dependency, so it runs on servers, in
 command-line tools, in isolates and in the browser. The widgets that display
 and edit a cube live in [`tessera_flutter`](https://pub.dev/packages/tessera_flutter).
 
-> **Status: 0.1.x.** The pipeline works end to end and is covered by tests;
+> **Status: 0.2.x.** The pipeline works end to end and is covered by tests;
 > the API may still change before 1.0 (see the CHANGELOG).
 
 > **User guide:** [github.com/nagylzs/tessera/docs](https://github.com/nagylzs/tessera/blob/main/docs/README.md) — data sources, schema, cubes, aggregates, filters, the expression language, widgets, theming, export, localization, saving, large data.
