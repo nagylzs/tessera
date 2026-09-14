@@ -164,8 +164,13 @@ inside a Flutter package does not help.
 
 `TODO.md` at the root lists the agreed work (the pre-publish items are
 done; the user guide and later features remain); tick items there as they
-are done. Publishing: bump `version:` and the CHANGELOG in the package,
-plus every `tessera: ^x.y.z` constraint when the engine changes; publish
+are done. Versioning: every feature commit adds its bullet under a `## Unreleased`
+heading in the affected package's CHANGELOG; `version:` is bumped only in
+the release commit (rename the heading, bump the number — on 0.x a
+breaking change bumps the minor, additive work the patch, since `^0.1.0`
+means `<0.2.0`). Publishing: bump `version:` and the CHANGELOG in the
+package, plus every `tessera: ^x.y.z` constraint when the engine's
+minor changes (the dependents are then re-released too); publish
 the engine first, dependents after pub.dev serves it (seconds; new
 *packages* are rate-limited to 4 per few minutes, new versions are not);
 `dart pub publish` (`flutter pub publish` for tessera_flutter); packages
