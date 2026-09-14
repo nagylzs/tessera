@@ -170,6 +170,9 @@ the engine first, dependents after pub.dev serves it (seconds; new
 *packages* are rate-limited to 4 per few minutes, new versions are not);
 `dart pub publish` (`flutter pub publish` for tessera_flutter); packages
 belong to the publisher, so no transfer is needed for later versions.
+pub.dev shows the README/CHANGELOG *from the uploaded archive* and never
+re-reads them — finish every doc edit and commit before publishing
+(0.1.1 of tessera/tessera_flutter exists only because of this).
 
 ## Commands
 
