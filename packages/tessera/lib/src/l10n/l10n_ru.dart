@@ -71,6 +71,36 @@ final class TesseraStringsRu extends TesseraStrings {
   String rankOf(String base) => '$base ранг';
 
   @override
+  String get showValuesAs => 'Показывать значения как';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => 'Простое значение',
+    ValueDisplay.percentOfRow => '% от итога строки',
+    ValueDisplay.percentOfColumn => '% от итога столбца',
+    ValueDisplay.percentOfGrand => '% от общего итога',
+    ValueDisplay.percentOfParentRow => '% от родительской строки',
+    ValueDisplay.percentOfParentColumn => '% от родительского столбца',
+    ValueDisplay.differenceFromPreviousRow => 'Отличие от предыдущей строки',
+    ValueDisplay.differenceFromPreviousColumn =>
+      'Отличие от предыдущего столбца',
+    ValueDisplay.percentDifferenceFromPreviousRow =>
+      '% отличия от предыдущей строки',
+    ValueDisplay.percentDifferenceFromPreviousColumn =>
+      '% отличия от предыдущего столбца',
+    ValueDisplay.runningTotalRows => 'Нарастающий итог по строкам',
+    ValueDisplay.runningTotalColumns => 'Нарастающий итог по столбцам',
+    ValueDisplay.rankRows => 'Ранг среди строк',
+    ValueDisplay.rankColumns => 'Ранг среди столбцов',
+  };
+
+  @override
+  String get formula => 'Формула';
+
+  @override
+  String get labelField => 'Подпись';
+
+  @override
   String get countOfFacts => 'Количество строк';
 
   @override

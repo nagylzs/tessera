@@ -131,9 +131,8 @@ the facts into a database only pays off if the whole cube moved there.
       the layout (`ShowValuesAs`-style), since they need the parent/sibling/base
       cell, not a row or a cell. Done 2026-09-14: `LayoutAggregate` +
       `percentOf`, `differenceFrom`, `percentDifferenceFrom`,
-      `runningTotal`, `rank`; localized labels; JSON forms. The widget's
-      aggregate picker does not offer them yet (a "show values as" menu on
-      an aggregate chip is the natural UI).
+      `runningTotal`, `rank`; localized labels; JSON forms. UI done the
+      same day: "Show values as" on the aggregate chips (`ValueDisplay`).
 - [x] Tests: parser (positions, precedence, quoting), checker (every type
       rule and error), null truth tables, closure compiler vs. a naive
       interpreter on `sales.csv`, and a benchmark on the 2 M-row set
@@ -181,7 +180,9 @@ the facts into a database only pays off if the whole cube moved there.
 - [x] Calculated aggregates: percent of row/column/grand total, difference
       from a base value (layout-relative wrappers, see above) and
       expression-based measures / derived aggregates from the expression
-      language section. Engine side done 2026-09-14; UI pending (see above).
+      language section. Engine and UI done 2026-09-14: the aggregate
+      picker offers cell formulas and calculated measures, the chips
+      "Show values as".
 - [ ] More data sources: JSON (array of objects) and JSONL, the formats
       every competitor reads; `ListDataSource` covers programmatic data
       already. A database/server-side (lazy) source is a bigger design

@@ -71,6 +71,37 @@ final class TesseraStringsIt extends TesseraStrings {
   String rankOf(String base) => '$base posizione';
 
   @override
+  String get showValuesAs => 'Mostra valori come';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => 'Valore semplice',
+    ValueDisplay.percentOfRow => '% del totale riga',
+    ValueDisplay.percentOfColumn => '% del totale colonna',
+    ValueDisplay.percentOfGrand => '% del totale generale',
+    ValueDisplay.percentOfParentRow => '% della riga padre',
+    ValueDisplay.percentOfParentColumn => '% della colonna padre',
+    ValueDisplay.differenceFromPreviousRow =>
+      'Differenza dalla riga precedente',
+    ValueDisplay.differenceFromPreviousColumn =>
+      'Differenza dalla colonna precedente',
+    ValueDisplay.percentDifferenceFromPreviousRow =>
+      '% differenza dalla riga precedente',
+    ValueDisplay.percentDifferenceFromPreviousColumn =>
+      '% differenza dalla colonna precedente',
+    ValueDisplay.runningTotalRows => 'Totale progressivo per righe',
+    ValueDisplay.runningTotalColumns => 'Totale progressivo per colonne',
+    ValueDisplay.rankRows => 'Posizione tra le righe',
+    ValueDisplay.rankColumns => 'Posizione tra le colonne',
+  };
+
+  @override
+  String get formula => 'Formula';
+
+  @override
+  String get labelField => 'Etichetta';
+
+  @override
   String get countOfFacts => 'Conteggio righe';
 
   @override

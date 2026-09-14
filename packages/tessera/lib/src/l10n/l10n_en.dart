@@ -70,6 +70,36 @@ final class TesseraStringsEn extends TesseraStrings {
   String rankOf(String base) => '$base rank';
 
   @override
+  String get showValuesAs => 'Show values as';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => 'Plain value',
+    ValueDisplay.percentOfRow => '% of row total',
+    ValueDisplay.percentOfColumn => '% of column total',
+    ValueDisplay.percentOfGrand => '% of grand total',
+    ValueDisplay.percentOfParentRow => '% of parent row',
+    ValueDisplay.percentOfParentColumn => '% of parent column',
+    ValueDisplay.differenceFromPreviousRow => 'Difference from previous row',
+    ValueDisplay.differenceFromPreviousColumn =>
+      'Difference from previous column',
+    ValueDisplay.percentDifferenceFromPreviousRow =>
+      '% difference from previous row',
+    ValueDisplay.percentDifferenceFromPreviousColumn =>
+      '% difference from previous column',
+    ValueDisplay.runningTotalRows => 'Running total along rows',
+    ValueDisplay.runningTotalColumns => 'Running total along columns',
+    ValueDisplay.rankRows => 'Rank along rows',
+    ValueDisplay.rankColumns => 'Rank along columns',
+  };
+
+  @override
+  String get formula => 'Formula';
+
+  @override
+  String get labelField => 'Label';
+
+  @override
   String get countOfFacts => 'Count of facts';
 
   @override

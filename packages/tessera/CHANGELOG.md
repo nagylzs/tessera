@@ -1,5 +1,8 @@
 ## Unreleased
 
+* `ValueDisplay`: the ready-made "show values as" choices (`apply(base)`,
+  `of(aggregate)`, `plainOf`); strings `showValuesAs`,
+  `valueDisplayName`, `formula`, `labelField` in every locale.
 * `TesseraStrings.expressionError(error)`: localized expression error
   messages, composed per locale by `expressionErrorText(kind, arguments)`
   with type names from `exprTypeName`; and the filter editor's strings

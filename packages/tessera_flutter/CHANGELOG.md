@@ -1,5 +1,15 @@
 ## Unreleased
 
+* `ExpressionField` (with `ExpressionTextController`, moved out of the
+  filter editor): an expression text field with live validation.
+* Aggregate picker: a "Formula" function for cell formulas
+  (`ExpressionAggregate`) and an "Expression…" entry under every measure
+  function for calculated measures (`Measure.expression`), each with a
+  label field; `AggregatePickerDialog.facts` / `functions`,
+  `showAggregatePicker(functions:)`, `AggregateEditor.functions`.
+* `AggregateEditor`: a long press or secondary click on a chip opens
+  "Show values as" with the `ValueDisplay` choices; the wrapped aggregate
+  replaces the chip in the spec, in sorts and in the selection.
 * `FilterEditor`, `FilterEditorDialog`, `showFilterEditor` and
   `FilterEditorResult` / `FilterEditorValue`: a filter editor with
   all-of / any-of / not groups, typed condition rows (including "is one

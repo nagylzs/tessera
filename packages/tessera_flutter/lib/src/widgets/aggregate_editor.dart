@@ -15,6 +15,10 @@ import 'cube_controller.dart';
 ///   the way to let the user choose which aggregates a [CubeView] displays
 ///   (in the spec's order). The last selected one cannot be deselected;
 ///   removing a selected aggregate reports the remaining selection.
+/// * A long press or secondary click on a chip opens its menu: "Show
+///   values as" wraps the aggregate in a [LayoutAggregate] of the chosen
+///   [ValueDisplay] (percent of a total, difference from the previous
+///   group, running total, rank) or unwraps it ("Plain value").
 class AggregateEditor extends StatelessWidget {
   const AggregateEditor({
     super.key,
@@ -23,6 +27,7 @@ class AggregateEditor extends StatelessWidget {
     this.onSelectedChanged,
     this.measures,
     this.dimensions,
+    this.functions,
     this.label,
     this.addTooltip,
   });
@@ -42,6 +47,9 @@ class AggregateEditor extends StatelessWidget {
   /// Dimensions offered by the picker for distinct counts; defaults to
   /// [standardDimensions].
   final List<Dimension>? dimensions;
+
+  /// Functions beyond the built-in ones the picker's expressions may call.
+  final FunctionRegistry? functions;
 
   /// Defaults to the localized "Values".
   final String? label;
@@ -79,16 +87,39 @@ class AggregateEditor extends StatelessWidget {
                 runSpacing: 4,
                 children: [
                   for (final a in aggregates)
-                    InputChip(
-                      label: Text(strings.aggregateLabel(a, cube.facts)),
-                      selected: selected?.contains(a) ?? false,
-                      onSelected: onSelectedChanged == null
-                          ? null
-                          : (on) => _toggle(a, on),
-                      onDeleted: aggregates.length > 1
-                          ? () => _remove(a)
-                          : null,
-                      visualDensity: VisualDensity.compact,
+                    MenuAnchor(
+                      menuChildren: [
+                        SubmenuButton(
+                          menuChildren: [
+                            for (final d in ValueDisplay.values)
+                              MenuItemButton(
+                                leadingIcon: Icon(
+                                  ValueDisplay.of(a) == d ? Icons.check : null,
+                                  size: 18,
+                                ),
+                                onPressed: () => _replace(a, d.apply(a)),
+                                child: Text(strings.valueDisplayName(d)),
+                              ),
+                          ],
+                          child: Text(strings.showValuesAs),
+                        ),
+                      ],
+                      builder: (context, menu, _) => GestureDetector(
+                        onLongPress: () => menu.open(),
+                        onSecondaryTapDown: (d) =>
+                            menu.open(position: d.localPosition),
+                        child: InputChip(
+                          label: Text(strings.aggregateLabel(a, cube.facts)),
+                          selected: selected?.contains(a) ?? false,
+                          onSelected: onSelectedChanged == null
+                              ? null
+                              : (on) => _toggle(a, on),
+                          onDeleted: aggregates.length > 1
+                              ? () => _remove(a)
+                              : null,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -124,11 +155,51 @@ class AggregateEditor extends StatelessWidget {
       measures: measures,
       dimensions: dimensions,
       used: cube.spec.aggregates.toSet(),
+      functions: functions,
     );
     if (picked == null) return;
     final spec = controller.cube.spec;
     controller.updateSpec(
       spec.copyWith(aggregates: [...spec.aggregates, picked]),
+    );
+  }
+
+  /// Puts [next] where [old] was, in the spec, in any sort that used it
+  /// and in the selection.
+  void _replace(Aggregate old, Aggregate next) {
+    if (next == old) return;
+    final spec = controller.cube.spec;
+    if (spec.aggregates.contains(next)) return;
+    CubeAxis fix(CubeAxis axis) => axis.copyWith(
+      dimensions: [
+        for (final d in axis.dimensions)
+          d.sort?.aggregate == old
+              ? AxisDimension(
+                  d.dimension,
+                  sort: AxisSort(
+                    by: SortBy.aggregate,
+                    aggregate: next,
+                    keyPath: d.sort!.keyPath,
+                    direction: d.sort!.direction,
+                    nulls: d.sort!.nulls,
+                  ),
+                )
+              : d,
+      ],
+    );
+    final aggregates = [for (final a in spec.aggregates) a == old ? next : a];
+    if (selected?.contains(old) ?? false) {
+      onSelectedChanged?.call([
+        for (final a in aggregates)
+          if (a == next || selected!.contains(a)) a,
+      ]);
+    }
+    controller.updateSpec(
+      spec.copyWith(
+        aggregates: aggregates,
+        rows: fix(spec.rows),
+        columns: fix(spec.columns),
+      ),
     );
   }
 

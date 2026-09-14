@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'expression_field.dart';
 
 /// The numeric columns of [facts] as measures.
 List<Measure> standardMeasures(FactTable facts) => [
@@ -20,6 +21,7 @@ Future<Aggregate?> showAggregatePicker(
   List<Dimension>? dimensions,
   Set<Aggregate> used = const {},
   String? title,
+  FunctionRegistry? functions,
 }) {
   final strings = TesseraLocalizations.of(context);
   return showDialog<Aggregate>(
@@ -29,6 +31,8 @@ Future<Aggregate?> showAggregatePicker(
       dimensions: dimensions ?? standardDimensions(facts),
       used: used,
       title: title,
+      facts: facts,
+      functions: functions,
       measureLabel: (m) => m.labelFor(facts),
       dimensionLabel: (d) => strings.dimensionLabel(d, facts),
     ),
@@ -37,6 +41,12 @@ Future<Aggregate?> showAggregatePicker(
 
 /// The dialog behind [showAggregatePicker]; pops with the chosen
 /// [Aggregate].
+///
+/// With [facts] given, two expression paths appear: a "Formula" function
+/// (a cell formula such as `sum(total) / count`, an
+/// [ExpressionAggregate]) and, under every measure function, an
+/// "Expression" entry for a calculated measure (`quantity * unit_price`,
+/// a [Measure.expression]); both validated as the user types.
 class AggregatePickerDialog extends StatefulWidget {
   const AggregatePickerDialog({
     super.key,
@@ -47,6 +57,8 @@ class AggregatePickerDialog extends StatefulWidget {
     this.usedHint,
     this.measureLabel,
     this.dimensionLabel,
+    this.facts,
+    this.functions,
   });
 
   final List<Measure> measures;
@@ -54,6 +66,12 @@ class AggregatePickerDialog extends StatefulWidget {
   final Set<Aggregate> used;
   final String? title;
   final String? usedHint;
+
+  /// Enables the expression paths; the columns expressions may use.
+  final FactTable? facts;
+
+  /// Functions beyond the built-in ones expressions may call.
+  final FunctionRegistry? functions;
 
   /// How measures and dimensions are named; default: their [Measure.label]
   /// / [Dimension.label].
@@ -64,8 +82,36 @@ class AggregatePickerDialog extends StatefulWidget {
   State<AggregatePickerDialog> createState() => _AggregatePickerDialogState();
 }
 
+/// A choice of the function dropdown: a built-in kind or the cell formula.
+final class _Function {
+  const _Function(this.kind);
+
+  /// `null` = formula.
+  final AggregateKind? kind;
+
+  static const formula = _Function(null);
+
+  @override
+  bool operator ==(Object other) => other is _Function && other.kind == kind;
+
+  @override
+  int get hashCode => kind.hashCode;
+}
+
 class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
-  var _kind = AggregateKind.sum;
+  var _function = const _Function(AggregateKind.sum);
+
+  /// The expression entry of the measure list is open.
+  var _measureExpression = false;
+  var _source = '';
+  ExpressionError? _error = const ExpressionError(
+    ExpressionErrorKind.unexpectedEnd,
+    offset: 0,
+    length: 0,
+  );
+  var _label = '';
+
+  AggregateKind get _kind => _function.kind ?? AggregateKind.sum;
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +126,8 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: DropdownButtonFormField<AggregateKind>(
-                initialValue: _kind,
+              child: DropdownButtonFormField<_Function>(
+                initialValue: _function,
                 isExpanded: true,
                 decoration: InputDecoration(
                   isDense: true,
@@ -90,14 +136,26 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
                 items: [
                   for (final k in AggregateKind.values)
                     DropdownMenuItem(
-                      value: k,
+                      value: _Function(k),
                       child: Text(
                         strings.aggregateKindLabel(k),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                  if (widget.facts != null)
+                    DropdownMenuItem(
+                      value: _Function.formula,
+                      child: Text(
+                        strings.formula,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                 ],
-                onChanged: (k) => setState(() => _kind = k!),
+                onChanged: (f) => setState(() {
+                  _function = f!;
+                  _measureExpression = false;
+                  _resetExpression();
+                }),
               ),
             ),
             const SizedBox(height: 8),
@@ -114,9 +172,33 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
     );
   }
 
+  void _resetExpression() {
+    _source = '';
+    _label = '';
+    _error = const ExpressionError(
+      ExpressionErrorKind.unexpectedEnd,
+      offset: 0,
+      length: 0,
+    );
+  }
+
   Widget _targets(BuildContext context, TesseraStrings strings) {
     final measureLabel = widget.measureLabel ?? (Measure m) => m.label;
     final dimensionLabel = widget.dimensionLabel ?? (Dimension d) => d.label;
+    final facts = widget.facts;
+    if (_function == _Function.formula && facts != null) {
+      return _expressionForm(
+        context,
+        strings,
+        scope: ExpressionScope.cellsOf(facts, functions: widget.functions),
+        hint: 'sum(x) / count',
+        build: () => Aggregate.expression(
+          _source,
+          label: _label.trim().isEmpty ? null : _label.trim(),
+          functions: widget.functions,
+        ),
+      );
+    }
     if (_kind.needsMeasure) {
       return ListView(
         children: [
@@ -127,6 +209,35 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
               measureLabel(m),
               m.id,
               _kind.build(measure: m),
+            ),
+          if (facts != null)
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.functions),
+              title: Text('${strings.expression}…'),
+              selected: _measureExpression,
+              onTap: () => setState(() {
+                _measureExpression = !_measureExpression;
+                _resetExpression();
+              }),
+            ),
+          if (facts != null && _measureExpression)
+            _expressionForm(
+              context,
+              strings,
+              scope: ExpressionScope.ofFacts(
+                facts,
+                functions: widget.functions,
+              ),
+              hint: 'quantity * unit_price',
+              build: () => _kind.build(
+                measure: Measure.expression(
+                  _source,
+                  label: _label.trim().isEmpty ? null : _label.trim(),
+                  functions: widget.functions,
+                ),
+              ),
+              shrink: true,
             ),
         ],
       );
@@ -148,6 +259,64 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
     final a = _kind.build();
     return ListView(
       children: [_tile(context, strings, strings.countOfFacts, a.id, a)],
+    );
+  }
+
+  /// An expression field, a label field and an add button; [build] makes
+  /// the aggregate from the current text. Validated as an expression of
+  /// type number in [scope].
+  Widget _expressionForm(
+    BuildContext context,
+    TesseraStrings strings, {
+    required ExpressionScope scope,
+    required String hint,
+    required Aggregate Function() build,
+    bool shrink = false,
+  }) {
+    final valid = _error == null && _source.trim().isNotEmpty;
+    final used = valid && widget.used.contains(build());
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+      child: Column(
+        mainAxisSize: shrink ? MainAxisSize.min : MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ExpressionField(
+            scope: scope,
+            expected: ExprType.number,
+            initialValue: _source,
+            hintText: hint,
+            autofocus: true,
+            onChanged: (v) => setState(() {
+              _source = v.source;
+              _error = v.error;
+            }),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            decoration: InputDecoration(
+              isDense: true,
+              labelText: strings.labelField,
+            ),
+            onChanged: (v) => setState(() => _label = v),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: FilledButton(
+              onPressed: valid && !used
+                  ? () => Navigator.pop(context, build())
+                  : null,
+              child: Text(strings.addAggregate),
+            ),
+          ),
+          if (used)
+            Text(
+              widget.usedHint ?? strings.alreadyInUse,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+        ],
+      ),
     );
   }
 

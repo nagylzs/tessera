@@ -71,6 +71,35 @@ final class TesseraStringsNl extends TesseraStrings {
   String rankOf(String base) => '$base rang';
 
   @override
+  String get showValuesAs => 'Waarden weergeven als';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => 'Gewone waarde',
+    ValueDisplay.percentOfRow => '% van rijtotaal',
+    ValueDisplay.percentOfColumn => '% van kolomtotaal',
+    ValueDisplay.percentOfGrand => '% van eindtotaal',
+    ValueDisplay.percentOfParentRow => '% van bovenliggende rij',
+    ValueDisplay.percentOfParentColumn => '% van bovenliggende kolom',
+    ValueDisplay.differenceFromPreviousRow => 'Verschil met vorige rij',
+    ValueDisplay.differenceFromPreviousColumn => 'Verschil met vorige kolom',
+    ValueDisplay.percentDifferenceFromPreviousRow =>
+      '% verschil met vorige rij',
+    ValueDisplay.percentDifferenceFromPreviousColumn =>
+      '% verschil met vorige kolom',
+    ValueDisplay.runningTotalRows => 'Lopend totaal over rijen',
+    ValueDisplay.runningTotalColumns => 'Lopend totaal over kolommen',
+    ValueDisplay.rankRows => 'Rang binnen rijen',
+    ValueDisplay.rankColumns => 'Rang binnen kolommen',
+  };
+
+  @override
+  String get formula => 'Formule';
+
+  @override
+  String get labelField => 'Label';
+
+  @override
   String get countOfFacts => 'Aantal rijen';
 
   @override

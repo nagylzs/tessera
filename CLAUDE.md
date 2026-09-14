@@ -405,6 +405,25 @@ Paths below are relative to the package (`lib/src/...` means
   the `ExpressionError` range; the message comes from
   `TesseraStrings.expressionError`. Tests: `test/filter_editor_test.dart`
   (tall `physicalSize`, `showFilterEditor` through a button).
+- `ExpressionField` (`widgets/expression_field.dart`, also
+  `ExpressionTextController`): validates in a given `ExpressionScope` /
+  `expected` on each keystroke, reports `ExpressionFieldValue(source,
+  error)`; used by the filter editor and the aggregate picker. Picker
+  (`AggregatePickerDialog.facts`/`functions` enable it): the function
+  dropdown's values are `_Function(kind)` plus `_Function.formula`; the
+  formula path shows `_expressionForm` in cell scope (→
+  `Aggregate.expression`), measure kinds get an "Expression…" tile that
+  opens the form in row scope (→ `kind.build(measure:
+  Measure.expression(...))`); the form has a label field and an add
+  button disabled while invalid, empty or already in use. Editor: each
+  chip sits in a `MenuAnchor` opened by long press / secondary click with
+  a "Show values as" submenu over `ValueDisplay.values` (check mark on
+  `ValueDisplay.of(a)`); `_replace(old, next)` swaps the aggregate in
+  the spec, the sorts and the reported selection. `ValueDisplay` lives in
+  the engine (`layout_aggregate.dart`): `apply(base)` unwraps first so
+  choices replace rather than nest, `of` returns null for wrappers
+  outside the list. Tests: `test/aggregate_editor_test.dart` ("expressions
+  and show values as" group).
 - Example app: `example/lib/main.dart` is a launcher (`LauncherPage`)
   listing the entries of `example/lib/examples.dart`; each example lives in
   its own folder under `example/lib/` (kept as one project so pub.dev's

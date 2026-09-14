@@ -70,6 +70,33 @@ final class TesseraStringsJa extends TesseraStrings {
   String rankOf(String base) => '$base（順位）';
 
   @override
+  String get showValuesAs => '値の表示形式';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => 'そのままの値',
+    ValueDisplay.percentOfRow => '行合計に対する%',
+    ValueDisplay.percentOfColumn => '列合計に対する%',
+    ValueDisplay.percentOfGrand => '総計に対する%',
+    ValueDisplay.percentOfParentRow => '親行に対する%',
+    ValueDisplay.percentOfParentColumn => '親列に対する%',
+    ValueDisplay.differenceFromPreviousRow => '前の行との差',
+    ValueDisplay.differenceFromPreviousColumn => '前の列との差',
+    ValueDisplay.percentDifferenceFromPreviousRow => '前の行との差の%',
+    ValueDisplay.percentDifferenceFromPreviousColumn => '前の列との差の%',
+    ValueDisplay.runningTotalRows => '行方向の累計',
+    ValueDisplay.runningTotalColumns => '列方向の累計',
+    ValueDisplay.rankRows => '行内の順位',
+    ValueDisplay.rankColumns => '列内の順位',
+  };
+
+  @override
+  String get formula => '数式';
+
+  @override
+  String get labelField => 'ラベル';
+
+  @override
   String get countOfFacts => '行数';
 
   @override

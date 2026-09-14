@@ -70,6 +70,33 @@ final class TesseraStringsZh extends TesseraStrings {
   String rankOf(String base) => '$base 排名';
 
   @override
+  String get showValuesAs => '值显示方式';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => '原始值',
+    ValueDisplay.percentOfRow => '占行汇总的%',
+    ValueDisplay.percentOfColumn => '占列汇总的%',
+    ValueDisplay.percentOfGrand => '占总计的%',
+    ValueDisplay.percentOfParentRow => '占父行的%',
+    ValueDisplay.percentOfParentColumn => '占父列的%',
+    ValueDisplay.differenceFromPreviousRow => '与上一行的差异',
+    ValueDisplay.differenceFromPreviousColumn => '与上一列的差异',
+    ValueDisplay.percentDifferenceFromPreviousRow => '与上一行的差异百分比',
+    ValueDisplay.percentDifferenceFromPreviousColumn => '与上一列的差异百分比',
+    ValueDisplay.runningTotalRows => '按行累计',
+    ValueDisplay.runningTotalColumns => '按列累计',
+    ValueDisplay.rankRows => '行内排名',
+    ValueDisplay.rankColumns => '列内排名',
+  };
+
+  @override
+  String get formula => '公式';
+
+  @override
+  String get labelField => '标签';
+
+  @override
   String get countOfFacts => '行数';
 
   @override

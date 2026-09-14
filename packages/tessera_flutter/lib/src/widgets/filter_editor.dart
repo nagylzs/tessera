@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'expression_field.dart';
 
 /// What [FilterEditor] reports on every change: the filter built from the
 /// editor's rows (`null` when there are none) and whether every row is
@@ -606,14 +607,14 @@ class _FilterEditorState extends State<FilterEditor> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Expanded(
-        child: _ExpressionField(
+        child: ExpressionField(
           key: ValueKey(e),
-          node: e,
-          label: strings.expression,
-          errorText: e.error == null ? null : strings.expressionError(e.error!),
-          onChanged: (text) => _changed(() {
-            e.source = text;
-            _validate(e);
+          scope: _scope,
+          expected: ExprType.boolean,
+          initialValue: e.source,
+          onChanged: (v) => _changed(() {
+            e.source = v.source;
+            e.error = v.error;
           }),
         ),
       ),
@@ -778,94 +779,6 @@ enum _Op {
     isTrue => s.opIsTrue,
     isFalse => s.opIsFalse,
   };
-}
-
-// ------------------------------------------------------- expression field
-
-/// A text field whose controller underlines the range of the current
-/// [ExpressionError].
-class _ExpressionField extends StatefulWidget {
-  const _ExpressionField({
-    super.key,
-    required this.node,
-    required this.label,
-    required this.errorText,
-    required this.onChanged,
-  });
-
-  final _ExpressionNode node;
-  final String label;
-  final String? errorText;
-  final ValueChanged<String> onChanged;
-
-  @override
-  State<_ExpressionField> createState() => _ExpressionFieldState();
-}
-
-class _ExpressionFieldState extends State<_ExpressionField> {
-  late final _controller = ExpressionTextController(text: widget.node.source);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _controller.error = widget.node.error;
-    return TextField(
-      controller: _controller,
-      style: const TextStyle(fontFamily: 'monospace'),
-      decoration: InputDecoration(
-        isDense: true,
-        labelText: widget.label,
-        errorText: widget.errorText,
-        errorMaxLines: 3,
-      ),
-      onChanged: widget.onChanged,
-    );
-  }
-}
-
-/// A [TextEditingController] that renders the source range of an
-/// [ExpressionError] with a wavy red underline, the way code editors mark
-/// a problem. Set [error] before each build.
-class ExpressionTextController extends TextEditingController {
-  ExpressionTextController({super.text});
-
-  ExpressionError? error;
-
-  @override
-  TextSpan buildTextSpan({
-    required BuildContext context,
-    TextStyle? style,
-    required bool withComposing,
-  }) {
-    final e = error;
-    final t = text;
-    if (e == null || e.length == 0 || e.offset >= t.length) {
-      return TextSpan(text: t, style: style);
-    }
-    final end = (e.offset + e.length).clamp(0, t.length);
-    final color = Theme.of(context).colorScheme.error;
-    return TextSpan(
-      style: style,
-      children: [
-        TextSpan(text: t.substring(0, e.offset)),
-        TextSpan(
-          text: t.substring(e.offset, end),
-          style: TextStyle(
-            decoration: TextDecoration.underline,
-            decorationColor: color,
-            decorationStyle: TextDecorationStyle.wavy,
-            backgroundColor: color.withValues(alpha: 0.12),
-          ),
-        ),
-        TextSpan(text: t.substring(end)),
-      ],
-    );
-  }
 }
 
 // ----------------------------------------------------------- value picker

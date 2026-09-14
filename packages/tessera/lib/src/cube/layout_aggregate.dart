@@ -270,3 +270,97 @@ final class RankAggregate extends LayoutAggregate<int> {
     return better + 1;
   }
 }
+
+/// The ready-made "show values as" choices an editor offers for an
+/// aggregate: [apply] wraps a base aggregate in the matching
+/// [LayoutAggregate], [of] recognizes a wrapped one.
+enum ValueDisplay {
+  plain,
+  percentOfRow,
+  percentOfColumn,
+  percentOfGrand,
+  percentOfParentRow,
+  percentOfParentColumn,
+  differenceFromPreviousRow,
+  differenceFromPreviousColumn,
+  percentDifferenceFromPreviousRow,
+  percentDifferenceFromPreviousColumn,
+  runningTotalRows,
+  runningTotalColumns,
+  rankRows,
+  rankColumns;
+
+  /// [base] shown this way; [plain] returns [base] itself. A base that is
+  /// already a [LayoutAggregate] is unwrapped first.
+  Aggregate apply(Aggregate base) {
+    final b = plainOf(base);
+    return switch (this) {
+      plain => b,
+      percentOfRow => Aggregate.percentOf(b, TotalOf.row),
+      percentOfColumn => Aggregate.percentOf(b, TotalOf.column),
+      percentOfGrand => Aggregate.percentOf(b, TotalOf.grand),
+      percentOfParentRow => Aggregate.percentOf(b, TotalOf.parentRow),
+      percentOfParentColumn => Aggregate.percentOf(b, TotalOf.parentColumn),
+      differenceFromPreviousRow => Aggregate.differenceFrom(
+        b,
+        axis: AxisSide.rows,
+      ),
+      differenceFromPreviousColumn => Aggregate.differenceFrom(
+        b,
+        axis: AxisSide.columns,
+      ),
+      percentDifferenceFromPreviousRow => Aggregate.percentDifferenceFrom(
+        b,
+        axis: AxisSide.rows,
+      ),
+      percentDifferenceFromPreviousColumn => Aggregate.percentDifferenceFrom(
+        b,
+        axis: AxisSide.columns,
+      ),
+      runningTotalRows => Aggregate.runningTotal(b, axis: AxisSide.rows),
+      runningTotalColumns => Aggregate.runningTotal(b, axis: AxisSide.columns),
+      rankRows => Aggregate.rank(b, axis: AxisSide.rows),
+      rankColumns => Aggregate.rank(b, axis: AxisSide.columns),
+    };
+  }
+
+  /// The innermost non-layout aggregate of [aggregate].
+  static Aggregate plainOf(Aggregate aggregate) {
+    var a = aggregate;
+    while (a is LayoutAggregate) {
+      a = a.base;
+    }
+    return a;
+  }
+
+  /// The choice that produces [aggregate] from its base, [plain] for a
+  /// non-layout aggregate, or `null` for a layout aggregate outside this
+  /// list (a difference from `next` or from a value, an ascending rank).
+  static ValueDisplay? of(Aggregate aggregate) => switch (aggregate) {
+    PercentOfTotalAggregate(:final of) => switch (of) {
+      TotalOf.row => percentOfRow,
+      TotalOf.column => percentOfColumn,
+      TotalOf.grand => percentOfGrand,
+      TotalOf.parentRow => percentOfParentRow,
+      TotalOf.parentColumn => percentOfParentColumn,
+    },
+    DifferenceFromAggregate(:final axis, :final item) =>
+      item is PreviousItem
+          ? (axis == AxisSide.rows
+                ? differenceFromPreviousRow
+                : differenceFromPreviousColumn)
+          : null,
+    PercentDifferenceFromAggregate(:final axis, :final item) =>
+      item is PreviousItem
+          ? (axis == AxisSide.rows
+                ? percentDifferenceFromPreviousRow
+                : percentDifferenceFromPreviousColumn)
+          : null,
+    RunningTotalAggregate(:final axis) =>
+      axis == AxisSide.rows ? runningTotalRows : runningTotalColumns,
+    RankAggregate(:final axis, :final ascending) =>
+      ascending ? null : (axis == AxisSide.rows ? rankRows : rankColumns),
+    LayoutAggregate() => null,
+    _ => plain,
+  };
+}

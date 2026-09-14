@@ -72,6 +72,35 @@ final class TesseraStringsHu extends TesseraStrings {
   String rankOf(String base) => '$base rangsora';
 
   @override
+  String get showValuesAs => 'Értékek megjelenítése';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => 'Egyszerű érték',
+    ValueDisplay.percentOfRow => 'A sor összegének %-ában',
+    ValueDisplay.percentOfColumn => 'Az oszlop összegének %-ában',
+    ValueDisplay.percentOfGrand => 'A végösszeg %-ában',
+    ValueDisplay.percentOfParentRow => 'A szülő sor %-ában',
+    ValueDisplay.percentOfParentColumn => 'A szülő oszlop %-ában',
+    ValueDisplay.differenceFromPreviousRow => 'Eltérés az előző sortól',
+    ValueDisplay.differenceFromPreviousColumn => 'Eltérés az előző oszloptól',
+    ValueDisplay.percentDifferenceFromPreviousRow =>
+      '%-os eltérés az előző sortól',
+    ValueDisplay.percentDifferenceFromPreviousColumn =>
+      '%-os eltérés az előző oszloptól',
+    ValueDisplay.runningTotalRows => 'Göngyölített összeg soronként',
+    ValueDisplay.runningTotalColumns => 'Göngyölített összeg oszloponként',
+    ValueDisplay.rankRows => 'Rangsor a sorok között',
+    ValueDisplay.rankColumns => 'Rangsor az oszlopok között',
+  };
+
+  @override
+  String get formula => 'Képlet';
+
+  @override
+  String get labelField => 'Felirat';
+
+  @override
   String get countOfFacts => 'Sorok száma';
 
   @override

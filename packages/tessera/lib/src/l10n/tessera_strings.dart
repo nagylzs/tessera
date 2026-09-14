@@ -69,6 +69,16 @@ abstract class TesseraStrings {
   /// "sum of Revenue rank".
   String rankOf(String base);
 
+  /// The "show values as" menu of an aggregate and the names of its
+  /// choices ("Plain value", "% of row total", …).
+  String get showValuesAs;
+  String valueDisplayName(ValueDisplay display);
+
+  /// The aggregate picker's cell-formula function and the caption of the
+  /// label field next to an expression.
+  String get formula;
+  String get labelField;
+
   // ------------------------------------------------- aggregate functions
 
   /// Function names as shown in the aggregate picker.

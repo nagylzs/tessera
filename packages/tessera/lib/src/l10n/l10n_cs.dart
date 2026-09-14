@@ -70,6 +70,36 @@ final class TesseraStringsCs extends TesseraStrings {
   String rankOf(String base) => '$base pořadí';
 
   @override
+  String get showValuesAs => 'Zobrazit hodnoty jako';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => 'Prostá hodnota',
+    ValueDisplay.percentOfRow => '% ze součtu řádku',
+    ValueDisplay.percentOfColumn => '% ze součtu sloupce',
+    ValueDisplay.percentOfGrand => '% z celkového součtu',
+    ValueDisplay.percentOfParentRow => '% z nadřazeného řádku',
+    ValueDisplay.percentOfParentColumn => '% z nadřazeného sloupce',
+    ValueDisplay.differenceFromPreviousRow => 'Rozdíl od předchozího řádku',
+    ValueDisplay.differenceFromPreviousColumn =>
+      'Rozdíl od předchozího sloupce',
+    ValueDisplay.percentDifferenceFromPreviousRow =>
+      '% rozdíl od předchozího řádku',
+    ValueDisplay.percentDifferenceFromPreviousColumn =>
+      '% rozdíl od předchozího sloupce',
+    ValueDisplay.runningTotalRows => 'Průběžný součet po řádcích',
+    ValueDisplay.runningTotalColumns => 'Průběžný součet po sloupcích',
+    ValueDisplay.rankRows => 'Pořadí mezi řádky',
+    ValueDisplay.rankColumns => 'Pořadí mezi sloupci',
+  };
+
+  @override
+  String get formula => 'Vzorec';
+
+  @override
+  String get labelField => 'Popisek';
+
+  @override
   String get countOfFacts => 'Počet řádků';
 
   @override

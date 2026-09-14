@@ -70,6 +70,34 @@ final class TesseraStringsTr extends TesseraStrings {
   String rankOf(String base) => '$base sıra';
 
   @override
+  String get showValuesAs => 'Değerleri şöyle göster';
+
+  @override
+  String valueDisplayName(ValueDisplay display) => switch (display) {
+    ValueDisplay.plain => 'Düz değer',
+    ValueDisplay.percentOfRow => 'Satır toplamının %’si',
+    ValueDisplay.percentOfColumn => 'Sütun toplamının %’si',
+    ValueDisplay.percentOfGrand => 'Genel toplamın %’si',
+    ValueDisplay.percentOfParentRow => 'Üst satırın %’si',
+    ValueDisplay.percentOfParentColumn => 'Üst sütunun %’si',
+    ValueDisplay.differenceFromPreviousRow => 'Önceki satırdan fark',
+    ValueDisplay.differenceFromPreviousColumn => 'Önceki sütundan fark',
+    ValueDisplay.percentDifferenceFromPreviousRow => 'Önceki satırdan % fark',
+    ValueDisplay.percentDifferenceFromPreviousColumn =>
+      'Önceki sütundan % fark',
+    ValueDisplay.runningTotalRows => 'Satırlar boyunca kümülatif toplam',
+    ValueDisplay.runningTotalColumns => 'Sütunlar boyunca kümülatif toplam',
+    ValueDisplay.rankRows => 'Satırlar arasında sıra',
+    ValueDisplay.rankColumns => 'Sütunlar arasında sıra',
+  };
+
+  @override
+  String get formula => 'Formül';
+
+  @override
+  String get labelField => 'Etiket';
+
+  @override
   String get countOfFacts => 'Satır sayısı';
 
   @override
