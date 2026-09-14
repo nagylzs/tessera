@@ -504,56 +504,40 @@ final class ExpressionAggregate extends DerivedAggregate<double> {
   @override
   String get label => _label ?? source;
 
+  /// The aggregates the formula refers to, by shape (`sum(qty)`,
+  /// `avg(qty * price)`, `count`, …), in first-use order. Known without a
+  /// fact table; [prepare] checks them against one.
   @override
   late final List<Aggregate> dependencies = List.unmodifiable(
-    aggregateReferences(expression.root),
+    aggregateReferences(expression.root, functions: functions),
   );
 
   FactTable? _preparedFor;
   NumberFn? _compiled;
   late final Float64List _slot = Float64List(dependencies.length);
 
-  /// Type-checks the formula against the columns of [facts]; throws
-  /// [ExpressionError] when a referenced column is missing or not numeric.
+  /// Type-checks the formula against the columns of [facts] and compiles
+  /// it; throws [ExpressionError] when a referenced column is missing or
+  /// an argument has the wrong type. The engine calls this before every
+  /// layout; [compute] requires it.
   @override
   void prepare(FactTable facts) {
     if (identical(facts, _preparedFor)) return;
-    expression.check(
+    final checked = expression.check(
       ExpressionScope.cellsOf(facts, functions: functions),
       expected: ExprType.number,
     );
-    _preparedFor = facts;
-  }
-
-  NumberFn _compile() {
-    // Types come from the dependencies themselves: every measure is numeric
-    // and `distinct` accepts any column, so a synthetic scope suffices.
-    final columns = <String, ExprType>{};
-    for (final d in dependencies) {
-      switch (d) {
-        case MeasureAggregate(:final measure):
-          for (final c in measure.columns) {
-            columns[c] = ExprType.number;
-          }
-        case DistinctCountAggregate(:final dimension):
-          columns.putIfAbsent(dimension.sourceColumn, () => ExprType.text);
-        default:
-          break;
-      }
-    }
-    final checked = expression.check(
-      ExpressionScope.cells(columns, functions: functions),
-      expected: ExprType.number,
-    );
-    return compileExpression(
+    _compiled = compileExpression(
       checked,
       CellBindings(dependencies, _slot),
     ).asNumber;
+    _preparedFor = facts;
   }
 
   @override
   double? compute(Object? Function(Aggregate aggregate) resultOf) {
-    final f = _compiled ??= _compile();
+    final f = _compiled;
+    if (f == null) throw StateError('$id: prepare(facts) was not called');
     final slot = _slot;
     for (var k = 0; k < dependencies.length; k++) {
       final v = resultOf(dependencies[k]);

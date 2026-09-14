@@ -1,5 +1,11 @@
 ## Unreleased
 
+* Cell formulas accept row expressions as aggregate arguments:
+  `sum(qty * price) / sum(qty)`, `max(price - cost)`,
+  `distinct(upper(left(country, 1)))` — the argument becomes an expression
+  measure (or dimension) the engine accumulates. `ExpressionAggregate`
+  compiles in `prepare(facts)`; `aggregateOfShape` takes the argument
+  node, `aggregateReferences` the function registry; `isRowExpression`.
 * Statistical aggregates: `Aggregate.stdDev` / `stdDevPopulation` /
   `variance` / `variancePopulation` (Excel's STDEV.S / STDEV.P / VAR.S /
   VAR.P; one Welford accumulator, merged with Chan's formula so parents

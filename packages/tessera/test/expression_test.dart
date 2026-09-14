@@ -282,10 +282,8 @@ void main() {
         ExpressionErrorKind.unknownColumn,
         'nope',
       ));
-      expect(
-        e('sum(qty + 1)', scope: cells).$1,
-        ExpressionErrorKind.argumentType,
-      );
+      // a row expression is a valid aggregate argument
+      expect(err('sum(qty + 1)', scope: cells), isNull);
       expect(
         e('sum(qty, price)', scope: cells).$1,
         ExpressionErrorKind.argumentCount,

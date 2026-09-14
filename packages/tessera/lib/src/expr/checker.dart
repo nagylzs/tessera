@@ -444,39 +444,98 @@ final class _Checker {
       if (!aggregateOnly) return null;
       _arity(e, name, name == 'count' ? '0-1' : '1', -1);
     }
-    if (args.single is! NameRef) {
-      if (!aggregateOnly) return null;
-      fail(args.single, ExpressionErrorKind.argumentType, [
-        name,
-        '1',
-        'a column name',
-        'an expression',
-      ]);
+    final arg = args.single;
+    final ExprType? t;
+    if (arg is NameRef) {
+      t = scope.columns[arg.name];
+      if (t == null) fail(arg, ExpressionErrorKind.unknownColumn, [arg.name]);
+      columns.add(arg.name);
+      types[arg] = t;
+    } else {
+      // Any other argument is a row expression over the columns: the
+      // aggregate is taken over an expression measure (or dimension).
+      if (!isRowExpression(arg)) {
+        if (!aggregateOnly) return null;
+        fail(arg, ExpressionErrorKind.argumentType, [
+          name,
+          '1',
+          'a column or a row expression',
+          'an expression over aggregates',
+        ]);
+      }
+      final row = _Checker(scope.copyWith(isCellScope: false));
+      try {
+        t = row.visit(arg);
+      } on ExpressionError {
+        if (!aggregateOnly) return null;
+        rethrow;
+      }
+      columns.addAll(row.columns);
     }
-    final ref = args.single as NameRef;
-    final t = scope.columns[ref.name];
-    if (t == null) fail(ref, ExpressionErrorKind.unknownColumn, [ref.name]);
-    columns.add(ref.name);
-    types[ref] = t;
-    if (name != 'distinct' && t != ExprType.number) {
-      fail(ref, ExpressionErrorKind.argumentType, [
+    if (name == 'distinct') {
+      if (t == null) fail(arg, ExpressionErrorKind.unknownType);
+    } else if (t != ExprType.number) {
+      // `min(country)` names a column, so it is meant as the aggregate.
+      if (!aggregateOnly && arg is! NameRef) return null;
+      fail(arg, ExpressionErrorKind.argumentType, [
         name,
         '1',
         'number',
-        t.name,
+        t?.name ?? 'null',
       ]);
     }
-    return aggregateOfShape(name, ref.name)!;
+    return aggregateOfShape(name, arg, functions: scope.functions)!;
   }
 }
 
+/// Whether [e] is an expression over columns only: it contains no
+/// aggregate reference (`count`, `sum(x)`, …) and may therefore be the
+/// argument of an aggregate in a cell formula.
+bool isRowExpression(Expr e) => switch (e) {
+  NameRef(:final name) => name.toLowerCase() != 'count',
+  CallExpr(:final name, :final arguments) =>
+    !(_Checker._aggregateNames.contains(name.toLowerCase()) &&
+            (arguments.isEmpty || arguments.length == 1)) &&
+        arguments.every(isRowExpression),
+  UnaryExpr(:final operand) => isRowExpression(operand),
+  BinaryExpr(:final left, :final right) =>
+    isRowExpression(left) && isRowExpression(right),
+  InExpr(:final subject, :final values) =>
+    isRowExpression(subject) && values.every(isRowExpression),
+  BetweenExpr(:final subject, :final low, :final high) =>
+    isRowExpression(subject) && isRowExpression(low) && isRowExpression(high),
+  IsEmptyExpr(:final subject) => isRowExpression(subject),
+  NumberLiteral() ||
+  TextLiteral() ||
+  BooleanLiteral() ||
+  DateLiteral() ||
+  NullLiteral() => true,
+};
+
 /// The aggregate a cell-formula call denotes by its shape alone (no type
-/// check): `count` / `count()` → facts, `sum|avg|average|min|max|count(col)`,
-/// `distinct(col)`; `null` otherwise.
-Aggregate? aggregateOfShape(String name, String? column) {
-  if (column == null) return name == 'count' ? Aggregate.count : null;
-  final m = Measure(column);
-  return switch (name.toLowerCase()) {
+/// check): `count` / `count()` → facts (a `null` [argument]);
+/// `sum|avg|average|min|max|count|stdev|stdevp|var|varp(x)` and
+/// `distinct(x)` where `x` is a column name or a row expression, which
+/// becomes an expression measure / dimension in its canonical source
+/// form; `null` for any other shape.
+Aggregate? aggregateOfShape(
+  String name,
+  Expr? argument, {
+  FunctionRegistry? functions,
+}) {
+  final lower = name.toLowerCase();
+  if (argument == null) return lower == 'count' ? Aggregate.count : null;
+  if (lower == 'distinct') {
+    return Aggregate.distinctCount(
+      argument is NameRef
+          ? ColumnDimension(argument.name)
+          : ExpressionDimension(argument.toSource(), functions: functions),
+    );
+  }
+  final m = argument is NameRef
+      ? Measure(argument.name)
+      : Measure.expression(argument.toSource(), functions: functions);
+  return switch (lower) {
     'sum' => Aggregate.sum(m),
     'avg' || 'average' => Aggregate.average(m),
     'min' => Aggregate.min(m),
@@ -486,15 +545,16 @@ Aggregate? aggregateOfShape(String name, String? column) {
     'stdevp' => Aggregate.stdDevPopulation(m),
     'var' => Aggregate.variance(m),
     'varp' => Aggregate.variancePopulation(m),
-    'distinct' => Aggregate.distinctCount(ColumnDimension(column)),
     _ => null,
   };
 }
 
 /// The aggregates a cell formula refers to, by shape, in first-use order.
 /// What [ExpressionAggregate.dependencies] is before any fact table is
-/// known; the checker verifies the column types later.
-List<Aggregate> aggregateReferences(Expr root) {
+/// known; the checker verifies the column types later. A one-argument
+/// call to an aggregate name whose argument is a row expression counts
+/// (`sum(qty * price)`), so does `min(x)` / `max(x)` in that shape.
+List<Aggregate> aggregateReferences(Expr root, {FunctionRegistry? functions}) {
   final out = <Aggregate>[];
   void add(Aggregate? a) {
     if (a != null && !out.contains(a)) out.add(a);
@@ -508,8 +568,8 @@ List<Aggregate> aggregateReferences(Expr root) {
         final lower = name.toLowerCase();
         if (arguments.isEmpty) {
           add(aggregateOfShape(lower, null));
-        } else if (arguments.length == 1 && arguments.single is NameRef) {
-          add(aggregateOfShape(lower, (arguments.single as NameRef).name));
+        } else if (arguments.length == 1 && isRowExpression(arguments.single)) {
+          add(aggregateOfShape(lower, arguments.single, functions: functions));
         }
         arguments.forEach(visit);
       case UnaryExpr(:final operand):

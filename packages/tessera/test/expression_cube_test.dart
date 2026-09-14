@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:test/test.dart';
 import 'package:tessera/tessera.dart';
 
@@ -696,6 +698,125 @@ void main() {
           expected: ExprType.number,
         ),
         isNull,
+      );
+    });
+
+    test('aggregates over row expressions', () {
+      final weighted = Aggregate.expression(
+        'sum(qty * price) / sum(qty)',
+        label: 'weighted price',
+      );
+      expect(weighted.dependencies, [
+        Aggregate.sum(Measure.expression('qty * price')),
+        Aggregate.sum(qty),
+      ]);
+      expect(weighted.dependencies.first.id, 'sum(qty * price)');
+      final spread = Aggregate.expression('max(price - qty) - min(price-qty)');
+      expect(spread.dependencies, [
+        Aggregate.max(Measure.expression('price - qty')),
+        Aggregate.min(Measure.expression('price - qty')),
+      ]);
+      expect(spread.dependencies.first.id, 'max(price - qty)');
+      // min/max over an aggregate expression stay the plain functions
+      final identity = Aggregate.expression(
+        'min(sum(qty)) + max(sum(qty) * 2)',
+      );
+      expect(identity.dependencies, [Aggregate.sum(qty)]);
+      final initials = Aggregate.expression(
+        'distinct(upper(left(country, 1)))',
+      );
+      expect(initials.dependencies, [
+        Aggregate.distinctCount(ExpressionDimension('upper(left(country, 1))')),
+      ]);
+      final sd = Aggregate.expression('stdevp(qty * 2)');
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(
+          rows: const CubeAxis(
+            dimensions: [AxisDimension(region)],
+            summaryPosition: SummaryPosition.start,
+          ),
+          aggregates: [weighted, spread, identity, initials, sd],
+        ),
+      );
+      // total: (10 + 40 + 250) / (1 + 2 + 3 + 5); the row without a price
+      // still has a quantity
+      expect(cellOf(cube, 0, weighted), closeTo(300 / 11, 1e-12));
+      // Europe: (10 + 40) / (1 + 2 + 3)
+      expect(cellOf(cube, 3, weighted), closeTo(50 / 6, 1e-12));
+      // price - qty over the total: 9, 18, null, 45, null → 45 − 9
+      expect(cellOf(cube, 0, spread), 36.0);
+      expect(cellOf(cube, 0, identity), 11.0 + 22.0);
+      // G, H, J, I
+      expect(cellOf(cube, 0, initials), 4.0);
+      expect(cellOf(cube, 3, initials), 2.0);
+      // population std dev of 2, 4, 6, 10 = sqrt(((3)²+(1.5)²... )) computed below
+      final values = [2.0, 4.0, 6.0, 10.0];
+      final mean = values.reduce((a, b) => a + b) / 4;
+      final m2 = values.fold(0.0, (a, v) => a + (v - mean) * (v - mean));
+      expect(cellOf(cube, 0, sd), closeTo(math.sqrt(m2 / 4), 1e-12));
+      // custom functions reach into the argument
+      final fns = FunctionRegistry.standard().withFunction(
+        ExpressionFunction(
+          'twice',
+          parameters: [ExprType.number],
+          returns: ExprType.number,
+          implementation: (a) => a[0] == null ? null : (a[0] as double) * 2,
+        ),
+      );
+      final doubled = Aggregate.expression('sum(twice(qty))', functions: fns);
+      final c2 = Cube(
+        facts: f,
+        spec: CubeSpec(aggregates: [doubled]),
+      );
+      expect(c2.layout.cellAt(0, 0).aggregate(doubled), 22.0);
+    });
+
+    test('errors in aggregate arguments point into the argument', () {
+      (ExpressionErrorKind, int, String) err(String s) {
+        final e = Expression.validate(
+          s,
+          scope: ExpressionScope.cellsOf(f),
+          expected: ExprType.number,
+        )!;
+        return (e.kind, e.offset, e.arguments.join(','));
+      }
+
+      expect(err('sum(nope + 1)'), (
+        ExpressionErrorKind.unknownColumn,
+        4,
+        'nope',
+      ));
+      expect(err('sum(country)').$1, ExpressionErrorKind.argumentType);
+      expect(err('sum(len(country) + region)'), (
+        ExpressionErrorKind.operandType,
+        19,
+        '+,number,text',
+      ));
+      expect(err('sum(sum(qty))'), (
+        ExpressionErrorKind.argumentType,
+        4,
+        'sum,1,a column or a row expression,an expression over aggregates',
+      ));
+      expect(err('avg(qty > 1)'), (
+        ExpressionErrorKind.argumentType,
+        4,
+        'avg,1,number,boolean',
+      ));
+      expect(err('distinct(null)').$1, ExpressionErrorKind.unknownType);
+      expect(err('min(country)').$1, ExpressionErrorKind.argumentType);
+      expect(err('count(qty, price)').$1, ExpressionErrorKind.argumentCount);
+      expect(
+        Expression.validate(
+          'sum(qty * 2) / count(price * 0 + 1)',
+          scope: ExpressionScope.cellsOf(f),
+          expected: ExprType.number,
+        ),
+        isNull,
+      );
+      expect(
+        () => Aggregate.expression('sum(qty)').compute((_) => 1.0),
+        throwsStateError,
       );
     });
 

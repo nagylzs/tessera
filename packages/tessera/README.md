@@ -188,9 +188,11 @@ ExpressionFilter('vat(total) > 10', functions: functions);
 ```
 
 Cell formulas (`Aggregate.expression`) refer to aggregates instead of
-columns: `sum(col)`, `avg(col)`, `min(col)`, `max(col)`, `count` (facts),
-`count(col)` (non-empty values), `stdev(col)`, `stdevp(col)`, `var(col)`,
-`varp(col)` and `distinct(col)`; the engine
+columns: `sum(x)`, `avg(x)`, `min(x)`, `max(x)`, `count` (facts),
+`count(x)` (non-empty values), `stdev(x)`, `stdevp(x)`, `var(x)`,
+`varp(x)` and `distinct(x)`, where `x` is a column or any row expression
+over the columns — `sum(qty * price) / sum(qty)` is a weighted average,
+`distinct(upper(left(country, 1)))` counts initials. The engine
 accumulates whatever the formula needs, whether or not the spec lists it,
 and evaluates the formula once per cell.
 

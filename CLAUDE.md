@@ -169,7 +169,11 @@ the root, ignored; members carry `resolution: workspace`):
   them by name), `checker.dart` (`ExpressionScope.rows/cells/ofFacts/
   ofSchema/cellsOf`, `CheckedExpression` = AST + side tables of types,
   resolved functions and aggregate refs; `aggregateOfShape` /
-  `aggregateReferences` for cell formulas), `compiler.dart`
+  `aggregateReferences` / `isRowExpression` for cell formulas — an
+  aggregate's argument is a column name or any row expression, which
+  becomes `Measure.expression(arg.toSource())` / `ExpressionDimension`
+  for `distinct`; `min(x)`/`max(x)` are aggregates when `x` is a row
+  expression, plain functions otherwise), `compiler.dart`
   (`compileExpression(checked, bindings)` → typed closures: numbers and
   dates `double Function(int)` with NaN = null, text `String?`, booleans
   `bool?` three-valued; `RowBindings(FactTableImpl)` reads the typed
@@ -190,7 +194,8 @@ the root, ignored; members carry `resolution: workspace`):
   into a typed `FactColumnImpl`, `plainColumnOf` gives the engine's
   dictionary fast path; `sourceColumns` on every dimension, `sourceColumn`
   = first); `DerivedAggregate` (`dependencies`, `compute(resultOf)`,
-  `prepare(facts)`) + `ExpressionAggregate` — the engine accumulates
+  `prepare(facts)` — `ExpressionAggregate` checks and compiles there
+  against the real columns, `compute` needs it) — the engine accumulates
   `accumulatedAggregates(spec.aggregates)` (`CubeLayoutImpl.accumulated`)
   and `resultOf(data, aggregate, accumulated)` serves cells and aggregate
   sorts. Tests: `test/expression_test.dart` (parser, checker, compiler,
