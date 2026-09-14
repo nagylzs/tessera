@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -240,4 +242,134 @@ final class TesseraStringsRu extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Разворачивание «$label» добавит $added ${isRow ? 'строк' : 'столбцов'}. Продолжить?';
+
+  @override
+  String get filter => 'Фильтр';
+
+  @override
+  String get noFilter => 'Без фильтра';
+
+  @override
+  String get addCondition => 'Добавить условие';
+
+  @override
+  String get addGroup => 'Добавить группу';
+
+  @override
+  String get addExpression => 'Добавить выражение';
+
+  @override
+  String get matchAll => 'Все условия';
+
+  @override
+  String get matchAny => 'Любое из условий';
+
+  @override
+  String get negate => 'Не';
+
+  @override
+  String get opEquals => 'равно';
+
+  @override
+  String get opNotEquals => 'не равно';
+
+  @override
+  String get opLess => 'меньше';
+
+  @override
+  String get opLessOrEqual => 'не больше';
+
+  @override
+  String get opGreater => 'больше';
+
+  @override
+  String get opGreaterOrEqual => 'не меньше';
+
+  @override
+  String get opBetween => 'между';
+
+  @override
+  String get opContains => 'содержит';
+
+  @override
+  String get opStartsWith => 'начинается с';
+
+  @override
+  String get opEndsWith => 'заканчивается на';
+
+  @override
+  String get opIsEmpty => 'пусто';
+
+  @override
+  String get opIsNotEmpty => 'не пусто';
+
+  @override
+  String get opIsOneOf => 'одно из';
+
+  @override
+  String get opIsTrue => 'истина';
+
+  @override
+  String get opIsFalse => 'ложь';
+
+  @override
+  String get customFilter => 'Пользовательский фильтр';
+
+  @override
+  String get expression => 'Выражение';
+
+  @override
+  String get selectValues => 'Выбрать значения…';
+
+  @override
+  String selectedCount(int count) => 'выбрано: $count';
+
+  @override
+  String get clear => 'Очистить';
+
+  @override
+  String get apply => 'Применить';
+
+  @override
+  String get column => 'Столбец';
+
+  @override
+  String get value => 'Значение';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => 'число',
+    ExprType.text => 'текст',
+    ExprType.boolean => 'логическое',
+    ExprType.date => 'дата',
+  };
+
+  @override
+  String expressionErrorText(
+    ExpressionErrorKind kind,
+    List<String> a,
+  ) => switch (kind) {
+    ExpressionErrorKind.unexpectedCharacter => 'неожиданный символ «${a[0]}»',
+    ExpressionErrorKind.unterminatedText => 'незакрытый текст',
+    ExpressionErrorKind.unterminatedName => 'после имени столбца нет «]»',
+    ExpressionErrorKind.unterminatedDate => 'после даты нет «#»',
+    ExpressionErrorKind.invalidNumber => 'неверное число «${a[0]}»',
+    ExpressionErrorKind.invalidDate => 'неверная дата «${a[0]}»',
+    ExpressionErrorKind.unexpectedToken => 'неожиданное «${a[0]}»',
+    ExpressionErrorKind.unexpectedEnd => 'неожиданный конец выражения',
+    ExpressionErrorKind.unknownColumn => 'неизвестный столбец «${a[0]}»',
+    ExpressionErrorKind.unknownFunction => 'неизвестная функция «${a[0]}»',
+    ExpressionErrorKind.argumentCount =>
+      '${a[0]} ожидает аргументов: ${a[1]}, передано ${a[2]}',
+    ExpressionErrorKind.argumentType =>
+      'аргумент ${a[1]} функции ${a[0]} должен быть типа ${a[2]}, а не ${a[3]}',
+    ExpressionErrorKind.operandType =>
+      'операнд ${a[0]} должен быть типа ${a[1]}, а не ${a[2]}',
+    ExpressionErrorKind.incompatibleTypes =>
+      '${a[0]} неприменимо к ${a[1]} и ${a[2]}',
+    ExpressionErrorKind.unknownType => 'невозможно определить тип',
+    ExpressionErrorKind.notAllowedHere => '«${a[0]}» здесь недопустимо',
+    ExpressionErrorKind.resultType =>
+      'выражение должно быть типа ${a[0]}, а не ${a[1]}',
+  };
 }

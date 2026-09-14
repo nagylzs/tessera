@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -239,4 +241,134 @@ final class TesseraStringsNl extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Het uitklappen van "$label" voegt $added ${isRow ? 'rijen' : 'kolommen'} toe. Doorgaan?';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get noFilter => 'Geen filter';
+
+  @override
+  String get addCondition => 'Voorwaarde toevoegen';
+
+  @override
+  String get addGroup => 'Groep toevoegen';
+
+  @override
+  String get addExpression => 'Expressie toevoegen';
+
+  @override
+  String get matchAll => 'Alle voorwaarden';
+
+  @override
+  String get matchAny => 'Een van de voorwaarden';
+
+  @override
+  String get negate => 'Niet';
+
+  @override
+  String get opEquals => 'is gelijk aan';
+
+  @override
+  String get opNotEquals => 'is ongelijk aan';
+
+  @override
+  String get opLess => 'is kleiner dan';
+
+  @override
+  String get opLessOrEqual => 'is hoogstens';
+
+  @override
+  String get opGreater => 'is groter dan';
+
+  @override
+  String get opGreaterOrEqual => 'is minstens';
+
+  @override
+  String get opBetween => 'ligt tussen';
+
+  @override
+  String get opContains => 'bevat';
+
+  @override
+  String get opStartsWith => 'begint met';
+
+  @override
+  String get opEndsWith => 'eindigt op';
+
+  @override
+  String get opIsEmpty => 'is leeg';
+
+  @override
+  String get opIsNotEmpty => 'is niet leeg';
+
+  @override
+  String get opIsOneOf => 'is een van';
+
+  @override
+  String get opIsTrue => 'is waar';
+
+  @override
+  String get opIsFalse => 'is onwaar';
+
+  @override
+  String get customFilter => 'Aangepast filter';
+
+  @override
+  String get expression => 'Expressie';
+
+  @override
+  String get selectValues => 'Waarden kiezen…';
+
+  @override
+  String selectedCount(int count) => '$count geselecteerd';
+
+  @override
+  String get clear => 'Wissen';
+
+  @override
+  String get apply => 'Toepassen';
+
+  @override
+  String get column => 'Kolom';
+
+  @override
+  String get value => 'Waarde';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => 'getal',
+    ExprType.text => 'tekst',
+    ExprType.boolean => 'booleaans',
+    ExprType.date => 'datum',
+  };
+
+  @override
+  String expressionErrorText(
+    ExpressionErrorKind kind,
+    List<String> a,
+  ) => switch (kind) {
+    ExpressionErrorKind.unexpectedCharacter => 'onverwacht teken "${a[0]}"',
+    ExpressionErrorKind.unterminatedText => 'tekst niet afgesloten',
+    ExpressionErrorKind.unterminatedName => '"]" ontbreekt na de kolomnaam',
+    ExpressionErrorKind.unterminatedDate => '"#" ontbreekt na de datum',
+    ExpressionErrorKind.invalidNumber => 'ongeldig getal "${a[0]}"',
+    ExpressionErrorKind.invalidDate => 'ongeldige datum "${a[0]}"',
+    ExpressionErrorKind.unexpectedToken => 'onverwacht "${a[0]}"',
+    ExpressionErrorKind.unexpectedEnd => 'onverwacht einde van de expressie',
+    ExpressionErrorKind.unknownColumn => 'onbekende kolom "${a[0]}"',
+    ExpressionErrorKind.unknownFunction => 'onbekende functie "${a[0]}"',
+    ExpressionErrorKind.argumentCount =>
+      '${a[0]} verwacht ${a[1]} argument(en), ${a[2]} opgegeven',
+    ExpressionErrorKind.argumentType =>
+      'argument ${a[1]} van ${a[0]} moet ${a[2]} zijn, niet ${a[3]}',
+    ExpressionErrorKind.operandType =>
+      'operand van ${a[0]} moet ${a[1]} zijn, niet ${a[2]}',
+    ExpressionErrorKind.incompatibleTypes =>
+      '${a[0]} is niet toepasbaar op ${a[1]} en ${a[2]}',
+    ExpressionErrorKind.unknownType => 'het type kan niet worden bepaald',
+    ExpressionErrorKind.notAllowedHere => '"${a[0]}" is hier niet toegestaan',
+    ExpressionErrorKind.resultType =>
+      'de expressie moet ${a[0]} zijn, niet ${a[1]}',
+  };
 }

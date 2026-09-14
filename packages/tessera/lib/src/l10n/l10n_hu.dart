@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -240,4 +242,133 @@ final class TesseraStringsHu extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'A(z) „$label” kibontása $added ${isRow ? 'sort' : 'oszlopot'} ad hozzá. Folytatod?';
+
+  @override
+  String get filter => 'Szűrő';
+
+  @override
+  String get noFilter => 'Nincs szűrő';
+
+  @override
+  String get addCondition => 'Feltétel hozzáadása';
+
+  @override
+  String get addGroup => 'Csoport hozzáadása';
+
+  @override
+  String get addExpression => 'Kifejezés hozzáadása';
+
+  @override
+  String get matchAll => 'Mindegyik teljesül';
+
+  @override
+  String get matchAny => 'Bármelyik teljesül';
+
+  @override
+  String get negate => 'Nem';
+
+  @override
+  String get opEquals => 'egyenlő';
+
+  @override
+  String get opNotEquals => 'nem egyenlő';
+
+  @override
+  String get opLess => 'kisebb, mint';
+
+  @override
+  String get opLessOrEqual => 'legfeljebb';
+
+  @override
+  String get opGreater => 'nagyobb, mint';
+
+  @override
+  String get opGreaterOrEqual => 'legalább';
+
+  @override
+  String get opBetween => 'között';
+
+  @override
+  String get opContains => 'tartalmazza';
+
+  @override
+  String get opStartsWith => 'ezzel kezdődik';
+
+  @override
+  String get opEndsWith => 'ezzel végződik';
+
+  @override
+  String get opIsEmpty => 'üres';
+
+  @override
+  String get opIsNotEmpty => 'nem üres';
+
+  @override
+  String get opIsOneOf => 'ezek egyike';
+
+  @override
+  String get opIsTrue => 'igaz';
+
+  @override
+  String get opIsFalse => 'hamis';
+
+  @override
+  String get customFilter => 'Egyedi szűrő';
+
+  @override
+  String get expression => 'Kifejezés';
+
+  @override
+  String get selectValues => 'Értékek kiválasztása…';
+
+  @override
+  String selectedCount(int count) => '$count kiválasztva';
+
+  @override
+  String get clear => 'Törlés';
+
+  @override
+  String get apply => 'Alkalmaz';
+
+  @override
+  String get column => 'Oszlop';
+
+  @override
+  String get value => 'Érték';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => 'szám',
+    ExprType.text => 'szöveg',
+    ExprType.boolean => 'logikai',
+    ExprType.date => 'dátum',
+  };
+
+  @override
+  String expressionErrorText(ExpressionErrorKind kind, List<String> a) =>
+      switch (kind) {
+        ExpressionErrorKind.unexpectedCharacter =>
+          'váratlan karakter: „${a[0]}”',
+        ExpressionErrorKind.unterminatedText => 'lezáratlan szöveg',
+        ExpressionErrorKind.unterminatedName => 'hiányzó „]” az oszlopnév után',
+        ExpressionErrorKind.unterminatedDate => 'hiányzó „#” a dátum után',
+        ExpressionErrorKind.invalidNumber => 'érvénytelen szám: „${a[0]}”',
+        ExpressionErrorKind.invalidDate => 'érvénytelen dátum: „${a[0]}”',
+        ExpressionErrorKind.unexpectedToken => 'váratlan „${a[0]}”',
+        ExpressionErrorKind.unexpectedEnd => 'a kifejezés váratlanul véget ér',
+        ExpressionErrorKind.unknownColumn => 'ismeretlen oszlop: „${a[0]}”',
+        ExpressionErrorKind.unknownFunction => 'ismeretlen függvény: „${a[0]}”',
+        ExpressionErrorKind.argumentCount =>
+          'a(z) ${a[0]} ${a[1]} paramétert vár, ${a[2]} érkezett',
+        ExpressionErrorKind.argumentType =>
+          'a(z) ${a[0]} ${a[1]}. paramétere ${a[2]} kell legyen, nem ${a[3]}',
+        ExpressionErrorKind.operandType =>
+          'a(z) ${a[0]} operandusa ${a[1]} kell legyen, nem ${a[2]}',
+        ExpressionErrorKind.incompatibleTypes =>
+          'a(z) ${a[0]} nem alkalmazható erre: ${a[1]} és ${a[2]}',
+        ExpressionErrorKind.unknownType => 'a típus nem állapítható meg',
+        ExpressionErrorKind.notAllowedHere => '„${a[0]}” itt nem használható',
+        ExpressionErrorKind.resultType =>
+          'a kifejezésnek ${a[0]} típusúnak kell lennie, nem ${a[1]}',
+      };
 }

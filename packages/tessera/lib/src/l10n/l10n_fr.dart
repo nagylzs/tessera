@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -240,4 +242,135 @@ final class TesseraStringsFr extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Développer « $label » ajoute $added ${isRow ? 'lignes' : 'colonnes'}. Continuer ?';
+
+  @override
+  String get filter => 'Filtre';
+
+  @override
+  String get noFilter => 'Aucun filtre';
+
+  @override
+  String get addCondition => 'Ajouter une condition';
+
+  @override
+  String get addGroup => 'Ajouter un groupe';
+
+  @override
+  String get addExpression => 'Ajouter une expression';
+
+  @override
+  String get matchAll => 'Toutes les conditions';
+
+  @override
+  String get matchAny => 'Au moins une condition';
+
+  @override
+  String get negate => 'Non';
+
+  @override
+  String get opEquals => 'est égal à';
+
+  @override
+  String get opNotEquals => 'est différent de';
+
+  @override
+  String get opLess => 'est inférieur à';
+
+  @override
+  String get opLessOrEqual => 'est au plus';
+
+  @override
+  String get opGreater => 'est supérieur à';
+
+  @override
+  String get opGreaterOrEqual => 'est au moins';
+
+  @override
+  String get opBetween => 'est entre';
+
+  @override
+  String get opContains => 'contient';
+
+  @override
+  String get opStartsWith => 'commence par';
+
+  @override
+  String get opEndsWith => 'se termine par';
+
+  @override
+  String get opIsEmpty => 'est vide';
+
+  @override
+  String get opIsNotEmpty => 'n’est pas vide';
+
+  @override
+  String get opIsOneOf => 'est parmi';
+
+  @override
+  String get opIsTrue => 'est vrai';
+
+  @override
+  String get opIsFalse => 'est faux';
+
+  @override
+  String get customFilter => 'Filtre personnalisé';
+
+  @override
+  String get expression => 'Expression';
+
+  @override
+  String get selectValues => 'Sélectionner des valeurs…';
+
+  @override
+  String selectedCount(int count) => '$count sélectionné(s)';
+
+  @override
+  String get clear => 'Effacer';
+
+  @override
+  String get apply => 'Appliquer';
+
+  @override
+  String get column => 'Colonne';
+
+  @override
+  String get value => 'Valeur';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => 'nombre',
+    ExprType.text => 'texte',
+    ExprType.boolean => 'booléen',
+    ExprType.date => 'date',
+  };
+
+  @override
+  String expressionErrorText(ExpressionErrorKind kind, List<String> a) =>
+      switch (kind) {
+        ExpressionErrorKind.unexpectedCharacter =>
+          'caractère inattendu « ${a[0]} »',
+        ExpressionErrorKind.unterminatedText => 'texte non terminé',
+        ExpressionErrorKind.unterminatedName =>
+          '« ] » manquant après le nom de colonne',
+        ExpressionErrorKind.unterminatedDate => '« # » manquant après la date',
+        ExpressionErrorKind.invalidNumber => 'nombre invalide « ${a[0]} »',
+        ExpressionErrorKind.invalidDate => 'date invalide « ${a[0]} »',
+        ExpressionErrorKind.unexpectedToken => '« ${a[0]} » inattendu',
+        ExpressionErrorKind.unexpectedEnd => 'fin inattendue de l’expression',
+        ExpressionErrorKind.unknownColumn => 'colonne inconnue « ${a[0]} »',
+        ExpressionErrorKind.unknownFunction => 'fonction inconnue « ${a[0]} »',
+        ExpressionErrorKind.argumentCount =>
+          '${a[0]} attend ${a[1]} argument(s), ${a[2]} fourni(s)',
+        ExpressionErrorKind.argumentType =>
+          'l’argument ${a[1]} de ${a[0]} doit être ${a[2]}, pas ${a[3]}',
+        ExpressionErrorKind.operandType =>
+          'l’opérande de ${a[0]} doit être ${a[1]}, pas ${a[2]}',
+        ExpressionErrorKind.incompatibleTypes =>
+          'impossible d’appliquer ${a[0]} à ${a[1]} et ${a[2]}',
+        ExpressionErrorKind.unknownType => 'impossible de déterminer le type',
+        ExpressionErrorKind.notAllowedHere =>
+          '« ${a[0]} » n’est pas autorisé ici',
+        ExpressionErrorKind.resultType =>
+          'l’expression doit être ${a[0]}, pas ${a[1]}',
+      };
 }

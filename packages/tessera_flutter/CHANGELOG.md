@@ -1,5 +1,13 @@
 ## Unreleased
 
+* `FilterEditor`, `FilterEditorDialog`, `showFilterEditor` and
+  `FilterEditorResult` / `FilterEditorValue`: a filter editor with
+  all-of / any-of / not groups, typed condition rows (including "is one
+  of" from the column's distinct values and a date picker), expression
+  rows with live validation (`ExpressionTextController` underlines the
+  error range) and read-only rows for filters without an editable form.
+  The example workbench has a "Filter…" action and shows the active
+  filter under the grid.
 * `AxisSide` now comes from the engine (re-exported, no import change).
 * The aggregate picker's function dropdown expands to the dialog width
   and ellipsizes long names (the new variance family labels).

@@ -141,11 +141,12 @@ the facts into a database only pays off if the whole cube moved there.
 - [ ] Docs: a chapter in the user guide with the grammar, the function list
       and the null rules (the guide does not exist yet); the `tessera`
       README has an "Expressions" section (done), `tessera_flutter`'s
-      should mention it once the filter editor exists.
-- [ ] Localized error messages: `ExpressionError` carries `kind`,
+      mentions the filter editor (done).
+- [x] Localized error messages: `ExpressionError` carries `kind`,
       `arguments` and an English `message`; add
       `TesseraStrings.expressionError(ExpressionError)` with the 14
       translations (decided 2026-09-14 to do this after the language).
+      Done 2026-09-14 with the filter editor.
 - [x] Decided 2026-09-14: text comparisons are case-sensitive (`lower()`
       for the other behaviour), dates support `date ± days` and
       `date - date`; keywords and function names are case-insensitive,
@@ -162,11 +163,14 @@ the facts into a database only pays off if the whole cube moved there.
       hook in the example app (load a `.tsnp` file), and narrower number
       encodings (int32, day numbers) if size matters.
 
-- [ ] A filter editor widget: the engine has the filter model
+- [x] A filter editor widget: the engine has the filter model
       (`FactFilter`, `ValueFilter`, `AndFilter`, …) but no UI for it.
       Builds on the structured filters and `ExpressionFilter` above: a
       builder (field, operator, value, and/or groups) plus an expression text
-      field with live validation from the checker.
+      field with live validation from the checker. Done 2026-09-14:
+      `FilterEditor` / `showFilterEditor` in `tessera_flutter`
+      (read-only rows for `PredicateFilter`s, as decided); wired into the
+      example workbench.
 - [x] Saving a pivot configuration: JSON for `CubeSpec`, `ExpansionState`
       and schema overrides, so an app can persist and restore a layout.
       Filters and calculated measures serialize as their expression text or

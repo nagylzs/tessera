@@ -22,6 +22,7 @@ concepts (data sources, schema inference, fact tables, cube specs).
 | `CubeView` | The grid. Built on `TableView` from `two_dimensional_scrollables`: lazy cells, pinned and merged group headers, expand/collapse icons, sort by tapping headers. |
 | `AxisEditor` | Chips for the dimensions of one axis; drag-and-drop within and between axes, delete, `+` opens `showDimensionPicker`. |
 | `AggregateEditor` | Chips for the aggregates; `+` opens `showAggregatePicker`; `selected`/`onSelectedChanged` let the app choose which of them `CubeView` shows. |
+| `FilterEditor` / `showFilterEditor` | Edits the cube's filter as a tree: "all of" / "any of" groups with a "not" toggle, condition rows (column, operator, value — typed fields, a date picker, "is one of" with the column's distinct values) and expression rows validated as the user types with the error underlined and explained in the current language; filters the editor cannot represent (a `PredicateFilter`) are shown read-only. Returns a `FilterEditorResult`. |
 | `CubeTheme` | Colours, sizes and text styles; defaults to the ambient Material theme. |
 | `TesseraLocalizations` | `delegate`, `supportedLocales` and `of(context)` for the engine's `TesseraStrings`. |
 

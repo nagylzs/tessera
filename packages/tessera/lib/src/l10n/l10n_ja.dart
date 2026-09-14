@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -230,4 +232,131 @@ final class TesseraStringsJa extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       '「$label」を展開すると $added ${isRow ? '行' : '列'}が追加されます。続行しますか？';
+
+  @override
+  String get filter => 'フィルター';
+
+  @override
+  String get noFilter => 'フィルターなし';
+
+  @override
+  String get addCondition => '条件を追加';
+
+  @override
+  String get addGroup => 'グループを追加';
+
+  @override
+  String get addExpression => '式を追加';
+
+  @override
+  String get matchAll => 'すべての条件を満たす';
+
+  @override
+  String get matchAny => 'いずれかの条件を満たす';
+
+  @override
+  String get negate => '否定';
+
+  @override
+  String get opEquals => 'に等しい';
+
+  @override
+  String get opNotEquals => 'に等しくない';
+
+  @override
+  String get opLess => 'より小さい';
+
+  @override
+  String get opLessOrEqual => '以下';
+
+  @override
+  String get opGreater => 'より大きい';
+
+  @override
+  String get opGreaterOrEqual => '以上';
+
+  @override
+  String get opBetween => 'の範囲内';
+
+  @override
+  String get opContains => 'を含む';
+
+  @override
+  String get opStartsWith => 'で始まる';
+
+  @override
+  String get opEndsWith => 'で終わる';
+
+  @override
+  String get opIsEmpty => 'が空';
+
+  @override
+  String get opIsNotEmpty => 'が空でない';
+
+  @override
+  String get opIsOneOf => 'のいずれか';
+
+  @override
+  String get opIsTrue => 'が真';
+
+  @override
+  String get opIsFalse => 'が偽';
+
+  @override
+  String get customFilter => 'カスタムフィルター';
+
+  @override
+  String get expression => '式';
+
+  @override
+  String get selectValues => '値を選択…';
+
+  @override
+  String selectedCount(int count) => '$count 件選択';
+
+  @override
+  String get clear => 'クリア';
+
+  @override
+  String get apply => '適用';
+
+  @override
+  String get column => '列';
+
+  @override
+  String get value => '値';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => '数値',
+    ExprType.text => 'テキスト',
+    ExprType.boolean => '真偽値',
+    ExprType.date => '日付',
+  };
+
+  @override
+  String expressionErrorText(ExpressionErrorKind kind, List<String> a) =>
+      switch (kind) {
+        ExpressionErrorKind.unexpectedCharacter => '予期しない文字「${a[0]}」',
+        ExpressionErrorKind.unterminatedText => 'テキストが閉じられていません',
+        ExpressionErrorKind.unterminatedName => '列名の後に「]」がありません',
+        ExpressionErrorKind.unterminatedDate => '日付の後に「#」がありません',
+        ExpressionErrorKind.invalidNumber => '無効な数値「${a[0]}」',
+        ExpressionErrorKind.invalidDate => '無効な日付「${a[0]}」',
+        ExpressionErrorKind.unexpectedToken => '予期しない「${a[0]}」',
+        ExpressionErrorKind.unexpectedEnd => '式が途中で終わっています',
+        ExpressionErrorKind.unknownColumn => '不明な列「${a[0]}」',
+        ExpressionErrorKind.unknownFunction => '不明な関数「${a[0]}」',
+        ExpressionErrorKind.argumentCount =>
+          '${a[0]} の引数は ${a[1]} 個ですが、${a[2]} 個指定されました',
+        ExpressionErrorKind.argumentType =>
+          '${a[0]} の引数 ${a[1]} は ${a[3]} ではなく ${a[2]} である必要があります',
+        ExpressionErrorKind.operandType =>
+          '${a[0]} のオペランドは ${a[2]} ではなく ${a[1]} である必要があります',
+        ExpressionErrorKind.incompatibleTypes =>
+          '${a[0]} は ${a[1]} と ${a[2]} に適用できません',
+        ExpressionErrorKind.unknownType => '型を決定できません',
+        ExpressionErrorKind.notAllowedHere => '「${a[0]}」はここでは使用できません',
+        ExpressionErrorKind.resultType => '式は ${a[1]} ではなく ${a[0]} である必要があります',
+      };
 }

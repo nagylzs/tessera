@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -238,4 +240,132 @@ final class TesseraStringsTr extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       '"$label" genişletildiğinde $added ${isRow ? 'satır' : 'sütun'} eklenir. Devam edilsin mi?';
+
+  @override
+  String get filter => 'Filtre';
+
+  @override
+  String get noFilter => 'Filtre yok';
+
+  @override
+  String get addCondition => 'Koşul ekle';
+
+  @override
+  String get addGroup => 'Grup ekle';
+
+  @override
+  String get addExpression => 'İfade ekle';
+
+  @override
+  String get matchAll => 'Tüm koşullar';
+
+  @override
+  String get matchAny => 'Koşullardan herhangi biri';
+
+  @override
+  String get negate => 'Değil';
+
+  @override
+  String get opEquals => 'eşittir';
+
+  @override
+  String get opNotEquals => 'eşit değildir';
+
+  @override
+  String get opLess => 'küçüktür';
+
+  @override
+  String get opLessOrEqual => 'en fazla';
+
+  @override
+  String get opGreater => 'büyüktür';
+
+  @override
+  String get opGreaterOrEqual => 'en az';
+
+  @override
+  String get opBetween => 'arasında';
+
+  @override
+  String get opContains => 'içerir';
+
+  @override
+  String get opStartsWith => 'ile başlar';
+
+  @override
+  String get opEndsWith => 'ile biter';
+
+  @override
+  String get opIsEmpty => 'boş';
+
+  @override
+  String get opIsNotEmpty => 'boş değil';
+
+  @override
+  String get opIsOneOf => 'şunlardan biri';
+
+  @override
+  String get opIsTrue => 'doğru';
+
+  @override
+  String get opIsFalse => 'yanlış';
+
+  @override
+  String get customFilter => 'Özel filtre';
+
+  @override
+  String get expression => 'İfade';
+
+  @override
+  String get selectValues => 'Değer seç…';
+
+  @override
+  String selectedCount(int count) => '$count seçildi';
+
+  @override
+  String get clear => 'Temizle';
+
+  @override
+  String get apply => 'Uygula';
+
+  @override
+  String get column => 'Sütun';
+
+  @override
+  String get value => 'Değer';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => 'sayı',
+    ExprType.text => 'metin',
+    ExprType.boolean => 'mantıksal',
+    ExprType.date => 'tarih',
+  };
+
+  @override
+  String expressionErrorText(ExpressionErrorKind kind, List<String> a) =>
+      switch (kind) {
+        ExpressionErrorKind.unexpectedCharacter =>
+          'beklenmeyen karakter "${a[0]}"',
+        ExpressionErrorKind.unterminatedText => 'metin kapatılmamış',
+        ExpressionErrorKind.unterminatedName => 'sütun adından sonra "]" eksik',
+        ExpressionErrorKind.unterminatedDate => 'tarihten sonra "#" eksik',
+        ExpressionErrorKind.invalidNumber => 'geçersiz sayı "${a[0]}"',
+        ExpressionErrorKind.invalidDate => 'geçersiz tarih "${a[0]}"',
+        ExpressionErrorKind.unexpectedToken => 'beklenmeyen "${a[0]}"',
+        ExpressionErrorKind.unexpectedEnd => 'ifade beklenmedik şekilde bitti',
+        ExpressionErrorKind.unknownColumn => 'bilinmeyen sütun "${a[0]}"',
+        ExpressionErrorKind.unknownFunction => 'bilinmeyen işlev "${a[0]}"',
+        ExpressionErrorKind.argumentCount =>
+          '${a[0]} ${a[1]} argüman bekler, ${a[2]} verildi',
+        ExpressionErrorKind.argumentType =>
+          '${a[0]} işlevinin ${a[1]}. argümanı ${a[3]} değil ${a[2]} olmalı',
+        ExpressionErrorKind.operandType =>
+          '${a[0]} işleminin operandı ${a[2]} değil ${a[1]} olmalı',
+        ExpressionErrorKind.incompatibleTypes =>
+          '${a[0]}, ${a[1]} ve ${a[2]} için uygulanamaz',
+        ExpressionErrorKind.unknownType => 'tür belirlenemiyor',
+        ExpressionErrorKind.notAllowedHere => '"${a[0]}" burada kullanılamaz',
+        ExpressionErrorKind.resultType => 'ifade ${a[1]} değil ${a[0]} olmalı',
+      };
 }

@@ -384,6 +384,27 @@ Paths below are relative to the package (`lib/src/...` means
   column and arrows walk value columns (`_resolveSelection()` runs before
   each key so repeats before the next frame see the moved selection).
   The example workbench keeps `_shown: List<Aggregate>?`.
+- Implemented: `FilterEditor` (`widgets/filter_editor.dart`) +
+  `FilterEditorDialog` / `showFilterEditor` → `FilterEditorResult(filter)`
+  (`null` result = dismissed, `filter == null` = cleared). Internal tree
+  model `_Group(all, negated, children)` / `_Condition(column, op, value,
+  high, values, revision)` / `_ExpressionNode(source, error)` /
+  `_Custom(filter)`; `_nodeOf` decomposes a `FactFilter` (Compare/Range/
+  Text/Empty/ValueFilter-over-column → condition, Expression → expression
+  row, anything with `toExpressionSource()` → expression row, else
+  read-only custom row; unknown columns fall back the same way),
+  `_build` recomposes (empty group → null, one child → itself, negated →
+  `NotFilter`); `FilterEditorValue.isValid` is false while a value is
+  missing or an expression has an error, and the dialog's Apply is
+  disabled then. An untouched dialog returns the original filter object.
+  Value fields are `TextFormField`s keyed by `(condition, high,
+  revision)` so a column/operator change or a date pick resets them;
+  `_Op.forType` lists operators per `ColumnType` (booleans: is true / is
+  false); "is one of" opens `_ValuePickerDialog` over
+  `facts.distinctValues`. `ExpressionTextController` (public) underlines
+  the `ExpressionError` range; the message comes from
+  `TesseraStrings.expressionError`. Tests: `test/filter_editor_test.dart`
+  (tall `physicalSize`, `showFilterEditor` through a button).
 - Example app: `example/lib/main.dart` is a launcher (`LauncherPage`)
   listing the entries of `example/lib/examples.dart`; each example lives in
   its own folder under `example/lib/` (kept as one project so pub.dev's
@@ -395,7 +416,9 @@ Paths below are relative to the package (`lib/src/...` means
   reads, disk cache after one full pass, HEAD Content-Length →
   `estimatedRowCount`; sendable to the import isolate; dart:io so not web);
   `example/lib/language_menu.dart` (`appLocale` + `LanguageMenu`). The
-  workbench's "Export…" menu writes the cube (all aggregates) as .xlsx
+  workbench's "Filter…" action opens `showFilterEditor` on the spec's
+  filter and shows the active filter's expression text above the
+  current-cell line; its "Export…" menu writes the cube (all aggregates) as .xlsx
   (`XlsxCubeExporter`), .ods (`OdsCubeExporter`), .html
   (`HtmlCubeExporter`), .svg (`SvgCubeExporter`), .pdf
   (`PdfCubeExporter` with Noto Sans Regular/Bold from `assets/fonts/`,

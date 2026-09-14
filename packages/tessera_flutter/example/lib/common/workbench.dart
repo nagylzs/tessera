@@ -218,6 +218,19 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
     );
   }
 
+  Future<void> _editFilter() async {
+    final controller = _controller;
+    if (controller == null) return;
+    final spec = controller.cube.spec;
+    final result = await showFilterEditor(
+      context,
+      facts: controller.cube.facts,
+      initial: spec.filter,
+    );
+    if (result == null) return;
+    controller.updateSpec(spec.copyWith(filter: () => result.filter));
+  }
+
   Future<void> _editSchema() async {
     final edited = await Navigator.push<Schema>(
       context,
@@ -416,6 +429,11 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
         ),
         const LanguageMenu(),
         IconButton(
+          icon: const Icon(Icons.filter_alt_outlined),
+          tooltip: 'Filter…',
+          onPressed: _controller == null ? null : _editFilter,
+        ),
+        IconButton(
           icon: const Icon(Icons.table_chart_outlined),
           tooltip: 'Schema…',
           onPressed: _schema == null ? null : _editSchema,
@@ -518,6 +536,11 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
               builder: (context, _) {
                 final cell = controller.currentCell;
                 final l10n = TesseraLocalizations.of(context);
+                final filter = controller.cube.spec.filter;
+                final filterText = filter == null
+                    ? null
+                    : '${l10n.filter}: '
+                          '${filter.toExpressionSource() ?? (filter is PredicateFilter ? filter.label : null) ?? l10n.customFilter}';
                 final text = cell == null
                     ? 'No current cell — tap a cell or use the arrow keys.'
                     : cell.coordinate.isEmpty
@@ -528,7 +551,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
                 return Padding(
                   padding: const EdgeInsets.all(8),
                   child: Text(
-                    text,
+                    filterText == null ? text : '$filterText\n$text',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 );

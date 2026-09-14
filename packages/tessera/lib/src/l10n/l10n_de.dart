@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -240,4 +242,134 @@ final class TesseraStringsDe extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Das Ausklappen von „$label“ fügt $added ${isRow ? 'Zeilen' : 'Spalten'} hinzu. Fortfahren?';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get noFilter => 'Kein Filter';
+
+  @override
+  String get addCondition => 'Bedingung hinzufügen';
+
+  @override
+  String get addGroup => 'Gruppe hinzufügen';
+
+  @override
+  String get addExpression => 'Ausdruck hinzufügen';
+
+  @override
+  String get matchAll => 'Alle Bedingungen';
+
+  @override
+  String get matchAny => 'Eine der Bedingungen';
+
+  @override
+  String get negate => 'Nicht';
+
+  @override
+  String get opEquals => 'ist gleich';
+
+  @override
+  String get opNotEquals => 'ist ungleich';
+
+  @override
+  String get opLess => 'ist kleiner als';
+
+  @override
+  String get opLessOrEqual => 'ist höchstens';
+
+  @override
+  String get opGreater => 'ist größer als';
+
+  @override
+  String get opGreaterOrEqual => 'ist mindestens';
+
+  @override
+  String get opBetween => 'liegt zwischen';
+
+  @override
+  String get opContains => 'enthält';
+
+  @override
+  String get opStartsWith => 'beginnt mit';
+
+  @override
+  String get opEndsWith => 'endet mit';
+
+  @override
+  String get opIsEmpty => 'ist leer';
+
+  @override
+  String get opIsNotEmpty => 'ist nicht leer';
+
+  @override
+  String get opIsOneOf => 'ist eines von';
+
+  @override
+  String get opIsTrue => 'ist wahr';
+
+  @override
+  String get opIsFalse => 'ist falsch';
+
+  @override
+  String get customFilter => 'Benutzerdefinierter Filter';
+
+  @override
+  String get expression => 'Ausdruck';
+
+  @override
+  String get selectValues => 'Werte auswählen…';
+
+  @override
+  String selectedCount(int count) => '$count ausgewählt';
+
+  @override
+  String get clear => 'Löschen';
+
+  @override
+  String get apply => 'Anwenden';
+
+  @override
+  String get column => 'Spalte';
+
+  @override
+  String get value => 'Wert';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => 'Zahl',
+    ExprType.text => 'Text',
+    ExprType.boolean => 'Wahrheitswert',
+    ExprType.date => 'Datum',
+  };
+
+  @override
+  String expressionErrorText(
+    ExpressionErrorKind kind,
+    List<String> a,
+  ) => switch (kind) {
+    ExpressionErrorKind.unexpectedCharacter => 'unerwartetes Zeichen „${a[0]}“',
+    ExpressionErrorKind.unterminatedText => 'Textliteral nicht abgeschlossen',
+    ExpressionErrorKind.unterminatedName => '„]“ nach dem Spaltennamen fehlt',
+    ExpressionErrorKind.unterminatedDate => '„#“ nach dem Datum fehlt',
+    ExpressionErrorKind.invalidNumber => 'ungültige Zahl „${a[0]}“',
+    ExpressionErrorKind.invalidDate => 'ungültiges Datum „${a[0]}“',
+    ExpressionErrorKind.unexpectedToken => 'unerwartetes „${a[0]}“',
+    ExpressionErrorKind.unexpectedEnd => 'unerwartetes Ende des Ausdrucks',
+    ExpressionErrorKind.unknownColumn => 'unbekannte Spalte „${a[0]}“',
+    ExpressionErrorKind.unknownFunction => 'unbekannte Funktion „${a[0]}“',
+    ExpressionErrorKind.argumentCount =>
+      '${a[0]} erwartet ${a[1]} Argument(e), ${a[2]} angegeben',
+    ExpressionErrorKind.argumentType =>
+      'Argument ${a[1]} von ${a[0]} muss ${a[2]} sein, nicht ${a[3]}',
+    ExpressionErrorKind.operandType =>
+      'Operand von ${a[0]} muss ${a[1]} sein, nicht ${a[2]}',
+    ExpressionErrorKind.incompatibleTypes =>
+      '${a[0]} ist auf ${a[1]} und ${a[2]} nicht anwendbar',
+    ExpressionErrorKind.unknownType => 'der Typ kann nicht bestimmt werden',
+    ExpressionErrorKind.notAllowedHere => '„${a[0]}“ ist hier nicht erlaubt',
+    ExpressionErrorKind.resultType =>
+      'der Ausdruck muss ${a[0]} sein, nicht ${a[1]}',
+  };
 }

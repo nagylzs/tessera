@@ -1,5 +1,12 @@
 ## Unreleased
 
+* `TesseraStrings.expressionError(error)`: localized expression error
+  messages, composed per locale by `expressionErrorText(kind, arguments)`
+  with type names from `exprTypeName`; and the filter editor's strings
+  (`filter`, `noFilter`, `addCondition`, `addGroup`, `addExpression`,
+  `matchAll`, `matchAny`, `negate`, the `op…` operator names,
+  `customFilter`, `expression`, `selectValues`, `selectedCount`, `clear`,
+  `apply`, `column`, `value`) in every locale.
 * Layout-relative aggregates ("Show Values As"): `Aggregate.percentOf`
   (`TotalOf.row` / `column` / `grand` / `parentRow` / `parentColumn`),
   `differenceFrom` and `percentDifferenceFrom` (`BaseItem.previous` /

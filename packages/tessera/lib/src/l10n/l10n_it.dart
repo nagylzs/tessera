@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -239,4 +241,134 @@ final class TesseraStringsIt extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Espandere "$label" aggiunge $added ${isRow ? 'righe' : 'colonne'}. Continuare?';
+
+  @override
+  String get filter => 'Filtro';
+
+  @override
+  String get noFilter => 'Nessun filtro';
+
+  @override
+  String get addCondition => 'Aggiungi condizione';
+
+  @override
+  String get addGroup => 'Aggiungi gruppo';
+
+  @override
+  String get addExpression => 'Aggiungi espressione';
+
+  @override
+  String get matchAll => 'Tutte le condizioni';
+
+  @override
+  String get matchAny => 'Almeno una condizione';
+
+  @override
+  String get negate => 'Non';
+
+  @override
+  String get opEquals => 'è uguale a';
+
+  @override
+  String get opNotEquals => 'è diverso da';
+
+  @override
+  String get opLess => 'è minore di';
+
+  @override
+  String get opLessOrEqual => 'è al massimo';
+
+  @override
+  String get opGreater => 'è maggiore di';
+
+  @override
+  String get opGreaterOrEqual => 'è almeno';
+
+  @override
+  String get opBetween => 'è compreso tra';
+
+  @override
+  String get opContains => 'contiene';
+
+  @override
+  String get opStartsWith => 'inizia con';
+
+  @override
+  String get opEndsWith => 'finisce con';
+
+  @override
+  String get opIsEmpty => 'è vuoto';
+
+  @override
+  String get opIsNotEmpty => 'non è vuoto';
+
+  @override
+  String get opIsOneOf => 'è uno di';
+
+  @override
+  String get opIsTrue => 'è vero';
+
+  @override
+  String get opIsFalse => 'è falso';
+
+  @override
+  String get customFilter => 'Filtro personalizzato';
+
+  @override
+  String get expression => 'Espressione';
+
+  @override
+  String get selectValues => 'Seleziona valori…';
+
+  @override
+  String selectedCount(int count) => '$count selezionati';
+
+  @override
+  String get clear => 'Cancella';
+
+  @override
+  String get apply => 'Applica';
+
+  @override
+  String get column => 'Colonna';
+
+  @override
+  String get value => 'Valore';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => 'numero',
+    ExprType.text => 'testo',
+    ExprType.boolean => 'booleano',
+    ExprType.date => 'data',
+  };
+
+  @override
+  String expressionErrorText(ExpressionErrorKind kind, List<String> a) =>
+      switch (kind) {
+        ExpressionErrorKind.unexpectedCharacter =>
+          'carattere inatteso "${a[0]}"',
+        ExpressionErrorKind.unterminatedText => 'testo non terminato',
+        ExpressionErrorKind.unterminatedName =>
+          'manca "]" dopo il nome della colonna',
+        ExpressionErrorKind.unterminatedDate => 'manca "#" dopo la data',
+        ExpressionErrorKind.invalidNumber => 'numero non valido "${a[0]}"',
+        ExpressionErrorKind.invalidDate => 'data non valida "${a[0]}"',
+        ExpressionErrorKind.unexpectedToken => '"${a[0]}" inatteso',
+        ExpressionErrorKind.unexpectedEnd => 'fine inattesa dell’espressione',
+        ExpressionErrorKind.unknownColumn => 'colonna sconosciuta "${a[0]}"',
+        ExpressionErrorKind.unknownFunction => 'funzione sconosciuta "${a[0]}"',
+        ExpressionErrorKind.argumentCount =>
+          '${a[0]} richiede ${a[1]} argomento/i, forniti ${a[2]}',
+        ExpressionErrorKind.argumentType =>
+          'l’argomento ${a[1]} di ${a[0]} deve essere ${a[2]}, non ${a[3]}',
+        ExpressionErrorKind.operandType =>
+          'l’operando di ${a[0]} deve essere ${a[1]}, non ${a[2]}',
+        ExpressionErrorKind.incompatibleTypes =>
+          'impossibile applicare ${a[0]} a ${a[1]} e ${a[2]}',
+        ExpressionErrorKind.unknownType => 'impossibile determinare il tipo',
+        ExpressionErrorKind.notAllowedHere => '"${a[0]}" non è consentito qui',
+        ExpressionErrorKind.resultType =>
+          'l’espressione deve essere ${a[0]}, non ${a[1]}',
+      };
 }

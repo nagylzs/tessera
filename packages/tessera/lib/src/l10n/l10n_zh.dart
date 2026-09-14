@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -230,4 +232,129 @@ final class TesseraStringsZh extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       '展开“$label”将添加 $added ${isRow ? '行' : '列'}。是否继续？';
+
+  @override
+  String get filter => '筛选';
+
+  @override
+  String get noFilter => '无筛选';
+
+  @override
+  String get addCondition => '添加条件';
+
+  @override
+  String get addGroup => '添加分组';
+
+  @override
+  String get addExpression => '添加表达式';
+
+  @override
+  String get matchAll => '满足所有条件';
+
+  @override
+  String get matchAny => '满足任一条件';
+
+  @override
+  String get negate => '非';
+
+  @override
+  String get opEquals => '等于';
+
+  @override
+  String get opNotEquals => '不等于';
+
+  @override
+  String get opLess => '小于';
+
+  @override
+  String get opLessOrEqual => '不大于';
+
+  @override
+  String get opGreater => '大于';
+
+  @override
+  String get opGreaterOrEqual => '不小于';
+
+  @override
+  String get opBetween => '介于';
+
+  @override
+  String get opContains => '包含';
+
+  @override
+  String get opStartsWith => '开头为';
+
+  @override
+  String get opEndsWith => '结尾为';
+
+  @override
+  String get opIsEmpty => '为空';
+
+  @override
+  String get opIsNotEmpty => '不为空';
+
+  @override
+  String get opIsOneOf => '属于';
+
+  @override
+  String get opIsTrue => '为真';
+
+  @override
+  String get opIsFalse => '为假';
+
+  @override
+  String get customFilter => '自定义筛选';
+
+  @override
+  String get expression => '表达式';
+
+  @override
+  String get selectValues => '选择值…';
+
+  @override
+  String selectedCount(int count) => '已选择 $count 项';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get apply => '应用';
+
+  @override
+  String get column => '列';
+
+  @override
+  String get value => '值';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => '数字',
+    ExprType.text => '文本',
+    ExprType.boolean => '布尔值',
+    ExprType.date => '日期',
+  };
+
+  @override
+  String expressionErrorText(ExpressionErrorKind kind, List<String> a) =>
+      switch (kind) {
+        ExpressionErrorKind.unexpectedCharacter => '意外的字符“${a[0]}”',
+        ExpressionErrorKind.unterminatedText => '文本未结束',
+        ExpressionErrorKind.unterminatedName => '列名后缺少“]”',
+        ExpressionErrorKind.unterminatedDate => '日期后缺少“#”',
+        ExpressionErrorKind.invalidNumber => '无效的数字“${a[0]}”',
+        ExpressionErrorKind.invalidDate => '无效的日期“${a[0]}”',
+        ExpressionErrorKind.unexpectedToken => '意外的“${a[0]}”',
+        ExpressionErrorKind.unexpectedEnd => '表达式意外结束',
+        ExpressionErrorKind.unknownColumn => '未知的列“${a[0]}”',
+        ExpressionErrorKind.unknownFunction => '未知的函数“${a[0]}”',
+        ExpressionErrorKind.argumentCount =>
+          '${a[0]} 需要 ${a[1]} 个参数，实际为 ${a[2]} 个',
+        ExpressionErrorKind.argumentType =>
+          '${a[0]} 的第 ${a[1]} 个参数必须是${a[2]}，而不是${a[3]}',
+        ExpressionErrorKind.operandType => '${a[0]} 的操作数必须是${a[1]}，而不是${a[2]}',
+        ExpressionErrorKind.incompatibleTypes => '${a[0]} 不能用于${a[1]}和${a[2]}',
+        ExpressionErrorKind.unknownType => '无法确定类型',
+        ExpressionErrorKind.notAllowedHere => '此处不允许使用“${a[0]}”',
+        ExpressionErrorKind.resultType => '表达式必须是${a[0]}，而不是${a[1]}',
+      };
 }

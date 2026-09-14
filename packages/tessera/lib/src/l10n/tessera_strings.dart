@@ -1,6 +1,8 @@
 import '../cube/aggregate.dart';
 import '../cube/aggregate_kind.dart';
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import '../facts/fact_table.dart';
 import 'locales.dart';
@@ -151,6 +153,72 @@ abstract class TesseraStrings {
   String get expandAll;
   String get collapseAll;
   String largeExpansion(String label, int added, {required bool isRow});
+
+  // ------------------------------------------------------ filter editor
+
+  /// Title and tooltip of the filter editor.
+  String get filter;
+  String get noFilter;
+  String get addCondition;
+  String get addGroup;
+  String get addExpression;
+
+  /// The two ways a group combines its conditions.
+  String get matchAll;
+  String get matchAny;
+
+  /// The toggle that negates a group.
+  String get negate;
+
+  /// Operators of a condition row.
+  String get opEquals;
+  String get opNotEquals;
+  String get opLess;
+  String get opLessOrEqual;
+  String get opGreater;
+  String get opGreaterOrEqual;
+  String get opBetween;
+  String get opContains;
+  String get opStartsWith;
+  String get opEndsWith;
+  String get opIsEmpty;
+  String get opIsNotEmpty;
+  String get opIsOneOf;
+  String get opIsTrue;
+  String get opIsFalse;
+
+  /// A filter the editor can only show and remove (a Dart predicate).
+  String get customFilter;
+  String get expression;
+  String get selectValues;
+  String selectedCount(int count);
+  String get clear;
+  String get apply;
+  String get column;
+  String get value;
+
+  // --------------------------------------------------- expression errors
+
+  /// The name of an expression type in error messages.
+  String exprTypeName(ExprType type);
+
+  /// The message for an expression error of [kind]; [arguments] as in
+  /// [ExpressionError.arguments], with type names already localized.
+  String expressionErrorText(ExpressionErrorKind kind, List<String> arguments);
+
+  /// The localized message of [error] (see [ExpressionError.message] for
+  /// the English one).
+  String expressionError(ExpressionError error) => expressionErrorText(
+    error.kind,
+    [for (final a in error.arguments) _typeArgument(a)],
+  );
+
+  String _typeArgument(String argument) {
+    for (final t in ExprType.values) {
+      if (t.name == argument) return exprTypeName(t);
+    }
+    return argument;
+  }
 
   // ------------------------------------------------ derived, concrete
 

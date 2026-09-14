@@ -1,4 +1,6 @@
 import '../cube/layout_aggregate.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -238,4 +240,131 @@ final class TesseraStringsCs extends TesseraStrings {
   @override
   String largeExpansion(String label, int added, {required bool isRow}) =>
       'Rozbalení „$label“ přidá $added ${isRow ? 'řádků' : 'sloupců'}. Pokračovat?';
+
+  @override
+  String get filter => 'Filtr';
+
+  @override
+  String get noFilter => 'Bez filtru';
+
+  @override
+  String get addCondition => 'Přidat podmínku';
+
+  @override
+  String get addGroup => 'Přidat skupinu';
+
+  @override
+  String get addExpression => 'Přidat výraz';
+
+  @override
+  String get matchAll => 'Všechny podmínky';
+
+  @override
+  String get matchAny => 'Některá z podmínek';
+
+  @override
+  String get negate => 'Ne';
+
+  @override
+  String get opEquals => 'se rovná';
+
+  @override
+  String get opNotEquals => 'se nerovná';
+
+  @override
+  String get opLess => 'je menší než';
+
+  @override
+  String get opLessOrEqual => 'je nejvýše';
+
+  @override
+  String get opGreater => 'je větší než';
+
+  @override
+  String get opGreaterOrEqual => 'je nejméně';
+
+  @override
+  String get opBetween => 'je mezi';
+
+  @override
+  String get opContains => 'obsahuje';
+
+  @override
+  String get opStartsWith => 'začíná na';
+
+  @override
+  String get opEndsWith => 'končí na';
+
+  @override
+  String get opIsEmpty => 'je prázdné';
+
+  @override
+  String get opIsNotEmpty => 'není prázdné';
+
+  @override
+  String get opIsOneOf => 'je jedno z';
+
+  @override
+  String get opIsTrue => 'je pravda';
+
+  @override
+  String get opIsFalse => 'je nepravda';
+
+  @override
+  String get customFilter => 'Vlastní filtr';
+
+  @override
+  String get expression => 'Výraz';
+
+  @override
+  String get selectValues => 'Vybrat hodnoty…';
+
+  @override
+  String selectedCount(int count) => 'vybráno: $count';
+
+  @override
+  String get clear => 'Vymazat';
+
+  @override
+  String get apply => 'Použít';
+
+  @override
+  String get column => 'Sloupec';
+
+  @override
+  String get value => 'Hodnota';
+
+  @override
+  String exprTypeName(ExprType type) => switch (type) {
+    ExprType.number => 'číslo',
+    ExprType.text => 'text',
+    ExprType.boolean => 'logická hodnota',
+    ExprType.date => 'datum',
+  };
+
+  @override
+  String expressionErrorText(ExpressionErrorKind kind, List<String> a) =>
+      switch (kind) {
+        ExpressionErrorKind.unexpectedCharacter => 'neočekávaný znak „${a[0]}“',
+        ExpressionErrorKind.unterminatedText => 'neukončený textový literál',
+        ExpressionErrorKind.unterminatedName => 'za názvem sloupce chybí „]“',
+        ExpressionErrorKind.unterminatedDate => 'za datem chybí „#“',
+        ExpressionErrorKind.invalidNumber => 'neplatné číslo „${a[0]}“',
+        ExpressionErrorKind.invalidDate => 'neplatné datum „${a[0]}“',
+        ExpressionErrorKind.unexpectedToken => 'neočekávané „${a[0]}“',
+        ExpressionErrorKind.unexpectedEnd => 'neočekávaný konec výrazu',
+        ExpressionErrorKind.unknownColumn => 'neznámý sloupec „${a[0]}“',
+        ExpressionErrorKind.unknownFunction => 'neznámá funkce „${a[0]}“',
+        ExpressionErrorKind.argumentCount =>
+          '${a[0]} očekává ${a[1]} argument(y), zadáno ${a[2]}',
+        ExpressionErrorKind.argumentType =>
+          'argument ${a[1]} funkce ${a[0]} musí být ${a[2]}, ne ${a[3]}',
+        ExpressionErrorKind.operandType =>
+          'operand ${a[0]} musí být ${a[1]}, ne ${a[2]}',
+        ExpressionErrorKind.incompatibleTypes =>
+          '${a[0]} nelze použít na ${a[1]} a ${a[2]}',
+        ExpressionErrorKind.unknownType => 'typ nelze určit',
+        ExpressionErrorKind.notAllowedHere => '„${a[0]}“ zde není povoleno',
+        ExpressionErrorKind.resultType => 'výraz musí být ${a[0]}, ne ${a[1]}',
+      };
 }
