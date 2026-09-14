@@ -99,7 +99,7 @@ final class TesseraStringsPt extends TesseraStrings {
   String get labelField => 'Rótulo';
 
   @override
-  String get countOfFacts => 'Contagem de linhas';
+  String get countOfFacts => 'Contagem de registros';
 
   @override
   String get sum => 'Soma';

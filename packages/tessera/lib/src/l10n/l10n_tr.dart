@@ -98,7 +98,7 @@ final class TesseraStringsTr extends TesseraStrings {
   String get labelField => 'Etiket';
 
   @override
-  String get countOfFacts => 'Satır sayısı';
+  String get countOfFacts => 'Kayıt sayısı';
 
   @override
   String get sum => 'Toplam';

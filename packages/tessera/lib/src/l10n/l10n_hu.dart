@@ -101,7 +101,7 @@ final class TesseraStringsHu extends TesseraStrings {
   String get labelField => 'Felirat';
 
   @override
-  String get countOfFacts => 'Sorok száma';
+  String get countOfFacts => 'Rekordok száma';
 
   @override
   String get sum => 'Összeg';

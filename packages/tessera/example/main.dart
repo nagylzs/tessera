@@ -27,7 +27,7 @@ Future<void> main(List<String> args) async {
   //    what inference decided and what the import had to fix.
   final result = await loadFacts(source);
   final facts = result.facts;
-  print('${facts.rowCount} facts, ${facts.columns.length} columns:');
+  print('${facts.rowCount} records, ${facts.columns.length} columns:');
   for (final c in facts.columns) {
     print('  ${c.name.padRight(12)} ${c.type.name}');
   }

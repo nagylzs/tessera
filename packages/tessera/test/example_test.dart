@@ -14,7 +14,7 @@ void main() {
         out,
       ]);
       expect(result.exitCode, 0, reason: '${result.stdout}${result.stderr}');
-      expect(result.stdout, contains('1000 facts, 11 columns'));
+      expect(result.stdout, contains('1000 records, 11 columns'));
       expect(result.stdout, contains('Europe'));
       expect(result.stdout, contains('Wrote $out'));
       final lines = File(out).readAsLinesSync();

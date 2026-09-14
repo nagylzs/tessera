@@ -100,7 +100,7 @@ final class TesseraStringsNl extends TesseraStrings {
   String get labelField => 'Label';
 
   @override
-  String get countOfFacts => 'Aantal rijen';
+  String get countOfFacts => 'Aantal records';
 
   @override
   String get sum => 'Som';

@@ -97,7 +97,7 @@ final class TesseraStringsJa extends TesseraStrings {
   String get labelField => 'ラベル';
 
   @override
-  String get countOfFacts => '行数';
+  String get countOfFacts => 'レコード数';
 
   @override
   String get sum => '合計';

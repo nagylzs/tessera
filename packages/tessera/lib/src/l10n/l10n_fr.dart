@@ -103,7 +103,7 @@ final class TesseraStringsFr extends TesseraStrings {
   String get labelField => 'Libellé';
 
   @override
-  String get countOfFacts => 'Nombre de lignes';
+  String get countOfFacts => 'Nombre d\'enregistrements';
 
   @override
   String get sum => 'Somme';

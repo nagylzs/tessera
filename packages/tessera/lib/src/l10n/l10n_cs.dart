@@ -100,7 +100,7 @@ final class TesseraStringsCs extends TesseraStrings {
   String get labelField => 'Popisek';
 
   @override
-  String get countOfFacts => 'Počet řádků';
+  String get countOfFacts => 'Počet záznamů';
 
   @override
   String get sum => 'Součet';

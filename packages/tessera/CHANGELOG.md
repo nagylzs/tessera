@@ -1,5 +1,8 @@
 ## Unreleased
 
+* The count-of-facts function is named "Count of records" in the picker
+  (`countOfFacts`) in every locale — "rows" clashed with the cube's own
+  rows, "facts" is jargon; the header label stays "count".
 * `FactFilter.toExpressionSource()` parenthesizes an `ExpressionFilter`
   inside `and` / `or` / `not`, so its own `or` keeps its precedence.
 * `ValueDisplay`: the ready-made "show values as" choices (`apply(base)`,

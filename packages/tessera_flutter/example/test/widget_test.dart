@@ -29,7 +29,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Tessera — sales.csv'), findsOneWidget);
-      await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
+      await waitFor(tester, find.textContaining('1000 records, 11 columns'));
     });
     expect(find.text('Europe'), findsOneWidget);
     expect(find.text('Total'), findsNWidgets(2));
@@ -50,7 +50,7 @@ void main() {
       await tester.tap(find.text('Simple pivot'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
-      await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
+      await waitFor(tester, find.textContaining('1000 records, 11 columns'));
       expect(find.widgetWithText(InputChip, 'date year'), findsOneWidget);
       await tester.tap(find.byTooltip('Schema…'));
       await tester.pumpAndSettle();
@@ -65,7 +65,7 @@ void main() {
     expect(find.text('dátum year'), findsNWidgets(2)); // chip + corner title
     expect(find.text('date year'), findsNothing);
     // no re-import happened: the report line is the original one
-    expect(find.textContaining('1000 facts, 11 columns'), findsOneWidget);
+    expect(find.textContaining('1000 records, 11 columns'), findsOneWidget);
   });
 
   testWidgets(
@@ -80,7 +80,7 @@ void main() {
         await tester.tap(find.text('Simple pivot'));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 400));
-        await waitFor(tester, find.textContaining('1000 facts, 11 columns'));
+        await waitFor(tester, find.textContaining('1000 records, 11 columns'));
         await tester.tap(find.byTooltip('Schema…'));
         await tester.pumpAndSettle();
         expect(find.byType(SchemaPage), findsOneWidget);
@@ -105,7 +105,7 @@ void main() {
 
         await tester.tap(find.text('Apply'));
         await tester.pumpAndSettle();
-        await waitFor(tester, find.textContaining('1000 facts, 10 columns'));
+        await waitFor(tester, find.textContaining('1000 records, 10 columns'));
       });
       final page = tester.state<State<SalesPage>>(find.byType(SalesPage));
       expect(page, isNotNull);

@@ -101,7 +101,7 @@ final class TesseraStringsRu extends TesseraStrings {
   String get labelField => 'Подпись';
 
   @override
-  String get countOfFacts => 'Количество строк';
+  String get countOfFacts => 'Количество записей';
 
   @override
   String get sum => 'Сумма';

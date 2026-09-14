@@ -97,7 +97,7 @@ final class TesseraStringsZh extends TesseraStrings {
   String get labelField => '标签';
 
   @override
-  String get countOfFacts => '行数';
+  String get countOfFacts => '记录数';
 
   @override
   String get sum => '求和';

@@ -165,7 +165,7 @@ void main() {
       find.byWidgetPredicate((w) => w is DropdownButtonFormField),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Count of facts').last);
+    await tester.tap(find.text('Count of records').last);
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ListTile));
     await tester.pumpAndSettle();

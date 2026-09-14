@@ -481,7 +481,7 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
               child: InkWell(
                 onTap: _showReport,
                 child: Text(
-                  '${facts.rowCount} facts, ${facts.columns.length} columns'
+                  '${facts.rowCount} records, ${facts.columns.length} columns'
                   '${report.widenedColumns.isEmpty ? '' : ', ${report.widenedColumns.length} widened'}'
                   '${report.nullifiedPerColumn.isEmpty ? '' : ', ${report.nullifiedPerColumn.values.fold(0, (a, b) => a + b)} values nullified'}'
                   ' — tap for the import report',
