@@ -41,6 +41,7 @@ blank instead of showing `0`.
 | **Schema / ColumnSpec** | Column types and parsing rules. Inferred from a sample of rows, then adjustable (change a type, exclude a column, supply a date format or a custom parser). |
 | **FactTable** | The imported data: immutable, columnar, dictionary-encoded. All rows live in memory. |
 | **Dimension** | Something you can group by. Derived from a column: the column value itself, a date part (`date.month`), or any mapping function. |
+| **Aggregate** | What a cell shows: `sum`, `average`, `min`, `max`, `count`, `countNonNull`, `distinctCount`, and the variance family `stdDev` / `stdDevPopulation` / `variance` / `variancePopulation` (Excel's STDEV.S / STDEV.P / VAR.S / VAR.P, computed stably in one pass). Implement `Aggregate` for your own, or write a cell formula with `Aggregate.expression`. |
 | **Measure** | A numeric column you aggregate over (`Measure('total')`), or a number computed per fact by an expression (`Measure.expression('quantity * unit_price')`). Any column can be a dimension; numeric ones can also be measures. |
 | **Expression** | A formula in Tessera's small expression language: `total > 100 and region = "Europe"`. Used by `ExpressionFilter`, `Measure.expression`, `ExpressionDimension` and `Aggregate.expression` (a cell formula such as `sum(total) / count`). Parsed, type-checked against the schema and compiled to closures over the columns; see [Expressions](#expressions). |
 | **CubeSpec** | Row axis, column axis (each an ordered list of dimensions), the aggregates to compute, and an optional filter. |
@@ -188,7 +189,8 @@ ExpressionFilter('vat(total) > 10', functions: functions);
 
 Cell formulas (`Aggregate.expression`) refer to aggregates instead of
 columns: `sum(col)`, `avg(col)`, `min(col)`, `max(col)`, `count` (facts),
-`count(col)` (non-empty values) and `distinct(col)`; the engine
+`count(col)` (non-empty values), `stdev(col)`, `stdevp(col)`, `var(col)`,
+`varp(col)` and `distinct(col)`; the engine
 accumulates whatever the formula needs, whether or not the spec lists it,
 and evaluates the formula once per cell.
 

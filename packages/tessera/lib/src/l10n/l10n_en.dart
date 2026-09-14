@@ -21,6 +21,18 @@ final class TesseraStringsEn extends TesseraStrings {
   String maximumOf(String t) => 'max of $t';
 
   @override
+  String stdDevOf(String t) => 'std dev of $t';
+
+  @override
+  String stdDevPopulationOf(String t) => 'population std dev of $t';
+
+  @override
+  String varianceOf(String t) => 'variance of $t';
+
+  @override
+  String variancePopulationOf(String t) => 'population variance of $t';
+
+  @override
   String countOf(String t) => 'count of $t';
 
   @override
@@ -43,6 +55,18 @@ final class TesseraStringsEn extends TesseraStrings {
 
   @override
   String get maximum => 'Maximum';
+
+  @override
+  String get standardDeviation => 'Standard deviation';
+
+  @override
+  String get populationStandardDeviation => 'Population standard deviation';
+
+  @override
+  String get variance => 'Variance';
+
+  @override
+  String get populationVariance => 'Population variance';
 
   @override
   String get countOfValues => 'Count of values';

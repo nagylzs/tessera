@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import '../expr/checker.dart';
@@ -56,6 +57,21 @@ abstract class Aggregate<R> {
   /// Number of facts whose [measure] is not null.
   static CountNonNullAggregate countNonNull(Measure measure) =>
       CountNonNullAggregate(measure);
+
+  /// Sample standard deviation (n − 1 denominator, Excel's `STDEV.S`).
+  static StdDevAggregate stdDev(Measure measure) => StdDevAggregate(measure);
+
+  /// Population standard deviation (n denominator, Excel's `STDEV.P`).
+  static StdDevPopulationAggregate stdDevPopulation(Measure measure) =>
+      StdDevPopulationAggregate(measure);
+
+  /// Sample variance (n − 1 denominator, Excel's `VAR.S`).
+  static VarianceAggregate variance(Measure measure) =>
+      VarianceAggregate(measure);
+
+  /// Population variance (n denominator, Excel's `VAR.P`).
+  static VariancePopulationAggregate variancePopulation(Measure measure) =>
+      VariancePopulationAggregate(measure);
 
   static DistinctCountAggregate distinctCount(Dimension dimension) =>
       DistinctCountAggregate(dimension);
@@ -152,6 +168,74 @@ final class CountNonNullAggregate extends MeasureAggregate<int> {
   @override
   AggregateAccumulator<int> createAccumulator() =>
       _CountNonNullAccumulator(measure);
+}
+
+/// Base of the variance family: one accumulator (count, mean, M2 — Welford
+/// on [AggregateAccumulator.add], Chan's parallel formula on `merge`, so
+/// parents merge children exactly and large means do not cancel), four
+/// results.
+abstract class VarianceFamilyAggregate extends MeasureAggregate<double> {
+  const VarianceFamilyAggregate(super.measure);
+
+  /// Whether the denominator is n − 1 (sample) or n (population).
+  bool get isSample;
+
+  /// Whether the result is the square root of the variance.
+  bool get isStdDev;
+
+  @override
+  AggregateAccumulator<double> createAccumulator() =>
+      _VarianceAccumulator(measure, sample: isSample, root: isStdDev);
+}
+
+/// Sample standard deviation of non-null values; `null` with fewer than
+/// two values.
+final class StdDevAggregate extends VarianceFamilyAggregate {
+  const StdDevAggregate(super.measure);
+
+  @override
+  String get function => 'stdev';
+  @override
+  bool get isSample => true;
+  @override
+  bool get isStdDev => true;
+}
+
+/// Population standard deviation of non-null values; `null` with no
+/// value.
+final class StdDevPopulationAggregate extends VarianceFamilyAggregate {
+  const StdDevPopulationAggregate(super.measure);
+
+  @override
+  String get function => 'stdevp';
+  @override
+  bool get isSample => false;
+  @override
+  bool get isStdDev => true;
+}
+
+/// Sample variance of non-null values; `null` with fewer than two values.
+final class VarianceAggregate extends VarianceFamilyAggregate {
+  const VarianceAggregate(super.measure);
+
+  @override
+  String get function => 'var';
+  @override
+  bool get isSample => true;
+  @override
+  bool get isStdDev => false;
+}
+
+/// Population variance of non-null values; `null` with no value.
+final class VariancePopulationAggregate extends VarianceFamilyAggregate {
+  const VariancePopulationAggregate(super.measure);
+
+  @override
+  String get function => 'varp';
+  @override
+  bool get isSample => false;
+  @override
+  bool get isStdDev => false;
 }
 
 /// Number of facts. Never `null`; `0` for an empty cell.
@@ -265,6 +349,56 @@ final class _ExtremumAccumulator extends AggregateAccumulator<double> {
 
   @override
   double? get result => value;
+}
+
+final class _VarianceAccumulator extends AggregateAccumulator<double> {
+  _VarianceAccumulator(
+    this.measure, {
+    required this.sample,
+    required this.root,
+  });
+  final Measure measure;
+  final bool sample;
+  final bool root;
+  int count = 0;
+  double mean = 0;
+
+  /// Sum of squared deviations from the running mean.
+  double m2 = 0;
+
+  @override
+  void add(FactTable facts, int row) {
+    final v = facts.measureValue(row, measure);
+    if (v == null) return;
+    count++;
+    final delta = v - mean;
+    mean += delta / count;
+    m2 += delta * (v - mean);
+  }
+
+  @override
+  void merge(_VarianceAccumulator other) {
+    if (other.count == 0) return;
+    if (count == 0) {
+      count = other.count;
+      mean = other.mean;
+      m2 = other.m2;
+      return;
+    }
+    final n = count + other.count;
+    final delta = other.mean - mean;
+    m2 += other.m2 + delta * delta * count * other.count / n;
+    mean += delta * other.count / n;
+    count = n;
+  }
+
+  @override
+  double? get result {
+    final denominator = sample ? count - 1 : count;
+    if (denominator < 1) return null;
+    final variance = m2 / denominator;
+    return root ? math.sqrt(variance) : variance;
+  }
 }
 
 final class _CountNonNullAccumulator extends AggregateAccumulator<int> {

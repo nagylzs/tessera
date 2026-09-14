@@ -21,6 +21,18 @@ final class TesseraStringsJa extends TesseraStrings {
   String maximumOf(String t) => '$tの最大値';
 
   @override
+  String stdDevOf(String t) => '$tの標準偏差';
+
+  @override
+  String stdDevPopulationOf(String t) => '$tの母標準偏差';
+
+  @override
+  String varianceOf(String t) => '$tの分散';
+
+  @override
+  String variancePopulationOf(String t) => '$tの母分散';
+
+  @override
   String countOf(String t) => '$tの件数';
 
   @override
@@ -43,6 +55,18 @@ final class TesseraStringsJa extends TesseraStrings {
 
   @override
   String get maximum => '最大値';
+
+  @override
+  String get standardDeviation => '標準偏差';
+
+  @override
+  String get populationStandardDeviation => '母標準偏差';
+
+  @override
+  String get variance => '分散';
+
+  @override
+  String get populationVariance => '母分散';
 
   @override
   String get countOfValues => '値の件数';

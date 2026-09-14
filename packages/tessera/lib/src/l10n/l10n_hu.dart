@@ -21,6 +21,18 @@ final class TesseraStringsHu extends TesseraStrings {
   String maximumOf(String t) => '$t maximuma';
 
   @override
+  String stdDevOf(String t) => '$t szórása';
+
+  @override
+  String stdDevPopulationOf(String t) => '$t sokasági szórása';
+
+  @override
+  String varianceOf(String t) => '$t varianciája';
+
+  @override
+  String variancePopulationOf(String t) => '$t sokasági varianciája';
+
+  @override
   String countOf(String t) => '$t darabszáma';
 
   @override
@@ -43,6 +55,18 @@ final class TesseraStringsHu extends TesseraStrings {
 
   @override
   String get maximum => 'Maximum';
+
+  @override
+  String get standardDeviation => 'Szórás';
+
+  @override
+  String get populationStandardDeviation => 'Sokasági szórás';
+
+  @override
+  String get variance => 'Variancia';
+
+  @override
+  String get populationVariance => 'Sokasági variancia';
 
   @override
   String get countOfValues => 'Értékek száma';

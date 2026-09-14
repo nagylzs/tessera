@@ -21,6 +21,19 @@ final class TesseraStringsNl extends TesseraStrings {
   String maximumOf(String t) => 'maximum van $t';
 
   @override
+  String stdDevOf(String t) => 'standaardafwijking van $t';
+
+  @override
+  String stdDevPopulationOf(String t) =>
+      'standaardafwijking (populatie) van $t';
+
+  @override
+  String varianceOf(String t) => 'variantie van $t';
+
+  @override
+  String variancePopulationOf(String t) => 'variantie (populatie) van $t';
+
+  @override
   String countOf(String t) => 'aantal van $t';
 
   @override
@@ -43,6 +56,18 @@ final class TesseraStringsNl extends TesseraStrings {
 
   @override
   String get maximum => 'Maximum';
+
+  @override
+  String get standardDeviation => 'Standaardafwijking';
+
+  @override
+  String get populationStandardDeviation => 'Standaardafwijking (populatie)';
+
+  @override
+  String get variance => 'Variantie';
+
+  @override
+  String get populationVariance => 'Variantie (populatie)';
 
   @override
   String get countOfValues => 'Aantal waarden';

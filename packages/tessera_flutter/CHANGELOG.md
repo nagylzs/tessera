@@ -1,3 +1,8 @@
+## Unreleased
+
+* The aggregate picker's function dropdown expands to the dialog width
+  and ellipsizes long names (the new variance family labels).
+
 ## 0.1.1
 
 * README: the status note no longer says the package is unpublished.

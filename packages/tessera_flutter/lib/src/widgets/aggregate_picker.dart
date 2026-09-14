@@ -82,6 +82,7 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: DropdownButtonFormField<AggregateKind>(
                 initialValue: _kind,
+                isExpanded: true,
                 decoration: InputDecoration(
                   isDense: true,
                   labelText: strings.function,
@@ -90,7 +91,10 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
                   for (final k in AggregateKind.values)
                     DropdownMenuItem(
                       value: k,
-                      child: Text(strings.aggregateKindLabel(k)),
+                      child: Text(
+                        strings.aggregateKindLabel(k),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                 ],
                 onChanged: (k) => setState(() => _kind = k!),

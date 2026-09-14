@@ -341,6 +341,10 @@ final class _Checker {
     'max',
     'count',
     'distinct',
+    'stdev',
+    'stdevp',
+    'var',
+    'varp',
   };
 
   ExprType? _call(CallExpr e) {
@@ -478,6 +482,10 @@ Aggregate? aggregateOfShape(String name, String? column) {
     'min' => Aggregate.min(m),
     'max' => Aggregate.max(m),
     'count' => Aggregate.countNonNull(m),
+    'stdev' => Aggregate.stdDev(m),
+    'stdevp' => Aggregate.stdDevPopulation(m),
+    'var' => Aggregate.variance(m),
+    'varp' => Aggregate.variancePopulation(m),
     'distinct' => Aggregate.distinctCount(ColumnDimension(column)),
     _ => null,
   };

@@ -21,6 +21,18 @@ final class TesseraStringsCs extends TesseraStrings {
   String maximumOf(String t) => 'maximum: $t';
 
   @override
+  String stdDevOf(String t) => 'směrodatná odchylka: $t';
+
+  @override
+  String stdDevPopulationOf(String t) => 'směrodatná odchylka (populace): $t';
+
+  @override
+  String varianceOf(String t) => 'rozptyl: $t';
+
+  @override
+  String variancePopulationOf(String t) => 'rozptyl (populace): $t';
+
+  @override
   String countOf(String t) => 'počet: $t';
 
   @override
@@ -43,6 +55,18 @@ final class TesseraStringsCs extends TesseraStrings {
 
   @override
   String get maximum => 'Maximum';
+
+  @override
+  String get standardDeviation => 'Směrodatná odchylka';
+
+  @override
+  String get populationStandardDeviation => 'Směrodatná odchylka (populace)';
+
+  @override
+  String get variance => 'Rozptyl';
+
+  @override
+  String get populationVariance => 'Rozptyl (populace)';
 
   @override
   String get countOfValues => 'Počet hodnot';

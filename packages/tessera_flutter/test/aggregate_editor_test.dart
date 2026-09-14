@@ -141,6 +141,9 @@ void main() {
   });
 
   testWidgets('the picker offers count and distinct count', (tester) async {
+    // 11 kinds do not fit the default 600 px dropdown menu
+    tester.view.physicalSize = const Size(2400, 3600);
+    addTearDown(tester.view.resetPhysicalSize);
     await tester.pumpWidget(host());
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();

@@ -21,6 +21,18 @@ final class TesseraStringsTr extends TesseraStrings {
   String maximumOf(String t) => '$t maksimumu';
 
   @override
+  String stdDevOf(String t) => '$t standart sapması';
+
+  @override
+  String stdDevPopulationOf(String t) => '$t popülasyon standart sapması';
+
+  @override
+  String varianceOf(String t) => '$t varyansı';
+
+  @override
+  String variancePopulationOf(String t) => '$t popülasyon varyansı';
+
+  @override
   String countOf(String t) => '$t sayısı';
 
   @override
@@ -43,6 +55,18 @@ final class TesseraStringsTr extends TesseraStrings {
 
   @override
   String get maximum => 'Maksimum';
+
+  @override
+  String get standardDeviation => 'Standart sapma';
+
+  @override
+  String get populationStandardDeviation => 'Popülasyon standart sapması';
+
+  @override
+  String get variance => 'Varyans';
+
+  @override
+  String get populationVariance => 'Popülasyon varyansı';
 
   @override
   String get countOfValues => 'Değer sayısı';

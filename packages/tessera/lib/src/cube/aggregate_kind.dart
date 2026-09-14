@@ -10,12 +10,24 @@ enum AggregateKind {
   min,
   max,
   countNonNull,
+  stdDev,
+  stdDevPopulation,
+  variance,
+  variancePopulation,
   distinctCount,
   count;
 
   /// Whether [build] needs a [Measure].
   bool get needsMeasure => switch (this) {
-    sum || average || min || max || countNonNull => true,
+    sum ||
+    average ||
+    min ||
+    max ||
+    countNonNull ||
+    stdDev ||
+    stdDevPopulation ||
+    variance ||
+    variancePopulation => true,
     distinctCount || count => false,
   };
 
@@ -28,6 +40,10 @@ enum AggregateKind {
     min => Aggregate.min(measure!),
     max => Aggregate.max(measure!),
     countNonNull => Aggregate.countNonNull(measure!),
+    stdDev => Aggregate.stdDev(measure!),
+    stdDevPopulation => Aggregate.stdDevPopulation(measure!),
+    variance => Aggregate.variance(measure!),
+    variancePopulation => Aggregate.variancePopulation(measure!),
     distinctCount => Aggregate.distinctCount(dimension!),
     count => Aggregate.count,
   };

@@ -1,5 +1,11 @@
 ## Unreleased
 
+* Statistical aggregates: `Aggregate.stdDev` / `stdDevPopulation` /
+  `variance` / `variancePopulation` (Excel's STDEV.S / STDEV.P / VAR.S /
+  VAR.P; one Welford accumulator, merged with Chan's formula so parents
+  are exact and large means do not cancel), `AggregateKind` entries, cell
+  formula names `stdev`, `stdevp`, `var`, `varp`, and strings
+  `stdDevOf` … `populationVariance` in every locale.
 * Expression language: `Expression` (parse, `check`, `validate`,
   `compile`), `ExpressionScope` (row or cell scope over a `FactTable` or
   `Schema`), `ExpressionError` (kind, source range, arguments),

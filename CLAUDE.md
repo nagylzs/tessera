@@ -273,7 +273,12 @@ Paths below are relative to the package (`lib/src/...` means
   `copyWith`), `AxisTree`/`AxisNode` (visible groups only — children exist
   only under expanded nodes), one pass over the facts into leaf cells, then
   row roll-up and column roll-up via `Accumulator.merge`, then ordering
-  (`AxisSort`) and summary placement. All built-in accumulators done.
+  (`AxisSort`) and summary placement. All built-in accumulators done,
+  including the variance family (`VarianceFamilyAggregate`: one
+  `_VarianceAccumulator` with count/mean/M2, Welford add, Chan merge;
+  sample results null below two values; `stdev`/`stdevp`/`var`/`varp`
+  also as cell-formula names). Median/percentiles are out by design
+  (cells never store row lists).
 - Widget-prep API (from the reference screenshots in the owner's pivot
   app): `AxisSort.keyPath` (sort by the aggregate in a specific cross-axis
   group; falls back to the summary when not visible), `HeaderEntry.childCount`

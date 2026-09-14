@@ -21,6 +21,18 @@ final class TesseraStringsZh extends TesseraStrings {
   String maximumOf(String t) => '$t的最大值';
 
   @override
+  String stdDevOf(String t) => '$t的标准差';
+
+  @override
+  String stdDevPopulationOf(String t) => '$t的总体标准差';
+
+  @override
+  String varianceOf(String t) => '$t的方差';
+
+  @override
+  String variancePopulationOf(String t) => '$t的总体方差';
+
+  @override
   String countOf(String t) => '$t的计数';
 
   @override
@@ -43,6 +55,18 @@ final class TesseraStringsZh extends TesseraStrings {
 
   @override
   String get maximum => '最大值';
+
+  @override
+  String get standardDeviation => '标准差';
+
+  @override
+  String get populationStandardDeviation => '总体标准差';
+
+  @override
+  String get variance => '方差';
+
+  @override
+  String get populationVariance => '总体方差';
 
   @override
   String get countOfValues => '值计数';

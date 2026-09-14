@@ -31,6 +31,13 @@ abstract class TesseraStrings {
   String minimumOf(String target);
   String maximumOf(String target);
 
+  /// "std dev of Revenue" (sample) and the population, variance and
+  /// population-variance twins.
+  String stdDevOf(String target);
+  String stdDevPopulationOf(String target);
+  String varianceOf(String target);
+  String variancePopulationOf(String target);
+
   /// Count of non-null values of [target].
   String countOf(String target);
   String distinctCountOf(String target);
@@ -45,6 +52,10 @@ abstract class TesseraStrings {
   String get average;
   String get minimum;
   String get maximum;
+  String get standardDeviation;
+  String get populationStandardDeviation;
+  String get variance;
+  String get populationVariance;
   String get countOfValues;
   String get distinctCount;
 
@@ -123,21 +134,29 @@ abstract class TesseraStrings {
 
   /// Label of an aggregate: built-in ones are composed from the column
   /// label with this locale's rules; custom ones use [Aggregate.labelFor].
-  String aggregateLabel(Aggregate aggregate, FactTable facts) =>
-      switch (aggregate) {
-        SumAggregate(:final measure) => sumOf(measure.labelFor(facts)),
-        AverageAggregate(:final measure) => averageOf(measure.labelFor(facts)),
-        MinAggregate(:final measure) => minimumOf(measure.labelFor(facts)),
-        MaxAggregate(:final measure) => maximumOf(measure.labelFor(facts)),
-        CountNonNullAggregate(:final measure) => countOf(
-          measure.labelFor(facts),
-        ),
-        DistinctCountAggregate(:final dimension) => distinctCountOf(
-          dimensionLabel(dimension, facts),
-        ),
-        CountAggregate() => countLabel,
-        _ => aggregate.labelFor(facts),
-      };
+  String aggregateLabel(
+    Aggregate aggregate,
+    FactTable facts,
+  ) => switch (aggregate) {
+    SumAggregate(:final measure) => sumOf(measure.labelFor(facts)),
+    AverageAggregate(:final measure) => averageOf(measure.labelFor(facts)),
+    MinAggregate(:final measure) => minimumOf(measure.labelFor(facts)),
+    MaxAggregate(:final measure) => maximumOf(measure.labelFor(facts)),
+    StdDevAggregate(:final measure) => stdDevOf(measure.labelFor(facts)),
+    StdDevPopulationAggregate(:final measure) => stdDevPopulationOf(
+      measure.labelFor(facts),
+    ),
+    VarianceAggregate(:final measure) => varianceOf(measure.labelFor(facts)),
+    VariancePopulationAggregate(:final measure) => variancePopulationOf(
+      measure.labelFor(facts),
+    ),
+    CountNonNullAggregate(:final measure) => countOf(measure.labelFor(facts)),
+    DistinctCountAggregate(:final dimension) => distinctCountOf(
+      dimensionLabel(dimension, facts),
+    ),
+    CountAggregate() => countLabel,
+    _ => aggregate.labelFor(facts),
+  };
 
   String aggregateKindLabel(AggregateKind kind) => switch (kind) {
     AggregateKind.sum => sum,
@@ -145,6 +164,10 @@ abstract class TesseraStrings {
     AggregateKind.min => minimum,
     AggregateKind.max => maximum,
     AggregateKind.countNonNull => countOfValues,
+    AggregateKind.stdDev => standardDeviation,
+    AggregateKind.stdDevPopulation => populationStandardDeviation,
+    AggregateKind.variance => variance,
+    AggregateKind.variancePopulation => populationVariance,
     AggregateKind.distinctCount => distinctCount,
     AggregateKind.count => countOfFacts,
   };
