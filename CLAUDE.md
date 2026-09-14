@@ -172,7 +172,12 @@ the engine first, dependents after pub.dev serves it (seconds; new
 belong to the publisher, so no transfer is needed for later versions.
 pub.dev shows the README/CHANGELOG *from the uploaded archive* and never
 re-reads them — finish every doc edit and commit before publishing
-(0.1.1 of tessera/tessera_flutter exists only because of this).
+(0.1.1 of tessera/tessera_flutter exists only because of this). After
+each upload, tag the commit it was built from — one annotated tag per
+package, `<package>-<version>` (e.g. `tessera_xlsx-0.1.0`), `git push
+--tags`. No `dev` branch: `main` may carry unreleased work because
+releases are the tags; use short-lived feature branches for big changes
+and branch from a tag for a hotfix.
 
 ## Commands
 
