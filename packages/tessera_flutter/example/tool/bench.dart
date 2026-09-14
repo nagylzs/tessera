@@ -57,4 +57,48 @@ Future<void> main(List<String> args) async {
   cube.layout;
   print('toggle:      ${sw.elapsedMilliseconds} ms');
   print('rss: ${(ProcessInfo.currentRss / 1e6).toStringAsFixed(0)} MB');
+
+  // Expressions: one pass per fact each, results cached afterwards.
+  sw = Stopwatch()..start();
+  Cube(
+    facts: facts,
+    spec: spec.copyWith(
+      filter: () => ExpressionFilter(
+        'total > 100 and region = "Europe" and year(date) = 2024',
+      ),
+    ),
+  ).layout;
+  print('expr filter: ${sw.elapsedMilliseconds} ms  (filter scan + cube)');
+
+  sw = Stopwatch()..start();
+  final net = Measure.expression(
+    'quantity * unit_price * (1 - coalesce(discount, 0))',
+    label: 'net',
+  );
+  Cube(
+    facts: facts,
+    spec: spec.copyWith(aggregates: [Aggregate.sum(net)]),
+  ).layout;
+  print('expr measure: ${sw.elapsedMilliseconds} ms  (materialize + cube)');
+
+  sw = Stopwatch()..start();
+  Cube(
+    facts: facts,
+    spec: spec.copyWith(
+      rows: CubeAxis.of([
+        ExpressionDimension('if(total > 100, "big", "small")', label: 'size'),
+        country,
+      ]),
+    ),
+  ).layout;
+  print('expr dimension: ${sw.elapsedMilliseconds} ms  (materialize + cube)');
+
+  sw = Stopwatch()..start();
+  Cube(
+    facts: facts,
+    spec: spec.copyWith(
+      aggregates: [Aggregate.expression('sum(total) / count', label: 'avg')],
+    ),
+  ).layout;
+  print('expr aggregate: ${sw.elapsedMilliseconds} ms  (cube)');
 }

@@ -19,6 +19,18 @@
 ///    [AxisGeometry] resolves the merged header cells of an axis for
 ///    renderers (the Flutter grid, exporters).
 ///
+/// Filters, calculated measures, computed dimensions and cell formulas
+/// share the expression language: [Expression] parses a formula such as
+/// `total > 100 and region = "Europe"`, [ExpressionScope] and
+/// [Expression.check] resolve names and types against the schema (errors
+/// are [ExpressionError]s with a source range), [FunctionRegistry] adds
+/// application functions, and the engine compiles the result to closures
+/// over the fact table's columns. [ExpressionFilter], [ExpressionMeasure]
+/// (`Measure.expression`), [ExpressionDimension] and [ExpressionAggregate]
+/// (`Aggregate.expression`, a [DerivedAggregate] computed per cell) are
+/// the plug points; the structured [CompareFilter], [RangeFilter],
+/// [TextFilter] and [EmptyFilter] render to expressions too.
+///
 /// [CubeGrid] lays a [CubeLayout] out as a rectangular grid (the way the
 /// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
 /// as CSV, `tessera_xlsx` as a workbook. [CubeExportTheme] is the
@@ -48,6 +60,15 @@ export 'src/export/cube_export_theme.dart';
 export 'src/export/cube_grid.dart';
 export 'src/export/grid_metrics.dart';
 export 'src/export/grid_pagination.dart';
+export 'src/expr/ast.dart';
+export 'src/expr/checker.dart';
+export 'src/expr/compiler.dart'
+    show BoolFn, CompiledExpression, NumberFn, TextFn, datePartOf;
+export 'src/expr/expr_type.dart';
+export 'src/expr/expression.dart';
+export 'src/expr/expression_error.dart';
+export 'src/expr/functions.dart';
+export 'src/expr/parser.dart' show parseDateLiteral;
 export 'src/facts/dimension.dart';
 export 'src/facts/fact_table.dart';
 export 'src/facts/importer.dart';

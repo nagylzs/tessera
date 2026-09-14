@@ -41,8 +41,10 @@ blank instead of showing `0`.
 | **Schema / ColumnSpec** | Column types and parsing rules. Inferred from a sample of rows, then adjustable (change a type, exclude a column, supply a date format or a custom parser). |
 | **FactTable** | The imported data: immutable, columnar, dictionary-encoded. All rows live in memory. |
 | **Dimension** | Something you can group by. Derived from a column: the column value itself, a date part (`date.month`), or any mapping function. |
-| **Measure** | A numeric column you aggregate over. Any column can be a dimension; numeric ones can also be measures. |
+| **Measure** | A numeric column you aggregate over (`Measure('total')`), or a number computed per fact by an expression (`Measure.expression('quantity * unit_price')`). Any column can be a dimension; numeric ones can also be measures. |
+| **Expression** | A formula in Tessera's small expression language: `total > 100 and region = "Europe"`. Used by `ExpressionFilter`, `Measure.expression`, `ExpressionDimension` and `Aggregate.expression` (a cell formula such as `sum(total) / count`). Parsed, type-checked against the schema and compiled to closures over the columns; see [Expressions](#expressions). |
 | **CubeSpec** | Row axis, column axis (each an ordered list of dimensions), the aggregates to compute, and an optional filter. |
+| **FactFilter** | Which facts the cube sees. Structured filters (`ValueFilter`, `CompareFilter`, `RangeFilter`, `TextFilter`, `EmptyFilter`, combined with `AndFilter` / `OrFilter` / `NotFilter`) are plain data that render to an expression; `ExpressionFilter` takes any boolean expression; `PredicateFilter` wraps a Dart function. |
 | **CubeGrid** | A layout as a rectangular grid of cells (labels, values, merged areas) — what exporters render. |
 | **CubeExportTheme** | Fills, fonts and number format of an exported document, as plain ints — shared by the CSV/XLSX/… exporters. |
 | **CsvCubeExporter** | Writes a layout as CSV text (`export` returns a `String`; `writeTo` streams into a sink). The `tessera_xlsx`, `tessera_ods`, `tessera_html`, `tessera_svg` and `tessera_pdf` packages do the same for their formats. |
@@ -117,6 +119,86 @@ final result = await loadFactsInIsolate(
 The source is sent to the worker isolate, so it must be sendable — plain
 data (`CsvDataSource.fromData(bytes)`) or a `File` work; a live stream does
 not.
+
+## Expressions
+
+Filters, calculated measures, computed dimensions and cell formulas share
+one small, side-effect free expression language, meant for people who
+write spreadsheet formulas or SQL `WHERE` clauses:
+
+```dart
+// facts where the expression is true (unknown, e.g. an empty total, excludes the fact)
+filter: ExpressionFilter('total > 100 and region = "Europe" and year(date) = 2024')
+
+// a number computed per fact, aggregated like a stored column
+Aggregate.sum(Measure.expression('quantity * unit_price * (1 - coalesce(discount, 0))', label: 'net'))
+
+// a value computed per fact, grouped like a stored column
+ExpressionDimension('if(total > 100, "big", "small")', label: 'size')
+
+// a number computed per cell from the cell's aggregates
+Aggregate.expression('sum(total) / count', label: 'per sale')
+```
+
+Grammar, loosest binding first: `or`; `and`; `not`; comparisons `=`
+(`==`), `<>` (`!=`), `<`, `<=`, `>`, `>=`, `x [not] in (a, b, …)`,
+`x [not] between low and high` (inclusive), `x is [not] empty`;
+`+`, `-`; `*`, `/`, `%`; unary `-`; then literals, names, calls and
+parentheses. Keywords and function names are case-insensitive; column
+names are not, and a name with spaces, punctuation or a keyword's spelling
+is written in brackets: `[unit price]`, `[and]`. Literals: numbers with a
+`.` decimal point (`1.5`, `2e3`), text in double or single quotes with the
+quote doubled to escape (`"say ""hi"""`), `true`, `false`, `null`, and
+dates as `#2024-01-31#` or `#2024-01-31 10:30:00#` (UTC, like every date in
+a fact table).
+
+Types are `number`, `text`, `boolean` and `date`, every one nullable, and
+they are checked before anything runs: an unknown column, `qty + region`
+or `year(qty)` is an `ExpressionError` with the offending range, which an
+editor can show while the user types (`Expression.validate(source, scope:
+ExpressionScope.ofSchema(schema), expected: ExprType.boolean)`). Empty
+values follow SQL: arithmetic and comparisons with an empty operand are
+empty, `and` / `or` use the three-valued truth tables, a filter keeps a
+fact only when the expression is `true`, and `x is empty`, `isempty(x)`
+and `coalesce(a, b, …)` are the ways to test for and replace them. Dates
+support `date + n` / `date - n` (days) and `date - date` (a number of
+days); text comparisons are case-sensitive (`lower()` for the other
+behaviour); `/` and `%` by zero give empty.
+
+Built-in functions: `if(cond, a, b)`, `coalesce(a, …)`, `isempty(x)`;
+`abs`, `round(n[, digits])`, `floor`, `ceil`, `sqrt`, `min(n, …)`,
+`max(n, …)`, `number(text)`; `len`, `lower`, `upper`, `trim`, `left(t, n)`,
+`right(t, n)`, `substring(t, start[, length])` (1-based), `contains`,
+`startswith`, `endswith`, `replace(t, from, to)`, `concat(t, …)`,
+`text(number | date | boolean)`; `year`, `quarter`, `month`, `week` (ISO),
+`day`, `weekday` (1 = Monday), `hour`, `date(text)`, `date(y, m, d)`,
+`today()`. An application adds its own with a `FunctionRegistry`:
+
+```dart
+final functions = FunctionRegistry.standard().withFunction(
+  ExpressionFunction(
+    'vat',
+    parameters: [ExprType.number],
+    returns: ExprType.number,
+    implementation: (args) => (args[0] as double?) == null ? null : (args[0] as double) * 0.27,
+  ),
+);
+ExpressionFilter('vat(total) > 10', functions: functions);
+```
+
+Cell formulas (`Aggregate.expression`) refer to aggregates instead of
+columns: `sum(col)`, `avg(col)`, `min(col)`, `max(col)`, `count` (facts),
+`count(col)` (non-empty values) and `distinct(col)`; the engine
+accumulates whatever the formula needs, whether or not the spec lists it,
+and evaluates the formula once per cell.
+
+The language has no loops, assignments or I/O, so expressions typed by a
+user cannot do harm. Expressions are compiled to closures that read the
+fact table's typed arrays directly, are evaluated once per fact per cube
+build (filters) or once per fact table (calculated measures and
+dimensions, whose values are then stored like a column), and their
+canonical text form (`Expression.parse(s).canonicalSource`,
+`FactFilter.toExpressionSource()`) is what an application saves.
 
 ## Example
 

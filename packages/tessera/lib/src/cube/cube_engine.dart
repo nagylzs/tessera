@@ -33,8 +33,8 @@ final class DimensionCodes {
     final index = {for (var i = 0; i < values.length; i++) values[i]: i};
     final codes = Int32List(facts.rowCount);
     // Fast path: a plain text column is already dictionary encoded.
-    if (dimension is ColumnDimension && facts is FactTableImpl) {
-      final column = facts.column(dimension.sourceColumn);
+    if (facts is FactTableImpl) {
+      final column = facts.plainColumnOf(dimension);
       if (column is TextColumn) {
         final remap = Int32List(column.dictionary.length);
         for (var c = 0; c < remap.length; c++) {
@@ -77,14 +77,55 @@ final class CubeCache {
       }
     } else {
       final list = <int>[];
+      final test = filter.compile(facts);
       for (var r = 0; r < facts.rowCount; r++) {
-        if (filter.matches(facts, r)) list.add(r);
+        if (test(r)) list.add(r);
       }
       rows = Int32List.fromList(list);
     }
     _filterKey = filter;
     return _filtered = rows;
   }
+}
+
+/// The aggregates the engine accumulates for [spec]: the spec's own
+/// non-derived ones plus the dependencies of its [DerivedAggregate]s, each
+/// once, in first-use order.
+List<Aggregate> accumulatedAggregates(List<Aggregate> aggregates) {
+  final out = <Aggregate>[];
+  void add(Aggregate a) {
+    if (a is DerivedAggregate) {
+      a.dependencies.forEach(add);
+    } else if (!out.contains(a)) {
+      out.add(a);
+    }
+  }
+
+  aggregates.forEach(add);
+  return List.unmodifiable(out);
+}
+
+/// The result of [aggregate] in [data] (`null` data = empty cell), where
+/// [accumulated] lists the accumulators' aggregates in order. Derived
+/// aggregates are computed from their dependencies.
+Object? resultOf(
+  CellData? data,
+  Aggregate aggregate,
+  List<Aggregate> accumulated,
+) {
+  if (aggregate is DerivedAggregate) {
+    return aggregate.compute((dep) => resultOf(data, dep, accumulated));
+  }
+  final index = accumulated.indexOf(aggregate);
+  if (index < 0) {
+    throw ArgumentError.value(
+      aggregate.id,
+      'aggregate',
+      'not among the cube\'s aggregates',
+    );
+  }
+  if (data == null) return aggregate.createAccumulator().result;
+  return data.accumulators[index].result;
 }
 
 /// Accumulated state of one cell.
@@ -281,19 +322,14 @@ final class AxisTree {
         ];
       } else {
         final aggregate = sort.aggregate!;
-        final index = aggregates.indexOf(aggregate);
-        if (index < 0) {
-          throw ArgumentError.value(
-            aggregate.id,
-            'sort.aggregate',
-            'not among the cube\'s aggregates',
-          );
-        }
         final keyPath = sort.keyPath;
         final keyNode =
             (keyPath == null ? null : other.resolve(keyPath)) ?? other.root;
-        Object? keyOf(AxisNode c) =>
-            cellOf(c, keyNode)?.accumulators[index].result;
+        Object? keyOf(AxisNode c) {
+          final data = cellOf(c, keyNode);
+          return data == null ? null : resultOf(data, aggregate, aggregates);
+        }
+
         // Only the key comparison follows the direction; ties stay in
         // ascending value order either way.
         int compare(AxisNode a, AxisNode b) {
@@ -372,7 +408,10 @@ CubeLayoutImpl computeLayout({
   final colTree = AxisTree(spec.columns, [
     for (final d in spec.columns.dimensions) cache.codesFor(facts, d.dimension),
   ])..applyExpansion(columnExpansion);
-  final aggregates = spec.aggregates;
+  for (final a in spec.aggregates) {
+    if (a is DerivedAggregate) a.prepare(facts);
+  }
+  final aggregates = accumulatedAggregates(spec.aggregates);
 
   // Pass over the facts: every fact lands in exactly one leaf cell.
   for (final r in rows) {
@@ -419,6 +458,7 @@ CubeLayoutImpl computeLayout({
   return CubeLayoutImpl(
     facts: facts,
     spec: spec,
+    accumulated: aggregates,
     filteredRows: rows,
     rowTree: rowTree,
     colTree: colTree,
@@ -642,17 +682,15 @@ final class CubeCellImpl implements CubeCell {
 
   @override
   R? aggregate<R>(Aggregate<R> aggregate) {
-    final index = layout.spec.aggregates.indexOf(aggregate);
-    if (index < 0) {
+    if (!layout.spec.aggregates.contains(aggregate) &&
+        !layout.accumulated.contains(aggregate)) {
       throw ArgumentError.value(
         aggregate.id,
         'aggregate',
         'not among the cube\'s aggregates',
       );
     }
-    final d = data;
-    if (d == null) return aggregate.createAccumulator().result;
-    return d.accumulators[index].result as R?;
+    return resultOf(data, aggregate, layout.accumulated) as R?;
   }
 
   @override
@@ -677,6 +715,7 @@ final class CubeLayoutImpl implements CubeLayout {
   CubeLayoutImpl({
     required this.facts,
     required this.spec,
+    required this.accumulated,
     required this.filteredRows,
     required this.rowTree,
     required this.colTree,
@@ -692,6 +731,10 @@ final class CubeLayoutImpl implements CubeLayout {
 
   @override
   final CubeSpec spec;
+
+  /// The aggregates behind the cells' accumulators, see
+  /// [accumulatedAggregates].
+  final List<Aggregate> accumulated;
 
   @override
   final AxisLayoutImpl rows;

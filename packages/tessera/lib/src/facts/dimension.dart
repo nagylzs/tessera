@@ -1,4 +1,7 @@
+import '../expr/expression.dart';
+import '../expr/functions.dart';
 import 'fact_table.dart';
+import 'fact_table_impl.dart';
 
 /// Compares two dimension values with `null` ordered first.
 ///
@@ -52,6 +55,10 @@ sealed class Dimension {
 
   /// Name of the [FactTable] column this dimension reads.
   String get sourceColumn;
+
+  /// Every column the dimension reads; `[sourceColumn]` except for an
+  /// [ExpressionDimension].
+  List<String> get sourceColumns => [sourceColumn];
 
   /// Computes the dimension value from the raw column value. `null` in means
   /// `null` out: a missing source value always lands in the empty group.
@@ -220,4 +227,59 @@ final class MappedDimension extends Dimension {
   @override
   String formatValue(Object? value) =>
       _format?.call(value) ?? super.formatValue(value);
+}
+
+/// A dimension whose value is computed per fact by an expression over the
+/// columns: `if(total > 100, "big", "small")`, `year(date) * 100 +
+/// month(date)`, `upper(left(country, 1))`.
+///
+/// The expression may have any type; its values are computed once per fact
+/// table (on first use) and grouped like a stored column. A parse error is
+/// thrown by the constructor; an unknown column or other type error
+/// surfaces when the dimension first meets the fact table, as an
+/// [ExpressionError] — validate beforehand with [Expression.validate] in
+/// `ExpressionScope.ofFacts(facts)`.
+final class ExpressionDimension extends Dimension {
+  ExpressionDimension(this.source, {this._id, this._label, this.functions})
+    : expression = Expression.parse(source);
+
+  final String source;
+  final Expression expression;
+
+  /// Functions beyond the built-in ones the expression may call.
+  final FunctionRegistry? functions;
+  final String? _id;
+  final String? _label;
+
+  /// [source] unless an id was given.
+  @override
+  String get id => _id ?? source;
+
+  @override
+  String? get explicitLabel => _label;
+
+  @override
+  String get label => _label ?? source;
+
+  @override
+  String labelFor(FactTable facts) => label;
+
+  /// The columns the expression reads, in name order.
+  @override
+  late final List<String> sourceColumns = List.unmodifiable(
+    expression.names.toList()..sort(),
+  );
+
+  /// The first of [sourceColumns], or `''` for a constant expression.
+  @override
+  String get sourceColumn => sourceColumns.isEmpty ? '' : sourceColumns.first;
+
+  /// The value is computed by the fact table; this is the identity.
+  @override
+  Object? valueOf(Object? columnValue) => columnValue;
+
+  /// Numbers without a spurious `.0`, dates as `yyyy-MM-dd`.
+  @override
+  String formatValue(Object? value) =>
+      value == null ? '' : ColumnBuilder.stringify(value);
 }

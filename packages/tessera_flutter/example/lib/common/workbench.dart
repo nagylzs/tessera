@@ -157,19 +157,43 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
   static CubeSpec _prune(CubeSpec spec, FactTable facts) {
     bool hasColumn(String name) => facts.columns.any((c) => c.name == name);
     bool dimensionOk(Dimension d) {
-      if (!hasColumn(d.sourceColumn)) return false;
+      if (!d.sourceColumns.every(hasColumn)) return false;
       if (d is DatePartDimension) {
         final t = facts.column(d.sourceColumn).type;
         return t == ColumnType.date || t == ColumnType.dateTime;
       }
+      if (d is ExpressionDimension) {
+        return Expression.validate(
+              d.source,
+              scope: ExpressionScope.ofFacts(facts, functions: d.functions),
+            ) ==
+            null;
+      }
       return true;
     }
 
+    bool measureOk(Measure m) => switch (m) {
+      ColumnMeasure(:final column) =>
+        hasColumn(column) && facts.column(column).type.isNumeric,
+      ExpressionMeasure(:final source, :final functions) =>
+        Expression.validate(
+              source,
+              scope: ExpressionScope.ofFacts(facts, functions: functions),
+              expected: ExprType.number,
+            ) ==
+            null,
+    };
+
     bool aggregateOk(Aggregate a) => switch (a) {
-      MeasureAggregate(:final measure) =>
-        hasColumn(measure.column) &&
-            facts.column(measure.column).type.isNumeric,
+      MeasureAggregate(:final measure) => measureOk(measure),
       DistinctCountAggregate(:final dimension) => dimensionOk(dimension),
+      ExpressionAggregate(:final source, :final functions) =>
+        Expression.validate(
+              source,
+              scope: ExpressionScope.cellsOf(facts, functions: functions),
+              expected: ExprType.number,
+            ) ==
+            null,
       _ => true,
     };
     CubeAxis prune(CubeAxis axis) => axis.copyWith(

@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import '../expr/checker.dart';
+import '../expr/expr_type.dart';
 import '../schema/column_spec.dart';
 import '../schema/column_type.dart';
 import '../schema/schema.dart';
@@ -460,21 +462,129 @@ final class FactTableImpl implements FactTable {
   Object? valueAt(int row, String column) => this.column(column).valueAt(row);
 
   @override
-  Object? dimensionValue(int row, Dimension dimension) =>
-      dimension.valueOf(column(dimension.sourceColumn).valueAt(row));
+  Object? dimensionValue(int row, Dimension dimension) {
+    if (dimension is ExpressionDimension) {
+      return materializeDimension(dimension).valueAt(row);
+    }
+    return dimension.valueOf(column(dimension.sourceColumn).valueAt(row));
+  }
 
   @override
   double? measureValue(int row, Measure measure) {
-    final c = column(measure.column);
-    if (!c.type.isNumeric) {
-      throw ArgumentError.value(
-        measure.column,
-        'measure',
-        'column is not numeric',
-      );
+    switch (measure) {
+      case ColumnMeasure(:final column):
+        final c = this.column(column);
+        if (!c.type.isNumeric) {
+          throw ArgumentError.value(column, 'measure', 'column is not numeric');
+        }
+        return c.numberAt(row);
+      case ExpressionMeasure():
+        final v = materializeMeasure(measure)[row];
+        return v.isNaN ? null : v;
     }
-    return c.numberAt(row);
   }
+
+  final _measures = <Measure, Float64List>{};
+  final _dimensions = <Dimension, FactColumnImpl>{};
+
+  /// The values of [measure] for every row (NaN = null), computed on first
+  /// use and cached.
+  Float64List materializeMeasure(ExpressionMeasure measure) =>
+      _measures.putIfAbsent(measure, () {
+        final f = measure.expression
+            .compile(
+              this,
+              scope: ExpressionScope.ofFacts(
+                this,
+                functions: measure.functions,
+              ),
+              expected: ExprType.number,
+            )
+            .asNumber;
+        final data = Float64List(rowCount);
+        for (var r = 0; r < rowCount; r++) {
+          data[r] = f(r);
+        }
+        return data;
+      });
+
+  /// The values of [dimension] for every row as a column of its type,
+  /// computed on first use and cached.
+  FactColumnImpl materializeDimension(ExpressionDimension dimension) =>
+      _dimensions.putIfAbsent(dimension, () {
+        final compiled = dimension.expression.compile(
+          this,
+          scope: ExpressionScope.ofFacts(this, functions: dimension.functions),
+        );
+        final name = dimension.id, label = dimension.label;
+        switch (compiled.type) {
+          case ExprType.number:
+            final f = compiled.asNumber;
+            final data = Float64List(rowCount);
+            var integral = true;
+            for (var r = 0; r < rowCount; r++) {
+              final v = data[r] = f(r);
+              if (integral && !v.isNaN && v != v.truncateToDouble()) {
+                integral = false;
+              }
+            }
+            return NumberColumn(
+              name,
+              label,
+              integral ? ColumnType.integer : ColumnType.number,
+              data,
+            );
+          case ExprType.date:
+            final f = compiled.asNumber;
+            final data = Float64List(rowCount);
+            var midnight = true;
+            for (var r = 0; r < rowCount; r++) {
+              final v = data[r] = f(r);
+              if (midnight && !v.isNaN && v % 86400000 != 0) midnight = false;
+            }
+            return DateColumn(
+              name,
+              label,
+              midnight ? ColumnType.date : ColumnType.dateTime,
+              data,
+            );
+          case ExprType.boolean:
+            final f = compiled.asBoolean;
+            final data = Uint8List(rowCount);
+            for (var r = 0; r < rowCount; r++) {
+              data[r] = switch (f(r)) {
+                false => 0,
+                true => 1,
+                null => 2,
+              };
+            }
+            return BoolColumn(name, label, data);
+          case ExprType.text:
+            final f = compiled.asText;
+            final index = <String, int>{};
+            final dictionary = <String>[];
+            final codes = Int32List(rowCount);
+            for (var r = 0; r < rowCount; r++) {
+              final v = f(r);
+              codes[r] = v == null
+                  ? -1
+                  : index.putIfAbsent(v, () {
+                      dictionary.add(v);
+                      return dictionary.length - 1;
+                    });
+            }
+            return TextColumn(name, label, dictionary, codes);
+        }
+      });
+
+  /// The column whose stored value *is* the dimension's value: the source
+  /// column of a [ColumnDimension], the materialized column of an
+  /// [ExpressionDimension]; `null` for dimensions that transform values.
+  FactColumnImpl? plainColumnOf(Dimension dimension) => switch (dimension) {
+    ColumnDimension(:final sourceColumn) => column(sourceColumn),
+    ExpressionDimension() => materializeDimension(dimension),
+    DatePartDimension() || MappedDimension() => null,
+  };
 
   @override
   List<Object?> distinctValues(Dimension dimension) =>

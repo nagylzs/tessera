@@ -56,14 +56,112 @@ through these in order, then publish.
       expansion and sorting, filters, the widgets, theming, export
       formats, localization, large data). Link it from every README.
 
+## Expression language (decided 2026-09-14, do before the filter editor and calculated aggregates)
+
+Surveyed pub.dev for an expression evaluator (expressions, cel, rumil_expressions,
+quds_formula_parser, worksheet_formula, eval_ex, petitparser, sqlparser, dart_eval,
+hetu_script, jsonata_dart, jsonlogic, sqlite3, duckdb): nothing fits (no
+null-as-group semantics, no DateTime, runtime-only typing, no error positions,
+JS-flavoured syntax, or heavy/platform dependencies). Decided: an own small
+language in the engine, dependency-free, in-memory like the rest. The heavy
+backends (sqlite3/duckdb) were rejected: tessera stays in-memory, and copying
+the facts into a database only pays off if the whole cube moved there.
+
+- [x] Grammar and parser (`expr/` in `packages/tessera`): a hand-written
+      Pratt parser (no petitparser). SQL/Excel-flavoured syntax for
+      spreadsheet users: `and`/`or`/`not`, `=`, `<>`, `<`, `<=`, `>`, `>=`,
+      `+ - * / %`, unary minus, `in (...)`, `between`, `is empty` / `is not
+      empty`, `if(cond, a, b)`, string/number/boolean/date literals (date as
+      `#2024-01-31#` or `date("2024-01-31")`), function calls, parentheses.
+      Column references by name; names with spaces or non-ASCII are quoted
+      (`[unit price]`). Function names case-insensitive. The stored form is
+      locale-neutral (`.` decimal point, English function names); the editor
+      may display localized. Parse errors carry source positions (offset +
+      length) and are localizable messages via `TesseraStrings`.
+- [x] Static typing: a checker resolves column references against the
+      `Schema` / `FactTable` and infers a type for every node (number, text,
+      boolean, date; all nullable) before anything runs, so the editor can
+      validate on every keystroke and highlight the error. Type errors have
+      positions like parse errors. Booleans and numbers do not mix.
+- [x] Null semantics: three-valued like SQL. Arithmetic and comparison with
+      a null operand yield null; `and`/`or` follow SQL truth tables; a null
+      filter result means the fact is excluded; `is empty` / `coalesce` are
+      the way to test and default. `=` on null is null, matching "(empty)"
+      is done with `is empty`, so a null dimension value stays a group.
+- [x] Compilation to typed closures over columns: the checker's typed AST is
+      compiled to closures that read the `FactTableImpl` storage directly
+      (`Float64List` for numbers/dates with NaN = null, `Int32List` codes +
+      dictionary for text, `Uint8List` for booleans), never through
+      `valueAt`/`Map` contexts, so evaluating a row allocates nothing. Number
+      expressions compile to `double Function(int row)`, boolean ones to a
+      three-valued result, text ones compare dictionary codes when both sides
+      are columns. Parse once, evaluate per row; cost is paid once per cube
+      build because the filtered row list is cached and calculated measures
+      are materialized (below).
+- [x] Built-in functions (small, fixed set): `abs`, `round(x, n)`, `floor`,
+      `ceil`, `min`, `max`, `coalesce`; `len`, `lower`, `upper`, `trim`,
+      `left`, `right`, `contains`, `startswith`, `endswith`, `concat`;
+      `year`, `month`, `day`, `quarter`, `weekday`, `isoweek` (reuse
+      `DatePart`), `date`, `today`; `if`, `isempty`. No loops, recursion or
+      I/O anywhere in the language (user input must be safe by construction).
+- [x] App-supplied functions: a `FunctionRegistry` where an application
+      registers a name, parameter types, return type and a Dart closure;
+      the checker and compiler treat them like built-ins. Passed to the
+      parser/checker explicitly, no global state.
+- [x] Plug points in the engine (breaking, do while 0.x): `ExpressionFilter`
+      (a `FactFilter` member holding the source text, compiled lazily, equal
+      by text); `Measure` becomes sealed with `ColumnMeasure` and
+      `ExpressionMeasure` (materialized once into a `Float64List` on first
+      use, cached per `FactTable`, then aggregated like any measure);
+      `ExpressionDimension` (group by a text/number/date/boolean expression,
+      e.g. `if(total > 100, "big", "small")`), materialized the same way;
+      cell-level formulas over aggregate results (`sum(total) /
+      sum(quantity)`) as a `DerivedAggregate` computed after accumulation,
+      so `Aggregate` grows a variant without an accumulator. The same parser
+      and checker serve all of them; only the variable context differs
+      (fact row vs. the cell's aggregate results).
+- [x] Structured filters independent of the language: add serializable
+      `FactFilter` members (`CompareFilter` column/op/value, `RangeFilter`,
+      `TextFilter` contains/starts/ends, `EmptyFilter`) so the filter editor's
+      builder UI (field, operator, value, and/or groups) and the saved
+      configuration work without the expression text; the expression is the
+      power-user escape hatch and can be converted from the structured tree.
+- [ ] Layout-relative calculations ("percent of row/column/grand total",
+      "difference from base") are NOT expressions: declarative wrappers over
+      the layout (`ShowValuesAs`-style), since they need the parent/sibling/base
+      cell, not a row or a cell.
+- [x] Tests: parser (positions, precedence, quoting), checker (every type
+      rule and error), null truth tables, closure compiler vs. a naive
+      interpreter on `sales.csv`, and a benchmark on the 2 M-row set
+      (`example/tool/bench.dart`) to confirm the once-per-build cost.
+- [ ] Docs: a chapter in the user guide with the grammar, the function list
+      and the null rules (the guide does not exist yet); the `tessera`
+      README has an "Expressions" section (done), `tessera_flutter`'s
+      should mention it once the filter editor exists.
+- [ ] Localized error messages: `ExpressionError` carries `kind`,
+      `arguments` and an English `message`; add
+      `TesseraStrings.expressionError(ExpressionError)` with the 14
+      translations (decided 2026-09-14 to do this after the language).
+- [x] Decided 2026-09-14: text comparisons are case-sensitive (`lower()`
+      for the other behaviour), dates support `date ± days` and
+      `date - date`; keywords and function names are case-insensitive,
+      column names are not; `==` / `!=` are accepted as aliases.
+
 ## Features users will ask for next (after the first release)
 
 - [ ] A filter editor widget: the engine has the filter model
       (`FactFilter`, `ValueFilter`, `AndFilter`, …) but no UI for it.
+      Builds on the structured filters and `ExpressionFilter` above: a
+      builder (field, operator, value, and/or groups) plus an expression text
+      field with live validation from the checker.
 - [ ] Saving a pivot configuration: JSON for `CubeSpec`, `ExpansionState`
       and schema overrides, so an app can persist and restore a layout.
+      Filters and calculated measures serialize as their expression text or
+      structured tree (a `PredicateFilter` closure cannot be saved).
 - [ ] Calculated aggregates: percent of row/column/grand total, difference
-      from a base value.
+      from a base value (layout-relative wrappers, see above) and
+      expression-based measures / derived aggregates from the expression
+      language section.
 - [ ] More data sources: JSON (array of objects) and JSONL, the formats
       every competitor reads; `ListDataSource` covers programmatic data
       already. A database/server-side (lazy) source is a bigger design

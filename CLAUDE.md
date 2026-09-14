@@ -155,6 +155,48 @@ the root, ignored; members carry `resolution: workspace`):
   --check` and ghostscript when installed, Noto Sans from
   `/usr/share/fonts/noto` when present. `example/main.dart` takes an
   optional font directory.
+- Expression language (`packages/tessera/lib/src/expr/`, decided
+  2026-09-14 after a package survey found nothing fitting; pure Dart, no
+  deps): `ast.dart` (sealed `Expr` with offset/length, `toSource` with
+  minimal parentheses, `quoteName`/`quoteText`), `parser.dart`
+  (hand-written lexer + recursive-descent parser, `parseDateLiteral`),
+  `expr_type.dart` (`ExprType` number/text/boolean/date, all nullable),
+  `expression_error.dart` (`ExpressionErrorKind` + range + arguments,
+  English `message`; localization is a TODO), `functions.dart`
+  (`ExpressionFunction` signature + optional boxed implementation,
+  immutable `FunctionRegistry.standard().withFunctions(...)`, overloads by
+  parameter types; built-ins have no implementation — the compiler knows
+  them by name), `checker.dart` (`ExpressionScope.rows/cells/ofFacts/
+  ofSchema/cellsOf`, `CheckedExpression` = AST + side tables of types,
+  resolved functions and aggregate refs; `aggregateOfShape` /
+  `aggregateReferences` for cell formulas), `compiler.dart`
+  (`compileExpression(checked, bindings)` → typed closures: numbers and
+  dates `double Function(int)` with NaN = null, text `String?`, booleans
+  `bool?` three-valued; `RowBindings(FactTableImpl)` reads the typed
+  arrays, `CellBindings(aggregates, slot)` reads a per-cell `Float64List`;
+  `column = "literal"` and `column in (...)` compare dictionary codes),
+  `expression.dart` (`Expression.parse/tryParse/validate/check/compile`,
+  `names`, `canonicalSource`). Semantics: SQL three-valued null, `/` and
+  `%` by zero → null, case-sensitive text, `date ± n` days, `date - date`
+  days, `==`/`!=` aliases, keywords/functions case-insensitive, column
+  names case-sensitive and `[quoted]` when needed, `#date#` literals UTC.
+  Plug points: `ExpressionFilter` + `FactFilter.compile(facts)` (the
+  engine scans with the compiled predicate) + structured `CompareFilter` /
+  `RangeFilter` / `TextFilter` / `EmptyFilter` (`ColumnFilter`, matched
+  through their own expression) and `toExpressionSource()` on every
+  filter; `Measure` sealed (`ColumnMeasure` via the `Measure(...)` const
+  factory, `ExpressionMeasure` materialized once per `FactTableImpl` into
+  a `Float64List`, cached by measure); `ExpressionDimension` (materialized
+  into a typed `FactColumnImpl`, `plainColumnOf` gives the engine's
+  dictionary fast path; `sourceColumns` on every dimension, `sourceColumn`
+  = first); `DerivedAggregate` (`dependencies`, `compute(resultOf)`,
+  `prepare(facts)`) + `ExpressionAggregate` — the engine accumulates
+  `accumulatedAggregates(spec.aggregates)` (`CubeLayoutImpl.accumulated`)
+  and `resultOf(data, aggregate, accumulated)` serves cells and aggregate
+  sorts. Tests: `test/expression_test.dart` (parser, checker, compiler,
+  sales.csv cross-checks) and `test/expression_cube_test.dart` (plug
+  points in cubes). The example's `_prune` validates expression-based
+  spec members with `Expression.validate`.
 - Planned: further exporters the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a
@@ -529,6 +571,11 @@ Layers 1–3 must not import Flutter — enforced now by the package split
   `this`) or the worker closure sharing scope with the caller's ports is
   unsendable ("object is unsendable - _Future") — hence
   `CsvDataSource.fromData(bytes)` and the separate `_runWorker` function.
+  Expressions on the same 2 M rows (2026-09-14, JIT, cube build
+  included): `ExpressionFilter` scan + cube 0.56 s, `Measure.expression`
+  materialize + cube 0.71 s, `ExpressionDimension` materialize + cube
+  0.77 s, `Aggregate.expression` cube 0.62 s — i.e. 0.2–0.4 s per
+  expression pass, paid once and cached (`bench.dart` prints them).
   Isolate import of 2 M rows: 9.9 s, i.e. no measurable overhead; the CSV
   row estimate was 5 % high (fraction is capped at 0.99 anyway). Import conversion has headroom (regex per numeric cell) — a
   tryParse fast path is a known TODO. Cube layout still runs on the caller.

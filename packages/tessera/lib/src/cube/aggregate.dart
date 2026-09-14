@@ -1,3 +1,10 @@
+import 'dart:typed_data';
+
+import '../expr/checker.dart';
+import '../expr/compiler.dart';
+import '../expr/expr_type.dart';
+import '../expr/expression.dart';
+import '../expr/functions.dart';
 import '../facts/dimension.dart';
 import '../facts/fact_table.dart';
 import '../facts/measure.dart';
@@ -52,6 +59,15 @@ abstract class Aggregate<R> {
 
   static DistinctCountAggregate distinctCount(Dimension dimension) =>
       DistinctCountAggregate(dimension);
+
+  /// A number computed per cell from other aggregates by a cell formula,
+  /// e.g. `sum(total) / count`; see [ExpressionAggregate].
+  static ExpressionAggregate expression(
+    String source, {
+    String? id,
+    String? label,
+    FunctionRegistry? functions,
+  }) => ExpressionAggregate(source, id: id, label: label, functions: functions);
 
   @override
   bool operator ==(Object other) => other is Aggregate && other.id == id;
@@ -297,4 +313,119 @@ final class _DistinctCountAccumulator extends AggregateAccumulator<int> {
 
   @override
   int get result => values.length;
+}
+
+/// An aggregate that is not accumulated over facts but computed per cell
+/// from the results of other aggregates ([dependencies]) once accumulation
+/// is done: a ratio, a difference, a rounded value.
+///
+/// The engine accumulates the dependencies (whether or not the spec lists
+/// them) and calls [compute] when the cell's value is read.
+/// [createAccumulator] is never called and throws.
+abstract class DerivedAggregate<R> extends Aggregate<R> {
+  const DerivedAggregate();
+
+  /// The aggregates whose results [compute] needs.
+  List<Aggregate> get dependencies;
+
+  /// The value for a cell; [resultOf] returns the cell's result of any of
+  /// the [dependencies] (`null` for an empty cell).
+  R? compute(Object? Function(Aggregate aggregate) resultOf);
+
+  /// Called by the engine before a layout is computed against [facts];
+  /// throws when the aggregate cannot be evaluated there.
+  void prepare(FactTable facts) {}
+
+  @override
+  AggregateAccumulator<R> createAccumulator() =>
+      throw UnsupportedError('$id is derived, not accumulated');
+}
+
+/// A number computed per cell by a formula over aggregates of the same
+/// cell: `sum(total) / sum(quantity)`, `round(sum(total) / count, 2)`,
+/// `count(discount) / count * 100`.
+///
+/// The formula is an expression in cell scope (see
+/// [ExpressionScope.cells]): `sum(col)`, `avg(col)`, `min(col)`,
+/// `max(col)`, `count` (facts), `count(col)` (non-empty values) and
+/// `distinct(col)` are the aggregate references; the built-in functions
+/// and arithmetic apply. The result is `null` when a referenced aggregate
+/// is `null` (an empty cell) or a division by zero occurs.
+final class ExpressionAggregate extends DerivedAggregate<double> {
+  ExpressionAggregate(this.source, {this._id, this._label, this.functions})
+    : expression = Expression.parse(source);
+
+  final String source;
+  final Expression expression;
+
+  /// Functions beyond the built-in ones the formula may call.
+  final FunctionRegistry? functions;
+  final String? _id;
+  final String? _label;
+
+  /// [source] unless an id was given.
+  @override
+  String get id => _id ?? source;
+
+  @override
+  String get label => _label ?? source;
+
+  @override
+  late final List<Aggregate> dependencies = List.unmodifiable(
+    aggregateReferences(expression.root),
+  );
+
+  FactTable? _preparedFor;
+  NumberFn? _compiled;
+  late final Float64List _slot = Float64List(dependencies.length);
+
+  /// Type-checks the formula against the columns of [facts]; throws
+  /// [ExpressionError] when a referenced column is missing or not numeric.
+  @override
+  void prepare(FactTable facts) {
+    if (identical(facts, _preparedFor)) return;
+    expression.check(
+      ExpressionScope.cellsOf(facts, functions: functions),
+      expected: ExprType.number,
+    );
+    _preparedFor = facts;
+  }
+
+  NumberFn _compile() {
+    // Types come from the dependencies themselves: every measure is numeric
+    // and `distinct` accepts any column, so a synthetic scope suffices.
+    final columns = <String, ExprType>{};
+    for (final d in dependencies) {
+      switch (d) {
+        case MeasureAggregate(:final measure):
+          for (final c in measure.columns) {
+            columns[c] = ExprType.number;
+          }
+        case DistinctCountAggregate(:final dimension):
+          columns.putIfAbsent(dimension.sourceColumn, () => ExprType.text);
+        default:
+          break;
+      }
+    }
+    final checked = expression.check(
+      ExpressionScope.cells(columns, functions: functions),
+      expected: ExprType.number,
+    );
+    return compileExpression(
+      checked,
+      CellBindings(dependencies, _slot),
+    ).asNumber;
+  }
+
+  @override
+  double? compute(Object? Function(Aggregate aggregate) resultOf) {
+    final f = _compiled ??= _compile();
+    final slot = _slot;
+    for (var k = 0; k < dependencies.length; k++) {
+      final v = resultOf(dependencies[k]);
+      slot[k] = v is num ? v.toDouble() : double.nan;
+    }
+    final r = f(0);
+    return r.isNaN ? null : r;
+  }
 }
