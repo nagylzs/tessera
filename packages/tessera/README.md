@@ -41,7 +41,7 @@ blank instead of showing `0`.
 | **Schema / ColumnSpec** | Column types and parsing rules. Inferred from a sample of rows, then adjustable (change a type, exclude a column, supply a date format or a custom parser). |
 | **FactTable** | The imported data: immutable, columnar, dictionary-encoded. All rows live in memory. |
 | **Dimension** | Something you can group by. Derived from a column: the column value itself, a date part (`date.month`), or any mapping function. |
-| **Aggregate** | What a cell shows: `sum`, `average`, `min`, `max`, `count`, `countNonNull`, `distinctCount`, and the variance family `stdDev` / `stdDevPopulation` / `variance` / `variancePopulation` (Excel's STDEV.S / STDEV.P / VAR.S / VAR.P, computed stably in one pass). Implement `Aggregate` for your own, or write a cell formula with `Aggregate.expression`. |
+| **Aggregate** | What a cell shows: `sum`, `average`, `min`, `max`, `count`, `countNonNull`, `distinctCount`, and the variance family `stdDev` / `stdDevPopulation` / `variance` / `variancePopulation` (Excel's STDEV.S / STDEV.P / VAR.S / VAR.P, computed stably in one pass). Implement `Aggregate` for your own, or write a cell formula with `Aggregate.expression`; `percentOf`, `differenceFrom`, `runningTotal` and `rank` show an aggregate against the cells around it. |
 | **Measure** | A numeric column you aggregate over (`Measure('total')`), or a number computed per fact by an expression (`Measure.expression('quantity * unit_price')`). Any column can be a dimension; numeric ones can also be measures. |
 | **Expression** | A formula in Tessera's small expression language: `total > 100 and region = "Europe"`. Used by `ExpressionFilter`, `Measure.expression`, `ExpressionDimension` and `Aggregate.expression` (a cell formula such as `sum(total) / count`). Parsed, type-checked against the schema and compiled to closures over the columns; see [Expressions](#expressions). |
 | **CubeSpec** | Row axis, column axis (each an ordered list of dimensions), the aggregates to compute, and an optional filter. |
@@ -205,6 +205,33 @@ build (filters) or once per fact table (calculated measures and
 dimensions, whose values are then stored like a column), and their
 canonical text form (`Expression.parse(s).canonicalSource`,
 `FactFilter.toExpressionSource()`) is what an application saves.
+
+## Show values as
+
+Layout-relative aggregates present another aggregate's values against
+the cells around them, the way Excel's "Show Values As" does. They are
+computed from the layout when a cell is read, so they follow expansion
+and sorting; the aggregate they are applied to need not be in the spec:
+
+```dart
+final revenue = Aggregate.sum(const Measure('total'));
+aggregates: [
+  revenue,
+  Aggregate.percentOf(revenue, TotalOf.row),          // also column, grand, parentRow, parentColumn
+  Aggregate.differenceFrom(revenue, axis: AxisSide.columns),   // from the previous column group
+  Aggregate.percentDifferenceFrom(revenue, axis: AxisSide.rows, item: const BaseItem.value('Europe')),
+  Aggregate.runningTotal(revenue, axis: AxisSide.columns),
+  Aggregate.rank(revenue, axis: AxisSide.rows),        // 1 = largest among siblings
+]
+```
+
+"Previous", "next", running totals and ranks work among the sibling
+groups of the cell's own group, in display order; summaries have no
+siblings and give `null` (a running total then equals the value itself).
+Percent of a missing or zero total is `null`. Sorting by a layout
+aggregate sorts by the aggregate it is applied to. Implement
+`LayoutAggregate` for your own: it receives a `LayoutCellContext` with
+the cell's values, its totals and its siblings.
 
 ## Saving a configuration
 

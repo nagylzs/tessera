@@ -1,5 +1,15 @@
 ## Unreleased
 
+* Layout-relative aggregates ("Show Values As"): `Aggregate.percentOf`
+  (`TotalOf.row` / `column` / `grand` / `parentRow` / `parentColumn`),
+  `differenceFrom` and `percentDifferenceFrom` (`BaseItem.previous` /
+  `next` / `value(v)` along an `AxisSide`), `runningTotal`, `rank`;
+  the `LayoutAggregate` base with `LayoutCellContext` for custom ones.
+  Computed when a cell is read; sorting by one sorts by its base. JSON
+  forms in `CubeJson`; labels through new `TesseraStrings` members
+  (`percentOfTotal`, `differenceFrom`, `previousItem`, `nextItem`,
+  `runningTotalOf`, `rankOf`) in every locale. `AxisSide` moved to the
+  engine (still exported by `tessera_flutter`).
 * `TesseraSnapshot`: a `FactTable` (and optionally a `CubeConfig`) as one
   `Uint8List` — magic, version, JSON header, raw little-endian column
   arrays at 8-byte offsets, text codes in the narrowest width — that

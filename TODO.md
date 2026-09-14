@@ -126,10 +126,14 @@ the facts into a database only pays off if the whole cube moved there.
       builder UI (field, operator, value, and/or groups) and the saved
       configuration work without the expression text; the expression is the
       power-user escape hatch and can be converted from the structured tree.
-- [ ] Layout-relative calculations ("percent of row/column/grand total",
+- [x] Layout-relative calculations ("percent of row/column/grand total",
       "difference from base") are NOT expressions: declarative wrappers over
       the layout (`ShowValuesAs`-style), since they need the parent/sibling/base
-      cell, not a row or a cell.
+      cell, not a row or a cell. Done 2026-09-14: `LayoutAggregate` +
+      `percentOf`, `differenceFrom`, `percentDifferenceFrom`,
+      `runningTotal`, `rank`; localized labels; JSON forms. The widget's
+      aggregate picker does not offer them yet (a "show values as" menu on
+      an aggregate chip is the natural UI).
 - [x] Tests: parser (positions, precedence, quoting), checker (every type
       rule and error), null truth tables, closure compiler vs. a naive
       interpreter on `sales.csv`, and a benchmark on the 2 M-row set
@@ -170,10 +174,10 @@ the facts into a database only pays off if the whole cube moved there.
       2026-09-14: `CubeJson` / `CubeConfig` / `JsonAdapter` in the engine;
       the example app does not use it yet (a "Save/Load layout" action
       would be the natural demo once the filter editor exists).
-- [ ] Calculated aggregates: percent of row/column/grand total, difference
+- [x] Calculated aggregates: percent of row/column/grand total, difference
       from a base value (layout-relative wrappers, see above) and
       expression-based measures / derived aggregates from the expression
-      language section.
+      language section. Engine side done 2026-09-14; UI pending (see above).
 - [ ] More data sources: JSON (array of objects) and JSONL, the formats
       every competitor reads; `ListDataSource` covers programmatic data
       already. A database/server-side (lazy) source is a bigger design

@@ -1,3 +1,4 @@
+import '../cube/layout_aggregate.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -40,6 +41,33 @@ final class TesseraStringsHu extends TesseraStrings {
 
   @override
   String get countLabel => 'darabszám';
+
+  @override
+  String percentOfTotal(String base, TotalOf of) => switch (of) {
+    TotalOf.row => '$base a sor összegének %-ában',
+    TotalOf.column => '$base az oszlop összegének %-ában',
+    TotalOf.grand => '$base a végösszeg %-ában',
+    TotalOf.parentRow => '$base a szülő sor %-ában',
+    TotalOf.parentColumn => '$base a szülő oszlop %-ában',
+  };
+
+  @override
+  String differenceFrom(String base, String item, {required bool percent}) =>
+      percent
+      ? '$base %-os eltérése ettől: $item'
+      : '$base eltérése ettől: $item';
+
+  @override
+  String get previousItem => 'előző';
+
+  @override
+  String get nextItem => 'következő';
+
+  @override
+  String runningTotalOf(String base) => '$base göngyölítve';
+
+  @override
+  String rankOf(String base) => '$base rangsora';
 
   @override
   String get countOfFacts => 'Sorok száma';

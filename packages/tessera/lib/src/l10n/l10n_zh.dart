@@ -1,3 +1,4 @@
+import '../cube/layout_aggregate.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -40,6 +41,31 @@ final class TesseraStringsZh extends TesseraStrings {
 
   @override
   String get countLabel => '计数';
+
+  @override
+  String percentOfTotal(String base, TotalOf of) => switch (of) {
+    TotalOf.row => '$base 占行汇总的%',
+    TotalOf.column => '$base 占列汇总的%',
+    TotalOf.grand => '$base 占总计的%',
+    TotalOf.parentRow => '$base 占父行的%',
+    TotalOf.parentColumn => '$base 占父列的%',
+  };
+
+  @override
+  String differenceFrom(String base, String item, {required bool percent}) =>
+      percent ? '$base 与$item的差异百分比' : '$base 与$item的差异';
+
+  @override
+  String get previousItem => '上一项';
+
+  @override
+  String get nextItem => '下一项';
+
+  @override
+  String runningTotalOf(String base) => '$base 累计';
+
+  @override
+  String rankOf(String base) => '$base 排名';
 
   @override
   String get countOfFacts => '行数';

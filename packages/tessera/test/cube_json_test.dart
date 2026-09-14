@@ -97,6 +97,29 @@ final richSpec = CubeSpec(
       id: 'w',
       label: 'Weighted',
     ),
+    Aggregate.percentOf(Aggregate.sum(qty), TotalOf.parentRow),
+    Aggregate.differenceFrom(Aggregate.sum(qty), axis: AxisSide.rows),
+    Aggregate.differenceFrom(
+      Aggregate.sum(qty),
+      axis: AxisSide.columns,
+      item: BaseItem.next,
+    ),
+    Aggregate.percentDifferenceFrom(
+      Aggregate.sum(qty),
+      axis: AxisSide.columns,
+      item: const BaseItem.value(2024),
+    ),
+    Aggregate.percentDifferenceFrom(
+      Aggregate.sum(qty),
+      axis: AxisSide.rows,
+      item: const BaseItem.value(null),
+    ),
+    Aggregate.runningTotal(Aggregate.average(price), axis: AxisSide.columns),
+    Aggregate.rank(Aggregate.sum(net), axis: AxisSide.rows, ascending: true),
+    Aggregate.rank(
+      Aggregate.percentOf(Aggregate.sum(qty), TotalOf.row),
+      axis: AxisSide.columns,
+    ),
   ],
   filter: AndFilter([
     ValueFilter(region, ['Europe', 'Asia', null]),
@@ -131,6 +154,22 @@ void main() {
       richSpec.columns.dimensions.map((d) => d.dimension),
     );
     expect(back.aggregates, richSpec.aggregates);
+    expect(
+      back.aggregates.last,
+      isA<RankAggregate>().having(
+        (a) => a.base,
+        'base',
+        isA<PercentOfTotalAggregate>(),
+      ),
+    );
+    expect(
+      (back.aggregates[16] as PercentDifferenceFromAggregate).item,
+      const BaseItem.value(2024),
+    );
+    expect(
+      (back.aggregates[17] as PercentDifferenceFromAggregate).item,
+      const BaseItem.value(null),
+    );
     expect(back.rows.summaryPosition, SummaryPosition.start);
     expect(back.rows.subtotalPosition, SubtotalPosition.bottom);
     expect(back.columns.summaryPosition, SummaryPosition.hidden);
@@ -163,7 +202,7 @@ void main() {
           .having((m) => m.label, 'label', 'Net'),
     );
     expect(
-      back.aggregates.last,
+      back.aggregates[12],
       isA<ExpressionAggregate>()
           .having((a) => a.label, 'label', 'Weighted')
           .having((a) => a.id, 'id', 'w'),
@@ -237,6 +276,50 @@ void main() {
     expect(codec.encodeMeasure(Measure.expression('qty * 2')), {
       'expression': 'qty * 2',
     });
+    expect(
+      codec.encodeAggregate(
+        Aggregate.differenceFrom(
+          Aggregate.count,
+          axis: AxisSide.rows,
+          item: BaseItem.value(DateTime.utc(2024)),
+        ),
+      ),
+      {
+        'type': 'differenceFrom',
+        'base': {'type': 'count'},
+        'axis': 'rows',
+        'item': {
+          'value': {'date': '2024-01-01T00:00:00.000Z'},
+        },
+      },
+    );
+    expect(
+      codec.encodeAggregate(
+        Aggregate.rank(Aggregate.count, axis: AxisSide.columns),
+      ),
+      {
+        'type': 'rank',
+        'base': {'type': 'count'},
+        'axis': 'columns',
+      },
+    );
+    expect(
+      () => codec.decodeAggregate({
+        'type': 'differenceFrom',
+        'base': {'type': 'count'},
+        'axis': 'rows',
+        'item': 'first',
+      }),
+      throwsFormatException,
+    );
+    expect(
+      () => codec.decodeAggregate({
+        'type': 'percentOf',
+        'base': {'type': 'count'},
+        'of': 'universe',
+      }),
+      throwsFormatException,
+    );
   });
 
   test('expansion states are positional against their axis', () async {

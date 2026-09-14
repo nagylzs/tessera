@@ -4,6 +4,7 @@ import '../cube/cube_spec.dart';
 import '../cube/dimension_path.dart';
 import '../cube/expansion_state.dart';
 import '../cube/filter.dart';
+import '../cube/layout_aggregate.dart';
 import '../expr/functions.dart';
 import '../facts/dimension.dart';
 import '../facts/fact_table.dart';
@@ -331,6 +332,43 @@ final class CubeJson {
           if (id != source) 'id': id,
           'label': ?explicitLabel,
         };
+      case PercentOfTotalAggregate(:final base, :final of):
+        return {
+          'type': 'percentOf',
+          'base': encodeAggregate(base),
+          'of': of.name,
+        };
+      case DifferenceFromAggregate(:final base, :final axis, :final item):
+        return {
+          'type': 'differenceFrom',
+          'base': encodeAggregate(base),
+          'axis': axis.name,
+          'item': _encodeItem(item),
+        };
+      case PercentDifferenceFromAggregate(
+        :final base,
+        :final axis,
+        :final item,
+      ):
+        return {
+          'type': 'percentDifferenceFrom',
+          'base': encodeAggregate(base),
+          'axis': axis.name,
+          'item': _encodeItem(item),
+        };
+      case RunningTotalAggregate(:final base, :final axis):
+        return {
+          'type': 'runningTotal',
+          'base': encodeAggregate(base),
+          'axis': axis.name,
+        };
+      case RankAggregate(:final base, :final axis, :final ascending):
+        return {
+          'type': 'rank',
+          'base': encodeAggregate(base),
+          'axis': axis.name,
+          if (ascending) 'ascending': true,
+        };
       case MeasureAggregate(:final measure):
         final type = _measureTypes[aggregate.runtimeType];
         if (type != null) {
@@ -338,6 +376,23 @@ final class CubeJson {
         }
     }
     return _custom(aggregates, aggregate, 'aggregate');
+  }
+
+  Object? _encodeItem(BaseItem item) => switch (item) {
+    PreviousItem() => 'previous',
+    NextItem() => 'next',
+    ValueItem(:final value) => {'value': encodeValue(value)},
+  };
+
+  BaseItem _decodeItem(Object? json) {
+    if (json == 'previous') return BaseItem.previous;
+    if (json == 'next') return BaseItem.next;
+    if (json is Map && json.containsKey('value')) {
+      return BaseItem.value(decodeValue(json['value']));
+    }
+    throw FormatException(
+      '"item": expected previous, next or {value}, got $json',
+    );
   }
 
   Aggregate decodeAggregate(Map<String, Object?> json) {
@@ -355,6 +410,34 @@ final class CubeJson {
           id: _optString(json, 'id'),
           label: _optString(json, 'label'),
           functions: functions,
+        );
+      case 'percentOf':
+        return Aggregate.percentOf(
+          decodeAggregate(_map(json, 'base')),
+          _enum(json, 'of', TotalOf.values, null),
+        );
+      case 'differenceFrom':
+        return Aggregate.differenceFrom(
+          decodeAggregate(_map(json, 'base')),
+          axis: _enum(json, 'axis', AxisSide.values, null),
+          item: _decodeItem(json['item']),
+        );
+      case 'percentDifferenceFrom':
+        return Aggregate.percentDifferenceFrom(
+          decodeAggregate(_map(json, 'base')),
+          axis: _enum(json, 'axis', AxisSide.values, null),
+          item: _decodeItem(json['item']),
+        );
+      case 'runningTotal':
+        return Aggregate.runningTotal(
+          decodeAggregate(_map(json, 'base')),
+          axis: _enum(json, 'axis', AxisSide.values, null),
+        );
+      case 'rank':
+        return Aggregate.rank(
+          decodeAggregate(_map(json, 'base')),
+          axis: _enum(json, 'axis', AxisSide.values, null),
+          ascending: json['ascending'] == true,
         );
     }
     if (_measureTypes.containsValue(type)) {

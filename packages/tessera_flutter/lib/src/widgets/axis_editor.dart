@@ -5,9 +5,6 @@ import '../l10n/tessera_localizations.dart';
 import 'cube_controller.dart';
 import 'dimension_picker.dart';
 
-/// Which axis of the cube an [AxisEditor] edits.
-enum AxisSide { rows, columns }
-
 /// Payload of a dimension being dragged between (or within) [AxisEditor]s.
 /// Public so custom widgets can act as drag sources or targets.
 final class DimensionDrag {

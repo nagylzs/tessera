@@ -202,6 +202,26 @@ the root, ignored; members carry `resolution: workspace`):
   sales.csv cross-checks) and `test/expression_cube_test.dart` (plug
   points in cubes). The example's `_prune` validates expression-based
   spec members with `Expression.validate`.
+- Layout-relative aggregates (`packages/tessera/lib/src/cube/
+  layout_aggregate.dart`): `AxisSide` (moved here from the widgets),
+  `TotalOf`, sealed `BaseItem` (`PreviousItem`/`NextItem`/`ValueItem`),
+  `LayoutCellContext` (`value`, `total(a, of)`, `sibling(a, axis,
+  item)`, `siblings(a, axis)` → values in display order + own index, -1
+  for a summary), abstract `LayoutAggregate` (`base`, `compute(context)`;
+  `createAccumulator` throws) and `PercentOfTotalAggregate`,
+  `DifferenceFromAggregate`, `PercentDifferenceFromAggregate`,
+  `RunningTotalAggregate`, `RankAggregate` (ties share a rank, next rank
+  skipped). Engine: `accumulatedAggregates` follows `base`,
+  `computeLayout` prepares derived aggregates under a layout aggregate,
+  `CubeCellImpl.aggregate` computes them through `_LayoutContext`
+  (totals = row/column root nodes, parents = `node.parent`, siblings =
+  `parent.ordered`, nested layout aggregates recurse), `order` sorts by
+  the innermost base, `resultOf` throws for them (no layout). Labels:
+  `TesseraStrings.percentOfTotal/differenceFrom/previousItem/nextItem/
+  runningTotalOf/rankOf` composed in `aggregateLabel`. JSON types
+  `percentOf`, `differenceFrom`, `percentDifferenceFrom`, `runningTotal`,
+  `rank` (`item`: `"previous"`, `"next"` or `{value}`). Tests:
+  `test/layout_aggregate_test.dart`.
 - JSON (`packages/tessera/lib/src/json/cube_json.dart`): `CubeConfig`
   (spec + rowExpansion + columnExpansion + schema; `of(cube, {schema})`
   defaults to `facts.schema`, which holds imported columns only, so apps

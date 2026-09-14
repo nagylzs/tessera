@@ -1,3 +1,4 @@
+import '../cube/layout_aggregate.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -41,6 +42,31 @@ final class TesseraStringsPl extends TesseraStrings {
 
   @override
   String get countLabel => 'liczba';
+
+  @override
+  String percentOfTotal(String base, TotalOf of) => switch (of) {
+    TotalOf.row => '$base % sumy wiersza',
+    TotalOf.column => '$base % sumy kolumny',
+    TotalOf.grand => '$base % sumy końcowej',
+    TotalOf.parentRow => '$base % wiersza nadrzędnego',
+    TotalOf.parentColumn => '$base % kolumny nadrzędnej',
+  };
+
+  @override
+  String differenceFrom(String base, String item, {required bool percent}) =>
+      percent ? '$base % różnicy od $item' : '$base różnica od $item';
+
+  @override
+  String get previousItem => 'poprzedni';
+
+  @override
+  String get nextItem => 'następny';
+
+  @override
+  String runningTotalOf(String base) => '$base suma bieżąca';
+
+  @override
+  String rankOf(String base) => '$base ranga';
 
   @override
   String get countOfFacts => 'Liczba wierszy';

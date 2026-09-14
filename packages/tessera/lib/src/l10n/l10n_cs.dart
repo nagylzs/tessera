@@ -1,3 +1,4 @@
+import '../cube/layout_aggregate.dart';
 import '../facts/dimension.dart';
 import 'tessera_strings.dart';
 
@@ -40,6 +41,31 @@ final class TesseraStringsCs extends TesseraStrings {
 
   @override
   String get countLabel => 'počet';
+
+  @override
+  String percentOfTotal(String base, TotalOf of) => switch (of) {
+    TotalOf.row => '$base % ze součtu řádku',
+    TotalOf.column => '$base % ze součtu sloupce',
+    TotalOf.grand => '$base % z celkového součtu',
+    TotalOf.parentRow => '$base % z nadřazeného řádku',
+    TotalOf.parentColumn => '$base % z nadřazeného sloupce',
+  };
+
+  @override
+  String differenceFrom(String base, String item, {required bool percent}) =>
+      percent ? '$base % rozdíl od $item' : '$base rozdíl od $item';
+
+  @override
+  String get previousItem => 'předchozí';
+
+  @override
+  String get nextItem => 'následující';
+
+  @override
+  String runningTotalOf(String base) => '$base průběžný součet';
+
+  @override
+  String rankOf(String base) => '$base pořadí';
 
   @override
   String get countOfFacts => 'Počet řádků';

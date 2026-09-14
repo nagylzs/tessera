@@ -9,6 +9,7 @@ import 'cube_spec.dart';
 import 'dimension_path.dart';
 import 'expansion_state.dart';
 import 'filter.dart';
+import 'layout_aggregate.dart';
 
 // Internal implementation of Cube.layout. Not exported.
 
@@ -96,6 +97,8 @@ List<Aggregate> accumulatedAggregates(List<Aggregate> aggregates) {
   void add(Aggregate a) {
     if (a is DerivedAggregate) {
       a.dependencies.forEach(add);
+    } else if (a is LayoutAggregate) {
+      add(a.base);
     } else if (!out.contains(a)) {
       out.add(a);
     }
@@ -115,6 +118,9 @@ Object? resultOf(
 ) {
   if (aggregate is DerivedAggregate) {
     return aggregate.compute((dep) => resultOf(data, dep, accumulated));
+  }
+  if (aggregate is LayoutAggregate) {
+    throw StateError('${aggregate.id} needs the layout; read it from a cell');
   }
   final index = accumulated.indexOf(aggregate);
   if (index < 0) {
@@ -321,7 +327,11 @@ final class AxisTree {
           if (nullChild != null && sort.nulls == NullPosition.last) nullChild,
         ];
       } else {
-        final aggregate = sort.aggregate!;
+        // A layout-relative aggregate sorts by what it is applied to.
+        var aggregate = sort.aggregate!;
+        while (aggregate is LayoutAggregate) {
+          aggregate = aggregate.base;
+        }
         final keyPath = sort.keyPath;
         final keyNode =
             (keyPath == null ? null : other.resolve(keyPath)) ?? other.root;
@@ -408,9 +418,16 @@ CubeLayoutImpl computeLayout({
   final colTree = AxisTree(spec.columns, [
     for (final d in spec.columns.dimensions) cache.codesFor(facts, d.dimension),
   ])..applyExpansion(columnExpansion);
-  for (final a in spec.aggregates) {
-    if (a is DerivedAggregate) a.prepare(facts);
+  void prepare(Aggregate a) {
+    if (a is DerivedAggregate) {
+      a.prepare(facts);
+      a.dependencies.forEach(prepare);
+    } else if (a is LayoutAggregate) {
+      prepare(a.base);
+    }
   }
+
+  spec.aggregates.forEach(prepare);
   final aggregates = accumulatedAggregates(spec.aggregates);
 
   // Pass over the facts: every fact lands in exactly one leaf cell.
@@ -690,6 +707,9 @@ final class CubeCellImpl implements CubeCell {
         'not among the cube\'s aggregates',
       );
     }
+    if (aggregate is LayoutAggregate<R>) {
+      return aggregate.compute(_LayoutContext(layout, rowNode, colNode));
+    }
     return resultOf(data, aggregate, layout.accumulated) as R?;
   }
 
@@ -709,6 +729,89 @@ final class CubeCellImpl implements CubeCell {
 
   @override
   String toString() => 'CubeCell($coordinate, $factCount facts)';
+}
+
+/// What a [LayoutAggregate] sees for one cell.
+final class _LayoutContext implements LayoutCellContext {
+  _LayoutContext(this.layout, this.rowNode, this.colNode);
+
+  final CubeLayoutImpl layout;
+  final AxisNode rowNode;
+  final AxisNode colNode;
+
+  Object? _at(AxisNode rn, AxisNode cn, Aggregate a) {
+    if (a is LayoutAggregate) {
+      return a.compute(_LayoutContext(layout, rn, cn));
+    }
+    return resultOf(rn.cells?[cn.id], a, layout.accumulated);
+  }
+
+  @override
+  Object? value(Aggregate aggregate) => _at(rowNode, colNode, aggregate);
+
+  @override
+  Object? total(Aggregate aggregate, TotalOf of) {
+    final rows = layout.rowTree, cols = layout.colTree;
+    final (AxisNode?, AxisNode?) ref = switch (of) {
+      TotalOf.row => (rowNode, cols.root),
+      TotalOf.column => (rows.root, colNode),
+      TotalOf.grand => (rows.root, cols.root),
+      TotalOf.parentRow => (rowNode.parent, colNode),
+      TotalOf.parentColumn => (rowNode, colNode.parent),
+    };
+    final (rn, cn) = ref;
+    if (rn == null || cn == null) return null;
+    return _at(rn, cn, aggregate);
+  }
+
+  (AxisTree, AxisNode) _along(AxisSide axis) => axis == AxisSide.rows
+      ? (layout.rowTree, rowNode)
+      : (layout.colTree, colNode);
+
+  Object? _atSibling(AxisSide axis, AxisNode sibling, Aggregate aggregate) =>
+      axis == AxisSide.rows
+      ? _at(sibling, colNode, aggregate)
+      : _at(rowNode, sibling, aggregate);
+
+  @override
+  Object? sibling(Aggregate aggregate, AxisSide axis, BaseItem item) {
+    final (tree, node) = _along(axis);
+    final parent = node.parent;
+    if (parent == null) return null;
+    final ordered = parent.ordered;
+    final AxisNode? target;
+    switch (item) {
+      case PreviousItem():
+        final i = ordered.indexOf(node);
+        target = i > 0 ? ordered[i - 1] : null;
+      case NextItem():
+        final i = ordered.indexOf(node);
+        target = i >= 0 && i + 1 < ordered.length ? ordered[i + 1] : null;
+      case ValueItem(:final value):
+        AxisNode? found;
+        for (final s in ordered) {
+          if (tree.valueOf(s) == value) {
+            found = s;
+            break;
+          }
+        }
+        target = found;
+    }
+    if (target == null) return null;
+    return _atSibling(axis, target, aggregate);
+  }
+
+  @override
+  (List<Object?>, int) siblings(Aggregate aggregate, AxisSide axis) {
+    final (_, node) = _along(axis);
+    final parent = node.parent;
+    if (parent == null) return (const [], -1);
+    final ordered = parent.ordered;
+    return (
+      [for (final s in ordered) _atSibling(axis, s, aggregate)],
+      ordered.indexOf(node),
+    );
+  }
 }
 
 final class CubeLayoutImpl implements CubeLayout {

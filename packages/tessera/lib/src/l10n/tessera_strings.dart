@@ -1,5 +1,6 @@
 import '../cube/aggregate.dart';
 import '../cube/aggregate_kind.dart';
+import '../cube/layout_aggregate.dart';
 import '../facts/dimension.dart';
 import '../facts/fact_table.dart';
 import 'locales.dart';
@@ -44,6 +45,27 @@ abstract class TesseraStrings {
 
   /// Label of the count-of-facts aggregate in headers, e.g. "count".
   String get countLabel;
+
+  // ------------------------------------------ layout-relative labels
+
+  /// "sum of Revenue % of row total": [base] is the label of the aggregate
+  /// the calculation is applied to.
+  String percentOfTotal(String base, TotalOf of);
+
+  /// "sum of Revenue difference from previous" ([percent] = false) or
+  /// "… % difference from previous" ([percent] = true); [item] is
+  /// [previousItem], [nextItem] or a group value as text.
+  String differenceFrom(String base, String item, {required bool percent});
+
+  /// The reference items of [differenceFrom].
+  String get previousItem;
+  String get nextItem;
+
+  /// "sum of Revenue running total".
+  String runningTotalOf(String base);
+
+  /// "sum of Revenue rank".
+  String rankOf(String base);
 
   // ------------------------------------------------- aggregate functions
 
@@ -155,7 +177,31 @@ abstract class TesseraStrings {
       dimensionLabel(dimension, facts),
     ),
     CountAggregate() => countLabel,
+    PercentOfTotalAggregate(:final base, :final of) => percentOfTotal(
+      aggregateLabel(base, facts),
+      of,
+    ),
+    DifferenceFromAggregate(:final base, :final item) => differenceFrom(
+      aggregateLabel(base, facts),
+      _itemLabel(item),
+      percent: false,
+    ),
+    PercentDifferenceFromAggregate(:final base, :final item) => differenceFrom(
+      aggregateLabel(base, facts),
+      _itemLabel(item),
+      percent: true,
+    ),
+    RunningTotalAggregate(:final base) => runningTotalOf(
+      aggregateLabel(base, facts),
+    ),
+    RankAggregate(:final base) => rankOf(aggregateLabel(base, facts)),
     _ => aggregate.labelFor(facts),
+  };
+
+  String _itemLabel(BaseItem item) => switch (item) {
+    PreviousItem() => previousItem,
+    NextItem() => nextItem,
+    ValueItem(:final value) => value == null ? emptyGroup : value.toString(),
   };
 
   String aggregateKindLabel(AggregateKind kind) => switch (kind) {

@@ -9,6 +9,7 @@ import '../expr/functions.dart';
 import '../facts/dimension.dart';
 import '../facts/fact_table.dart';
 import '../facts/measure.dart';
+import 'layout_aggregate.dart';
 
 /// Running state of one [Aggregate] over a subset of facts.
 ///
@@ -75,6 +76,40 @@ abstract class Aggregate<R> {
 
   static DistinctCountAggregate distinctCount(Dimension dimension) =>
       DistinctCountAggregate(dimension);
+
+  /// [base] as a percentage of a total ([TotalOf.row], [TotalOf.column],
+  /// [TotalOf.grand], [TotalOf.parentRow], [TotalOf.parentColumn]).
+  static PercentOfTotalAggregate percentOf(Aggregate base, TotalOf of) =>
+      PercentOfTotalAggregate(base, of);
+
+  /// [base] minus its value in a sibling group along [axis]: the previous
+  /// or next one in display order, or the one with a given value.
+  static DifferenceFromAggregate differenceFrom(
+    Aggregate base, {
+    required AxisSide axis,
+    BaseItem item = BaseItem.previous,
+  }) => DifferenceFromAggregate(base, axis, item);
+
+  /// The change of [base] from a sibling group, in percent of that group.
+  static PercentDifferenceFromAggregate percentDifferenceFrom(
+    Aggregate base, {
+    required AxisSide axis,
+    BaseItem item = BaseItem.previous,
+  }) => PercentDifferenceFromAggregate(base, axis, item);
+
+  /// [base] summed over the sibling groups along [axis] up to this one.
+  static RunningTotalAggregate runningTotal(
+    Aggregate base, {
+    required AxisSide axis,
+  }) => RunningTotalAggregate(base, axis);
+
+  /// The rank of [base] among the sibling groups along [axis], 1 = largest
+  /// (with [ascending], 1 = smallest).
+  static RankAggregate rank(
+    Aggregate base, {
+    required AxisSide axis,
+    bool ascending = false,
+  }) => RankAggregate(base, axis, ascending: ascending);
 
   /// A number computed per cell from other aggregates by a cell formula,
   /// e.g. `sum(total) / count`; see [ExpressionAggregate].

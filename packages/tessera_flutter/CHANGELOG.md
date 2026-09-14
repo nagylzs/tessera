@@ -1,5 +1,6 @@
 ## Unreleased
 
+* `AxisSide` now comes from the engine (re-exported, no import change).
 * The aggregate picker's function dropdown expands to the dialog width
   and ellipsizes long names (the new variance family labels).
 

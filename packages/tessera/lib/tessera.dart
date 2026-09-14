@@ -35,6 +35,12 @@
 /// as JSON data and decodes it again, with [JsonAdapter]s for
 /// application-defined aggregates, dimensions and filters.
 ///
+/// [LayoutAggregate]s — [PercentOfTotalAggregate], [DifferenceFromAggregate],
+/// [PercentDifferenceFromAggregate], [RunningTotalAggregate], [RankAggregate]
+/// — show an aggregate against the cells around it (Excel's "Show Values
+/// As"); the engine computes them from the layout through a
+/// [LayoutCellContext].
+///
 /// [TesseraSnapshot] writes a [FactTable] (and a [CubeConfig]) as one
 /// buffer of bytes that loads back without parsing — a cache, or a table
 /// built on a server and sent to clients; the format is documented in
@@ -64,6 +70,7 @@ export 'src/cube/cube_spec.dart';
 export 'src/cube/dimension_path.dart';
 export 'src/cube/expansion_state.dart';
 export 'src/cube/filter.dart';
+export 'src/cube/layout_aggregate.dart';
 export 'src/export/csv_cube_exporter.dart';
 export 'src/export/cube_export_theme.dart';
 export 'src/export/cube_grid.dart';
