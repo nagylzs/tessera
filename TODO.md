@@ -41,11 +41,12 @@ through these in order, then publish.
       metrics or judgements, so it cannot go stale.
 - [x] Optional: `dart pub global activate pana` and run it on each package
       for the score pub.dev will show.
-- [ ] Publish order: `tessera`, then `tessera_xlsx`, `tessera_ods`,
+- [x] Publish order: `tessera`, then `tessera_xlsx`, `tessera_ods`,
       `tessera_html`, `tessera_svg`, `tessera_pdf`, then `tessera_flutter`
       (pub checks that dependencies exist). Run the dry runs once more
       right before; versions cannot be deleted, only retracted within
-      seven days.
+      seven days. (0.1.0 of all seven published 2026-09-14/15, under the
+      `nagylzs.eu` publisher.)
 
 ## User guide (repository only, not uploaded)
 

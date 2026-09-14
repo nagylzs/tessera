@@ -24,7 +24,9 @@ with these packages:
 Every exporter renders a `CubeLayout` without Flutter; further formats
 can be added the same way.
 
-> **Status: early development.** Nothing is published to pub.dev yet.
+> **Status: 0.1.x.** Published on pub.dev under the
+> [nagylzs.eu](https://pub.dev/publishers/nagylzs.eu) publisher; the API may
+> still change before 1.0 (see each CHANGELOG).
 
 ## Scope and alternatives
 

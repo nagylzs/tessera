@@ -7,9 +7,8 @@ pivot-table engine: an expandable cube grid, drag-and-drop axis and
 aggregate editors, picker dialogs, and localizations for fourteen
 languages.
 
-> **Status: early development.** Everything works end to end and is covered
-> by widget tests, but the API is still moving and nothing is published to
-> pub.dev yet.
+> **Status: 0.1.x.** Everything works end to end and is covered by widget
+> tests; the API may still change before 1.0 (see the CHANGELOG).
 
 This package re-exports `package:tessera/tessera.dart`, so a single import
 gives you both the engine and the widgets. Read the engine's README for the

@@ -1,6 +1,6 @@
 # tessera — project notes for Claude
 
-Pub workspace (not yet published) for analyzing, grouping and aggregating
+Pub workspace (published on pub.dev, publisher `nagylzs.eu`) for analyzing, grouping and aggregating
 tabular data: a pivot-table engine plus Flutter widgets. Owner: László
 Zsolt Nagy (nagylzs@gmail.com). MIT.
 
@@ -162,9 +162,14 @@ package that depends on Flutter cannot be used with the standalone Dart
 SDK at all (servers, `dart:stable` images) — a Flutter-free entrypoint
 inside a Flutter package does not help.
 
-`TODO.md` at the root lists the agreed pre-publish work (API decisions,
-small fixes, publishing order, the user guide, later features); tick
-items there as they are done.
+`TODO.md` at the root lists the agreed work (the pre-publish items are
+done; the user guide and later features remain); tick items there as they
+are done. Publishing: bump `version:` and the CHANGELOG in the package,
+plus every `tessera: ^x.y.z` constraint when the engine changes; publish
+the engine first, dependents after pub.dev serves it (seconds; new
+*packages* are rate-limited to 4 per few minutes, new versions are not);
+`dart pub publish` (`flutter pub publish` for tessera_flutter); packages
+belong to the publisher, so no transfer is needed for later versions.
 
 ## Commands
 
