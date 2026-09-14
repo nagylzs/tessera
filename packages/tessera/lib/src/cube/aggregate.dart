@@ -501,6 +501,9 @@ final class ExpressionAggregate extends DerivedAggregate<double> {
   @override
   String get id => _id ?? source;
 
+  /// The label given at construction, or `null` when [label] is [source].
+  String? get explicitLabel => _label;
+
   @override
   String get label => _label ?? source;
 

@@ -34,6 +34,9 @@ sealed class Measure {
   /// column's label for a [ColumnMeasure]).
   String labelFor(FactTable facts);
 
+  /// The label given at construction, or `null` when [label] is derived.
+  String? get explicitLabel;
+
   /// The fact table columns the measure reads.
   Set<String> get columns;
 
@@ -57,6 +60,9 @@ final class ColumnMeasure extends Measure {
 
   @override
   String get id => column;
+
+  @override
+  String? get explicitLabel => _label;
 
   @override
   String get label => _label ?? column;
@@ -95,6 +101,9 @@ final class ExpressionMeasure extends Measure {
   /// [source] unless an id was given.
   @override
   String get id => _id ?? source;
+
+  @override
+  String? get explicitLabel => _label;
 
   @override
   String get label => _label ?? source;

@@ -1,5 +1,15 @@
 ## Unreleased
 
+* `CubeJson`: JSON encoding and decoding of `CubeConfig` (a new bundle of
+  `CubeSpec`, both `ExpansionState`s and the `Schema`; `CubeConfig.of(cube)`,
+  `toCube(facts)`), and of every part on its own — axes, sorts,
+  dimensions, measures, aggregates, filters, paths, expansion states,
+  schemas, values (dates as `{"date": …}`). `JsonAdapter` for custom
+  aggregates, dimensions and filters; `functions` for decoded expressions;
+  `FormatException` on malformed input, `UnsupportedError` for members
+  without a JSON form. `Measure.explicitLabel`,
+  `ExpressionAggregate.explicitLabel`; `ValueFilter`, `AndFilter`,
+  `OrFilter` and `NotFilter` compare by value.
 * Cell formulas accept row expressions as aggregate arguments:
   `sum(qty * price) / sum(qty)`, `max(price - cost)`,
   `distinct(upper(left(country, 1)))` — the argument becomes an expression

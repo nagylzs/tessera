@@ -31,6 +31,10 @@
 /// the plug points; the structured [CompareFilter], [RangeFilter],
 /// [TextFilter] and [EmptyFilter] render to expressions too.
 ///
+/// [CubeJson] encodes a [CubeConfig] — spec, expansion states and schema —
+/// as JSON data and decodes it again, with [JsonAdapter]s for
+/// application-defined aggregates, dimensions and filters.
+///
 /// [CubeGrid] lays a [CubeLayout] out as a rectangular grid (the way the
 /// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
 /// as CSV, `tessera_xlsx` as a workbook. [CubeExportTheme] is the
@@ -75,6 +79,7 @@ export 'src/facts/importer.dart';
 export 'src/facts/isolate_import.dart';
 export 'src/facts/measure.dart';
 export 'src/facts/standard_dimensions.dart';
+export 'src/json/cube_json.dart';
 export 'src/l10n/locales.dart';
 export 'src/l10n/tessera_strings.dart';
 export 'src/schema/column_spec.dart';

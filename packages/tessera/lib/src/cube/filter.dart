@@ -17,7 +17,8 @@ import '../facts/fact_table.dart';
 /// data an editor can build and an application can store; each one can be
 /// written as an expression ([toExpressionSource]). [ExpressionFilter]
 /// holds an arbitrary boolean expression in the expression language; and
-/// [PredicateFilter] wraps a Dart function, which cannot be stored.
+/// [PredicateFilter] wraps a Dart function, which cannot be stored. All
+/// but [PredicateFilter] compare by value.
 sealed class FactFilter {
   const FactFilter();
 
@@ -47,6 +48,19 @@ final class ValueFilter extends FactFilter {
   @override
   bool matches(FactTable facts, int row) =>
       values.contains(facts.dimensionValue(row, dimension));
+
+  @override
+  bool operator ==(Object other) =>
+      other is ValueFilter &&
+      other.dimension == dimension &&
+      other.values.length == values.length &&
+      other.values.containsAll(values);
+
+  @override
+  int get hashCode => Object.hash(dimension, values.length);
+
+  @override
+  String toString() => 'ValueFilter($dimension, $values)';
 
   @override
   String? toExpressionSource() {
@@ -110,6 +124,13 @@ final class AndFilter extends FactFilter {
 
   @override
   String? toExpressionSource() => _join(filters, 'and', 'true');
+
+  @override
+  bool operator ==(Object other) =>
+      other is AndFilter && _sameFilters(other.filters, filters);
+
+  @override
+  int get hashCode => Object.hashAll(filters);
 }
 
 final class OrFilter extends FactFilter {
@@ -133,6 +154,21 @@ final class OrFilter extends FactFilter {
 
   @override
   String? toExpressionSource() => _join(filters, 'or', 'false');
+
+  @override
+  bool operator ==(Object other) =>
+      other is OrFilter && _sameFilters(other.filters, filters);
+
+  @override
+  int get hashCode => Object.hashAll(filters);
+}
+
+bool _sameFilters(List<FactFilter> a, List<FactFilter> b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }
 
 String? _join(List<FactFilter> filters, String op, String empty) {
@@ -164,6 +200,13 @@ final class NotFilter extends FactFilter {
     final s = filter.toExpressionSource();
     return s == null ? null : 'not $s';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is NotFilter && other.filter == filter;
+
+  @override
+  int get hashCode => Object.hash(NotFilter, filter);
 }
 
 /// Keeps facts for which [source], a boolean expression over the columns

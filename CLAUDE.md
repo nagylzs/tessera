@@ -202,6 +202,26 @@ the root, ignored; members carry `resolution: workspace`):
   sales.csv cross-checks) and `test/expression_cube_test.dart` (plug
   points in cubes). The example's `_prune` validates expression-based
   spec members with `Expression.validate`.
+- JSON (`packages/tessera/lib/src/json/cube_json.dart`): `CubeConfig`
+  (spec + rowExpansion + columnExpansion + schema; `of(cube, {schema})`
+  defaults to `facts.schema`, which holds imported columns only, so apps
+  with an edited schema pass theirs; `toCube(facts)`), `CubeJson` (const
+  codec; `aggregates`/`dimensions`/`filters` adapter lists, `functions`
+  for decoded expressions; `encodeX`/`decodeX` for config, spec, axis,
+  sort, dimension, measure, aggregate, filter, path, expansion, schema,
+  columnSpec, value), `JsonAdapter<T>` (`type`, `encode` returns null
+  when not its value, `decode`). Shapes: objects with `type` for
+  dimensions (`column`/`datePart`/`expression`), aggregates (`sum`, `avg`,
+  `min`, `max`, `countValues`, `stdev`, `stdevp`, `var`, `varp`, `count`,
+  `distinct`, `expression`) and filters (`value`, `expression`, `compare`,
+  `range`, `text`, `empty`, `and`, `or`, `not`); measures are
+  `{column}` or `{expression}`; dates `{"date": iso-utc}`; sort keyPaths
+  self-contained `[{dimension, value}]`; expansion states positional value
+  lists against the axis (sorted by length then text); `version: 1` on a
+  config. Errors: `FormatException` (malformed), `UnsupportedError`
+  (PredicateFilter, MappedDimension, custom aggregate without adapter);
+  `ColumnSpec.parser` is dropped silently (documented). Tests:
+  `test/cube_json_test.dart`.
 - Planned: further exporters the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a

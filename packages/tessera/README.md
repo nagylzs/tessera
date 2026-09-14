@@ -52,6 +52,7 @@ blank instead of showing `0`.
 | **ExpansionState** | Which groups are expanded on an axis. The summary is the root; the first level is visible when the root is expanded. `Cube.expandRowLevel` / `collapseRowLevel` (and the column twins) open or close a whole level. |
 | **CubeLayout** | The visible rows, columns and cells derived from facts + spec + expansion state. |
 | **AxisGeometry** | The merged header cells of an axis, for renderers (grids, exporters). |
+| **CubeJson / CubeConfig** | JSON form of a pivot configuration (spec, expansion states, schema) for saving and restoring a layout; adapters for custom members. |
 | **TesseraStrings** | Localized texts and label/number formatting rules; fourteen languages built in. |
 
 ### Layers
@@ -203,6 +204,33 @@ build (filters) or once per fact table (calculated measures and
 dimensions, whose values are then stored like a column), and their
 canonical text form (`Expression.parse(s).canonicalSource`,
 `FactFilter.toExpressionSource()`) is what an application saves.
+
+## Saving a configuration
+
+`CubeJson` turns a pivot configuration into plain JSON data and back, so
+an application can persist a layout and restore it over the same source:
+
+```dart
+// save
+final config = CubeConfig.of(cube, schema: editedSchema); // schema optional
+final text = jsonEncode(CubeJson.standard.encodeConfig(config));
+
+// restore
+final restored = CubeJson.standard.decodeConfig(jsonDecode(text) as Map<String, Object?>);
+final facts = (await loadFacts(source, schema: restored.schema)).facts;
+final cube = restored.toCube(facts);
+```
+
+A `CubeConfig` bundles the `CubeSpec` (axes with sorts, aggregates,
+filter), both `ExpansionState`s and the `Schema`. Every built-in
+dimension, measure, aggregate and filter has a JSON form, expressions are
+stored as their source text, dates as `{"date": "…"}`, and expansion paths
+as lists of values positional against their axis. Application-defined
+aggregates, dimensions and filters plug in through a `JsonAdapter`; a
+`FunctionRegistry` given to the codec reaches every decoded expression. A
+`PredicateFilter`, a `MappedDimension` or a `ColumnSpec.parser` is a Dart
+function and cannot be stored: the first two throw without an adapter, the
+parser is dropped.
 
 ## Example
 

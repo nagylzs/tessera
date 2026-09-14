@@ -154,10 +154,13 @@ the facts into a database only pays off if the whole cube moved there.
       Builds on the structured filters and `ExpressionFilter` above: a
       builder (field, operator, value, and/or groups) plus an expression text
       field with live validation from the checker.
-- [ ] Saving a pivot configuration: JSON for `CubeSpec`, `ExpansionState`
+- [x] Saving a pivot configuration: JSON for `CubeSpec`, `ExpansionState`
       and schema overrides, so an app can persist and restore a layout.
       Filters and calculated measures serialize as their expression text or
-      structured tree (a `PredicateFilter` closure cannot be saved).
+      structured tree (a `PredicateFilter` closure cannot be saved). Done
+      2026-09-14: `CubeJson` / `CubeConfig` / `JsonAdapter` in the engine;
+      the example app does not use it yet (a "Save/Load layout" action
+      would be the natural demo once the filter editor exists).
 - [ ] Calculated aggregates: percent of row/column/grand total, difference
       from a base value (layout-relative wrappers, see above) and
       expression-based measures / derived aggregates from the expression
