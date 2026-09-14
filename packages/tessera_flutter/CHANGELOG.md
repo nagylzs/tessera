@@ -1,3 +1,7 @@
+## 0.1.1
+
+* README: the status note no longer says the package is unpublished.
+
 ## 0.1.0
 
 * `CubeView` shows several aggregates side by side — one value column per

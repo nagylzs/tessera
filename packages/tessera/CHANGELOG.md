@@ -1,3 +1,7 @@
+## 0.1.1
+
+* README: the status note no longer says the package is unpublished.
+
 ## 0.1.0
 
 * Initial release: data sources (CSV, lists), schema inference, the fact

@@ -1,6 +1,6 @@
 name: tessera
 description: "Analyze, group and aggregate tabular data: a pivot-table engine with expandable row/column hierarchies. Pure Dart; tessera_flutter adds the widgets."
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/nagylzs/tessera/tree/main/packages/tessera
 issue_tracker: https://github.com/nagylzs/tessera/issues
 topics:
