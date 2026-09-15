@@ -21,6 +21,12 @@ class TesseraExampleApp extends StatelessWidget {
         colorSchemeSeed: Colors.teal,
         brightness: Brightness.dark,
       ),
+      // `--dart-define=THEME=light|dark` fixes the theme (screenshots)
+      themeMode: switch (const String.fromEnvironment('THEME')) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      },
       locale: locale,
       localizationsDelegates: const [
         TesseraLocalizations.delegate,
@@ -29,9 +35,19 @@ class TesseraExampleApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: TesseraLocalizations.supportedLocales,
-      home: const LauncherPage(),
+      home: _initial(context),
     ),
   );
+
+  /// The launcher, or one example straight away when started with
+  /// `--dart-define=EXAMPLE=<title>` (handy for screenshots).
+  Widget _initial(BuildContext context) {
+    const title = String.fromEnvironment('EXAMPLE');
+    for (final e in examples) {
+      if (e.title == title) return e.build(context);
+    }
+    return const LauncherPage();
+  }
 }
 
 class LauncherPage extends StatelessWidget {

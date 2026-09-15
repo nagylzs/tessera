@@ -103,7 +103,11 @@ missing values, hierarchical dimensions and orphan values — see
 `example/tool/gen_sales_csv.dart`) and lets you configure everything
 interactively: the inferred schema (include, type, label, date format,
 number syntax per column), the axes (drag-and-drop), the aggregates, the
-language, and the cube itself. *Public datasets* (`example/lib/datasets/`)
+language, and the cube itself. *Charts* (`example/lib/charts/`) puts a
+live chart next to the grid — bar, stacked, line, pie and scatter from the
+layout, from the facts or from the current cell's drill-down, drawn with
+`fl_chart` from the engine's `ChartData` / `ScatterData`
+(`chart_widgets.dart` is the whole adapter). *Public datasets* (`example/lib/datasets/`)
 downloads real-world CSV files of up to ~70 MB through a custom
 `HttpCsvDataSource` (`example/lib/common/http_csv_data_source.dart`) — a
 worked example of implementing `DataSource`, with early-cancelled prefix

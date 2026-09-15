@@ -29,6 +29,7 @@ class CubeWorkbench extends StatefulWidget {
     this.theme = const CubeTheme(),
     this.exportTheme = const CubeExportTheme(),
     this.actions,
+    this.companion,
   });
 
   final DataSource source;
@@ -56,6 +57,17 @@ class CubeWorkbench extends StatefulWidget {
   /// is `null` until the import has finished.
   final List<Widget> Function(BuildContext context, CubeController? controller)?
   actions;
+
+  /// A pane shown next to the grid — to the right when the area is wider
+  /// than tall, below it otherwise — receiving the controller and the
+  /// dimensions offered by the pickers. `null` gives the grid the whole
+  /// area.
+  final Widget Function(
+    BuildContext context,
+    CubeController controller,
+    List<Dimension> dimensions,
+  )?
+  companion;
 
   @override
   State<CubeWorkbench> createState() => _CubeWorkbenchState();
@@ -537,10 +549,29 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: CubeView(
-                controller: controller,
-                aggregates: shown,
-                theme: widget.theme,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final view = CubeView(
+                    controller: controller,
+                    aggregates: shown,
+                    theme: widget.theme,
+                  );
+                  final companion = widget.companion;
+                  if (companion == null) return view;
+                  final pane = companion(context, controller, _dimensions);
+                  // beside the grid on a clearly landscape area, below it
+                  // otherwise (a square-ish window is better split top/bottom)
+                  return Flex(
+                    direction:
+                        constraints.maxWidth > constraints.maxHeight * 1.3
+                        ? Axis.horizontal
+                        : Axis.vertical,
+                    children: [
+                      Expanded(flex: 3, child: view),
+                      Expanded(flex: 2, child: pane),
+                    ],
+                  );
+                },
               ),
             ),
             // the current cell: what an app would chart or drill into

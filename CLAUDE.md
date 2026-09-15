@@ -319,14 +319,31 @@ package that depends on Flutter cannot be used with the standalone Dart
 SDK at all (servers, `dart:stable` images) — a Flutter-free entrypoint
 inside a Flutter package does not help.
 
-`docs/` at the root is the user guide (14 chapters, `docs/README.md` the
+`docs/` at the root is the user guide (15 chapters, `docs/README.md` the
 index, `docs/snapshot.md` the format spec, `docs/images/` the screenshots
-at 1600 px width, re-encoded as 8-bit palette PNGs (`magick -depth 8 -colors 255`, 16 MB → 4.7 MB), taken from the example app in English — run the release
-bundle with `LANG=en_US.UTF-8` since the machine's locale is Hungarian,
-make the window floating with `i3-msg '[id=…] floating enable, resize
-set 2600 1500'`, capture with `import -window`; the debug build shows the
-banner). Every README links to the guide; keep the chapters in step with
-API changes the same way the READMEs are.
+at 1600 px width, re-encoded as 8-bit palette PNGs (PIL
+`quantize(255)`; earlier `magick -depth 8 -colors 255`), taken from the
+example app in English at the 2× scale of the originals). Since
+2026-09-15 they are taken on a **virtual display**, which never touches
+the owner's desktop (synthetic clicks once landed in their chat window):
+`Xvfb :5 -screen 0 3200x1800x24`, `echo "Xft.dpi: 120" | DISPLAY=:5
+xrdb -merge`, then the release bundle (`flutter build linux --release
+--dart-define=THEME=light`, no banner; `EXAMPLE=<title>` to skip the
+launcher) with `DISPLAY=:5 GDK_SCALE=2 LIBGL_ALWAYS_SOFTWARE=1
+LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8` (the machine's locale is
+Hungarian; a debug `flutter run` there also needs
+`--no-enable-impeller`, Impeller times out on llvmpipe), sized with
+`xdotool windowmove 0 0 windowsize W H`, driven with `xdotool mousemove
+X Y click 1`, captured with `ffmpeg -f x11grab -video_size WxH -i :5
+-frames:v 1 out.png` (move the mouse to the corner first), downscaled to
+1600 px with PIL. Flutter 3.47's engine picks the *Ubuntu* font on this
+machine instead of Noto Sans (which every earlier screenshot uses):
+point `FONTCONFIG_FILE` at a fonts.conf that includes
+`/etc/fonts/fonts.conf` and aliases `Ubuntu` → `Noto Sans` (strong
+binding). Gotcha: `pkill -f '<pattern>'` also matches the Claude shell
+that *contains* the pattern in a heredoc or comment — put such commands
+in a script file and call it. Every README links to the guide; keep the
+chapters in step with API changes the same way the READMEs are.
 
 `TODO.md` at the root lists the agreed work (the pre-publish items are
 done; the user guide and later features remain); tick items there as they
@@ -371,9 +388,10 @@ dart format packages                           # run before committing
 (cd packages/<p> && pana --no-warning .)       # pub.dev score; needs libwebp-utils (cwebp) for the screenshot check;
                                                # dependent packages score low until tessera itself is on pub.dev
 cd packages/tessera_flutter/example && dart run tool/gen_sales_csv.dart   # regenerates assets/sales.csv AND packages/tessera/test/data/sales.csv (seeded)
-cd packages/tessera_flutter/example && flutter run -d linux   # run the example (X11: xdotool + `import -window` for screenshots; i3 tiles it)
+cd packages/tessera_flutter/example && flutter run -d linux   # run the example on the desktop (i3 tiles it; prefer the Xvfb recipe under docs/)
 # find the window with `xdotool search --class tessera_example`; stop with
-# pkill -f '[f]lutter run -d linux' (the bracket keeps pkill from killing the shell)
+# pkill -f '[f]lutter run -d linux' from a script (see the pkill gotcha under docs/);
+# the app binary survives that — also pkill -f '[b]undle/tessera_example'
 ```
 
 Paths below are relative to the package (`lib/src/...` means
@@ -529,6 +547,47 @@ Paths below are relative to the package (`lib/src/...` means
   as `CubeWorkbench.exportTheme` (used by the .xlsx and .ods exports). No `CubeTheme → CubeExportTheme`
   converter on purpose (needs a context; screen shading is too subtle
   on paper) — Excel themes are authored.
+- "Charts" (`example/lib/charts/`, `fl_chart` is an example-only
+  dependency): `ChartsPage` = `CubeWorkbench` with `companion:` (new hook —
+  a builder `(context, controller, dimensions)` placed by the workbench in a
+  `Flex` next to the `CubeView`, horizontal when the area is wider than 1.3 ×
+  its height, 3:2) and an
+  AppBar toggle hiding it. `ChartPanel` (`chart_panel.dart`): `ChartType`
+  chips (bar/stacked/line/pie/scatter) × `ChartSource` chips
+  (layout/facts/cell = `fromLayout`/`fromFacts`/`fromCell`); remembered
+  choices (`_value`, `_x`, `_y`, `_category`, `_series`, `_xMeasure`,
+  `_yMeasure`) are re-validated on every build against the spec's
+  aggregates (the only value/X/Y choices — scatter from the layout needs
+  two), the current cell (Cell mode disables dimensions with
+  `cell.coordinate.constrains(d)`, falls back to the grand-total cell
+  when nothing is selected) and the dimension list; `DropdownMenu`s are
+  keyed by (label, value) so they re-create when the resolved value moves.
+  "Per fact" (scatter + cell) = `ScatterData.ofFacts(rows: cell.factRows,
+  limit: 2000)` with numeric columns as X/Y. Caption names the producer,
+  the cell and the sizes. `chart_widgets.dart` is the whole `fl_chart`
+  adapter: `seriesColors` (golden-angle OKLCH hues from the primary),
+  `niceInterval` (fl_chart's default tick interval crowds tall axes),
+  `barChart` (rod width from a `LayoutBuilder`; stacked = one rod with
+  stack items, positives up / negatives down), `lineChart` (`LineAxis.of`:
+  time when every category has `periodStart` — x = days since epoch —,
+  numeric when every value is a number, else categorical with
+  `FlSpot.nullSpot` gaps), `pieChart` (first series, positive values),
+  `scatterChart` (dot radius grows with `log(factCount)`; tooltip labels
+  keyed by (x, y)). Tests: `example/test/charts_test.dart` (sets
+  `devicePixelRatio = 1`, the default 3 leaves no room for the panel).
+  `main.dart` honours `--dart-define=EXAMPLE=<title>` (open one example
+  directly) and `THEME=light|dark` — for screenshots (see the virtual
+  display recipe under `docs/`). Adapter details settled by the visual
+  check: axis ranges rounded outwards to whole 1-2-5 ticks (`_AxisRange`,
+  tick count from the pane size), grid on the same interval, no end
+  labels on numeric/time X axes (they collide with the neighbouring
+  tick), `(empty)` kept on a categorical line axis (`withoutEmpty` only
+  for real axes), a lone date part (month, weekday) is categorical not
+  numeric, pie radius from the pane, `pathLabel` prepends ancestors when
+  categories or series sit deeper than the first level ("2024 › Q1";
+  bottom titles put the own label on a second line), the Facts/Cell
+  category defaults to the pivot's first row dimension and per-fact X/Y
+  to the aggregated columns.
 - "Public datasets" (`example/lib/datasets/`): six real CSVs (GitHub raw
   with Content-Length; data.wa.gov chunked without) listed in
   `publicDatasets`, cached under `systemTemp/tessera_examples/`; "Clear

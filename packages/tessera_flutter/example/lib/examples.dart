@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'charts/charts_page.dart';
 import 'datasets/datasets_page.dart';
 import 'simple/sales_page.dart';
 import 'theming/theming_page.dart';
@@ -39,6 +40,15 @@ const examples = [
     build: _theming,
   ),
   Example(
+    title: 'Charts',
+    description:
+        'A live chart next to the grid: bar, line, pie and scatter from the '
+        'layout, from the facts, or drilling into the current cell, drawn '
+        'with fl_chart from ChartData / ScatterData.',
+    icon: Icons.bar_chart_outlined,
+    build: _charts,
+  ),
+  Example(
     title: 'Public datasets',
     description:
         'Download real-world CSV files (60 KB to 70 MB) through a custom '
@@ -50,4 +60,5 @@ const examples = [
 
 Widget _simple(BuildContext context) => const SalesPage();
 Widget _theming(BuildContext context) => const ThemingPage();
+Widget _charts(BuildContext context) => const ChartsPage();
 Widget _datasets(BuildContext context) => const DatasetsPage();

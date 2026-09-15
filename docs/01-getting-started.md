@@ -73,21 +73,25 @@ cd packages/tessera && dart run example/main.dart
 
 ## The example app
 
-`packages/tessera_flutter/example` is a small launcher with three pages.
+`packages/tessera_flutter/example` is a small launcher with four pages.
 The screenshots in this guide come from it.
 
-![The launcher: Simple pivot, Theming, Public datasets](images/launcher.png)
+![The launcher: Simple pivot, Theming, Charts, Public datasets](images/launcher.png)
 
 - **Simple pivot** loads `sales.csv`, lets you edit the inferred schema,
   the axes, the aggregates and the filter, and export the result.
 - **Theming** is the same cube under the built-in theme presets, colour
   seeds and light/dark.
+- **Charts** puts a live chart next to the grid: bar, line, pie and
+  scatter from the layout, from the facts or from the current cell,
+  drawn with `fl_chart` ([charts chapter](15-charts.md)).
 - **Public datasets** downloads real CSV files, 60 KB to 70 MB, through
   a custom HTTP data source with progress reporting.
 
 ```
 cd packages/tessera_flutter/example
 flutter run        # any desktop; -d chrome works too, except the datasets page (dart:io)
+flutter run --dart-define=EXAMPLE=Charts   # open one example directly
 ```
 
 ## Where things are

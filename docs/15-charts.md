@@ -166,6 +166,23 @@ without a dimension is single and unnamed. `ofFacts` takes a `filter`,
 an explicit row set (`CubeCell.factRows`) and a `limit`, because two
 million points are not a chart.
 
+## The Charts example
+
+The demo app's *Charts* page (`packages/tessera_flutter/example/lib/charts/`)
+is this chapter as a UI: a live chart beside the grid, chips for the
+chart type (bar, stacked, line, pie, scatter) and the source (Layout /
+Facts / Cell = `fromLayout` / `fromFacts` / `fromCell`), and only the
+controls that apply — the value (or X and Y) among the pivot's own
+aggregates, the category and series dimensions in Facts and Cell mode
+with the dimensions the current cell pins disabled, the entry selection
+and transposition in Layout mode, and "per fact" for a scatter of the
+cell's rows. The caption under the chart names the producer, the cell
+and the sizes; the line chart says which axis kind the category values
+gave it. `chart_widgets.dart` holds the whole `fl_chart` adapter, one
+function per chart type.
+
+![The Charts example: a stacked bar chart of the layout next to the grid](images/charts.png)
+
 ## Feeding a chart library
 
 The adapter is the application's, and short. With
@@ -187,4 +204,8 @@ LineChart(LineChartData(
 A bar chart uses `categories[i].label` for the group titles and
 `series[j].label` for the legend; a pie chart uses one series. Labels
 are localized through the `strings` parameter every producer takes, the
-same `TesseraStrings` the exporters use.
+same `TesseraStrings` the exporters use. A label is the group's own
+value — `Africa`, `Q1` — so when the leaves sit at mixed depths
+(`Electronics › Africa` next to `Furniture`, or 2024's quarters next to
+2025) the `path` tells them apart; the example's adapter prepends the
+ancestors from `path.entries` in that case (`pathLabel`).

@@ -202,7 +202,7 @@ the facts into a database only pays off if the whole cube moved there.
       table; the engine's `ChartData` / `ScatterData` (`lib/src/chart/`)
       produce chart-ready series from a layout, from facts or from one
       cell's drill-down, and the app draws them (`docs/15-charts.md`).
-      A demo with a chart package in the example app is still open.
+      The example app's "Charts" page draws them with `fl_chart`.
 - [x] Trust signals after publishing: a screenshot-led README, the user
       guide, a CHANGELOG discipline and an issue template; the popular
       grids win on track record for a while. Done 2026-09-15: the README

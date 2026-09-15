@@ -1,6 +1,14 @@
 ## Unreleased
 
 * Example app: JSON and JSON Lines in the export menu.
+* Example app: a "Charts" page — a live chart beside the grid (below it
+  on a tall screen) drawn with `fl_chart` from the engine's `ChartData`
+  / `ScatterData`: bar, stacked, line (time / numeric / categorical X
+  axis from the typed category values), pie and scatter, from the layout
+  as displayed, from the facts, or from the current cell's drill-down
+  (dimensions the cell pins are disabled); per-fact scatter of the cell's
+  rows. `CubeWorkbench.companion` places a pane next to the view;
+  `--dart-define=EXAMPLE=<title>` opens an example directly.
 
 ## 0.2.0
 
