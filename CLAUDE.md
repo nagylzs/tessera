@@ -345,9 +345,10 @@ that *contains* the pattern in a heredoc or comment — put such commands
 in a script file and call it. Every README links to the guide; keep the
 chapters in step with API changes the same way the READMEs are.
 
-`TODO.md` at the root lists the agreed work (the pre-publish items are
-done; the user guide and later features remain); tick items there as they
-are done. Versioning: every feature commit adds its bullet under a `## Unreleased`
+`TODO.md` at the root lists the agreed open work (reset 2026-09-15
+after 0.2.1; example-app demos, snapshot follow-ups, visibility, and
+the "out of scope by decision" list); tick items there as they are
+done. Versioning: every feature commit adds its bullet under a `## Unreleased`
 heading in the affected package's CHANGELOG; `version:` is bumped only in
 the release commit (rename the heading, bump the number — on 0.x a
 breaking change bumps the minor, additive work the patch, since `^0.1.0`
