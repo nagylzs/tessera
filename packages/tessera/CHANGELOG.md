@@ -1,5 +1,10 @@
 ## Unreleased
 
+* `Schema.structureKey`: a canonical key for the structure of a source
+  (the JSON list of its column names, in order), so that applications
+  can remember schema edits or layouts per structure and apply them to
+  the next file of the same shape. Built from names only on purpose:
+  inferred types vary with the sampled rows.
 * `TesseraSnapshot.mimeType` (`application/vnd.tessera.snapshot`) and
   `TesseraSnapshot.fileExtension` (`tsnp`): the official media type and
   extension of snapshots, so that servers, file dialogs and file

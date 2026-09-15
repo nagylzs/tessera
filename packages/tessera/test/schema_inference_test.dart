@@ -8,6 +8,22 @@ Map<String, ColumnType> typesOf(Schema s) => {
 };
 
 void main() {
+  test('structureKey is the JSON list of column names, in order', () {
+    const a = ColumnSpec(name: 'region', type: ColumnType.text);
+    const b = ColumnSpec(name: 'amount', type: ColumnType.number);
+    expect(Schema([a, b]).structureKey, '["region","amount"]');
+    expect(Schema([b, a]).structureKey, '["amount","region"]');
+    // Types, labels and exclusion do not matter, only names and order.
+    expect(
+      Schema([
+        a.copyWith(type: ColumnType.integer, label: 'Region', include: false),
+        b,
+      ]).structureKey,
+      Schema([a, b]).structureKey,
+    );
+    expect(Schema([]).structureKey, '[]');
+  });
+
   group('NumberSyntax', () {
     test('standard integers and numbers', () {
       const s = NumberSyntax.standard;

@@ -75,6 +75,19 @@ Label-only edits are cheap — the demo relabels the facts in place with
 `FactTable.withLabels` — while a type or inclusion change means a
 re-import.
 
+### Remembering edits per structure
+
+People tend to open the same export again and again. `Schema.structureKey`
+is a canonical key for the *shape* of a source — the JSON list of its
+column names, in order, such as `["region","product","amount"]` — so an
+application can save the user's edited schema (with `CubeJson.encodeSchema`)
+under the key of the inferred schema and apply it to the next file with the
+same columns. The key deliberately ignores types: inference looks at a
+sample of rows, so two files of the same structure can infer differently,
+and that is exactly when a remembered correction is worth applying. Take
+the key from the schema `inferSchema` returned, which lists every source
+column; exclusions and labels the user makes later do not change it.
+
 ## Import
 
 ```dart
