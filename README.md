@@ -2,6 +2,8 @@
 
 # tessera
 
+[![CI](https://github.com/nagylzs/tessera/actions/workflows/ci.yml/badge.svg)](https://github.com/nagylzs/tessera/actions/workflows/ci.yml)
+
 ![CubeView: regions and countries against years and quarters, with a group and a year expanded](packages/tessera_flutter/doc/cube_view.png)
 
 Analyze, group and aggregate tabular data in Dart and Flutter: a pivot-table
