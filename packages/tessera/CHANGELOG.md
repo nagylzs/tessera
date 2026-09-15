@@ -1,3 +1,11 @@
+## Unreleased
+
+* `TesseraSnapshot.mimeType` (`application/vnd.tessera.snapshot`) and
+  `TesseraSnapshot.fileExtension` (`tsnp`): the official media type and
+  extension of snapshots, so that servers, file dialogs and file
+  associations all declare the same value. Documented in
+  `docs/snapshot.md`.
+
 ## 0.2.1
 
 * `JsonDataSource` (a JSON array of objects, parsed whole) and

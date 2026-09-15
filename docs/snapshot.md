@@ -12,6 +12,22 @@ Snapshots are a cache and a transport format, not an interchange format
 for other tools; a Tessera client reads every version up to the one it
 knows and rejects newer ones.
 
+## Media type and file extension
+
+| | |
+|---|---|
+| Media (MIME) type | `application/vnd.tessera.snapshot` |
+| File extension | `.tsnp` |
+
+These are the official values, exposed as `TesseraSnapshot.mimeType` and
+`TesseraSnapshot.fileExtension`; use them wherever a type is declared —
+the `Content-Type` of an HTTP response that carries a snapshot, a file
+picker filter, a desktop MIME database entry, an Android intent filter —
+rather than inventing a variant. The name is in the vendor tree of
+RFC 6838 and is not registered with IANA. Nothing is inferred from the
+type or the extension when reading: a reader identifies a snapshot by
+the magic bytes, so a file with a wrong or missing type still decodes.
+
 ## Layout
 
 All integers are little-endian. Offsets in the header are relative to the

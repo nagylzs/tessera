@@ -39,6 +39,20 @@ final class TesseraSnapshot {
   /// The first four bytes of every snapshot.
   static const magic = 'TSNP';
 
+  /// The media (MIME) type of a snapshot: `application/vnd.tessera.snapshot`.
+  ///
+  /// The one value to use everywhere a type is declared — the
+  /// `Content-Type` of an HTTP response carrying a snapshot, a file
+  /// picker or save dialog, a desktop or Android file association — so
+  /// that every writer and reader agrees. Do not invent variants such as
+  /// `application/x-tessera` or `application/octet-stream` with a hint.
+  /// It is a vendor-tree name (RFC 6838) chosen by this project and not
+  /// registered with IANA.
+  static const mimeType = 'application/vnd.tessera.snapshot';
+
+  /// The file extension, without the dot: `tsnp`.
+  static const fileExtension = 'tsnp';
+
   /// The version this library writes and the newest it reads.
   static const formatVersion = 1;
 

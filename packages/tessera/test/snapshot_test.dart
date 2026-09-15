@@ -53,6 +53,12 @@ Map<String, Object?> headerOf(Uint8List bytes) {
 }
 
 void main() {
+  test('the official media type and extension are fixed', () {
+    expect(TesseraSnapshot.mimeType, 'application/vnd.tessera.snapshot');
+    expect(TesseraSnapshot.fileExtension, 'tsnp');
+    expect(TesseraSnapshot.magic, 'TSNP');
+  });
+
   test('sales.csv round-trips with its configuration', () async {
     final f = await sales();
     final spec = CubeSpec(
