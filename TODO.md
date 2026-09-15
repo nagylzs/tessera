@@ -20,6 +20,12 @@ under `## Unreleased` in the affected package's CHANGELOG.
 
 ## Engine
 
+- [ ] Register `application/vnd.tessera.snapshot` with IANA once Tessera
+      Studio is released (the form asks for an application that uses the
+      type): https://www.iana.org/form/media-types — vendor tree, no RFC
+      needed; specification = `docs/snapshot.md`, encoding binary, magic
+      `TSNP` at offset 0, extension `.tsnp`. Then a shared-mime-info
+      entry (freedesktop) so Linux desktops detect it by magic.
 - [ ] Snapshot: narrower number encodings (int32 for integral columns,
       day numbers for dates) if size ever matters; keep version 1
       readable.
