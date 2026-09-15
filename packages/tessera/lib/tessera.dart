@@ -8,8 +8,10 @@
 /// The library is organised in layers:
 ///
 /// 1. **Source & schema** — [DataSource] is the common interface for anything
-///    that yields rows; [inferSchema] guesses a [Schema] from a sample of
-///    rows, and [ColumnSpec] lets the user override types and parsing.
+///    that yields rows ([CsvDataSource], [JsonDataSource], [JsonlDataSource],
+///    [ListDataSource] are built in); [inferSchema] guesses a [Schema] from a
+///    sample of rows, and [ColumnSpec] lets the user override types and
+///    parsing.
 /// 2. **Facts** — [FactTableImporter] turns a source into an immutable,
 ///    in-memory [FactTable]. [Dimension]s and [Measure]s are *views* on its
 ///    columns, not properties of them.
@@ -48,7 +50,8 @@
 ///
 /// [CubeGrid] lays a [CubeLayout] out as a rectangular grid (the way the
 /// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
-/// as CSV, `tessera_xlsx` as a workbook. [CubeExportTheme] is the
+/// as CSV, [JsonCubeExporter] as JSON or JSON Lines records,
+/// `tessera_xlsx` as a workbook. [CubeExportTheme] is the
 /// format-neutral look every exporter takes, [GridMetrics] the pixel
 /// geometry for renderers that lay cells out themselves (SVG, PDF) and
 /// [GridPagination] cuts it into pages with repeated headers; [HueLevels] colours nesting
@@ -76,6 +79,7 @@ export 'src/export/cube_export_theme.dart';
 export 'src/export/cube_grid.dart';
 export 'src/export/grid_metrics.dart';
 export 'src/export/grid_pagination.dart';
+export 'src/export/json_cube_exporter.dart';
 export 'src/expr/ast.dart';
 export 'src/expr/checker.dart' show CheckedExpression, ExpressionScope;
 export 'src/expr/compiler.dart'
@@ -101,5 +105,6 @@ export 'src/schema/value_parsing.dart';
 export 'src/snapshot/tessera_snapshot.dart';
 export 'src/source/csv_data_source.dart';
 export 'src/source/data_source.dart';
+export 'src/source/json_data_source.dart';
 export 'src/source/list_data_source.dart';
 export 'src/source/schema_inference.dart';

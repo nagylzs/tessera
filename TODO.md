@@ -187,10 +187,14 @@ the facts into a database only pays off if the whole cube moved there.
       language section. Engine and UI done 2026-09-14: the aggregate
       picker offers cell formulas and calculated measures, the chips
       "Show values as".
-- [ ] More data sources: JSON (array of objects) and JSONL, the formats
+- [x] More data sources: JSON (array of objects) and JSONL, the formats
       every competitor reads; `ListDataSource` covers programmatic data
-      already. A database/server-side (lazy) source is a bigger design
-      question; decide whether it is in scope at all.
+      already. Done 2026-09-15 in the engine (`JsonDataSource`,
+      `JsonlDataSource`, `JsonCubeExporter` for both directions; nested
+      objects flattened to dotted columns, arrays as JSON text). A
+      database/server-side (lazy) source is a bigger design question;
+      decide whether it is in scope at all (the snapshot format covers the
+      "server does the import" case).
 - [ ] Charts: decide and document. The commercial pivots and om_data_grid
       pair the table with charts; tessera probably stays a table and
       leaves charts to the app (a `CubeLayout` → chart series helper would

@@ -8,6 +8,7 @@ dependencies it uses.
 | Format | Package | Call | Returns |
 |---|---|---|---|
 | CSV | `tessera` | `CsvCubeExporter().export(layout)` / `writeTo(sink, layout)` | `String` |
+| JSON, JSON Lines | `tessera` | `JsonCubeExporter().export(layout)` / `exportLines(layout)` / `records(layout)` | `String` / `List<Map>` |
 | XLSX | `tessera_xlsx` | `XlsxCubeExporter().export(layout)` | `Uint8List` |
 | ODS | `tessera_ods` | `OdsCubeExporter().export(layout)` | `Uint8List` |
 | HTML | `tessera_html` | `HtmlCubeExporter().export(layout)` | `String` |
@@ -55,6 +56,18 @@ for UTF-8), and `groupLabels`: `origin` writes a group label once, where
 the sheet shows it; `repeat` fills it down every row so other tools can
 pivot on the result. `europeanExcel` is the preset for a semicolon file
 with a comma decimal.
+
+**JSON and JSON Lines** write the grid as records: one object per grid
+row, the row dimensions as fields named after their titles, and one field
+per column entry and aggregate named from the column labels and the
+aggregate name — `"2024 / Q1 / sum of total": 35584.98`. Numbers are
+numbers, blanks are `null`, dates are ISO text. A row group's label
+repeats in every record of the group by default, so each record stands on
+its own (`JsonExportOptions.groupLabels` switches to once per group);
+`pathSeparator` and `indent` are the other knobs. `export` gives the
+array, `exportLines` one record per line, `records` the objects for your
+own processing. The JSON Lines output is exactly what `JsonlDataSource`
+reads, so a cube can be re-imported as a table.
 
 **XLSX and ODS** write one formatted sheet: merged header areas, fills
 and fonts from the theme, thin borders, frozen headers

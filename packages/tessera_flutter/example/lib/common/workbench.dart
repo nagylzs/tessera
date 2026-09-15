@@ -351,6 +351,19 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
             ).export(layout),
           ),
         );
+      case ExportFormat.json:
+        bytes = Uint8List.fromList(
+          utf8.encode(
+            JsonCubeExporter(
+              strings: strings,
+              options: const JsonExportOptions(indent: '  '),
+            ).export(layout),
+          ),
+        );
+      case ExportFormat.jsonl:
+        bytes = Uint8List.fromList(
+          utf8.encode(JsonCubeExporter(strings: strings).exportLines(layout)),
+        );
     }
     final uri = await FilePicker.saveFile(
       dialogTitle: 'Export',
@@ -579,7 +592,9 @@ enum ExportFormat {
   html('Web page', 'html', 'text/html'),
   svg('SVG image', 'svg', 'image/svg+xml'),
   pdf('PDF document', 'pdf', 'application/pdf'),
-  csv('CSV', 'csv', 'text/csv');
+  csv('CSV', 'csv', 'text/csv'),
+  json('JSON', 'json', 'application/json'),
+  jsonl('JSON Lines', 'jsonl', 'application/jsonl');
 
   const ExportFormat(this.label, this.extension, this.mimeType);
 

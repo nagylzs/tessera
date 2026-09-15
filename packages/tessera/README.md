@@ -39,7 +39,7 @@ blank instead of showing `0`.
 
 | Term | Meaning |
 |---|---|
-| **DataSource** | Anything that yields rows: column names plus a re-openable row stream. Implement it to plug in your own format. |
+| **DataSource** | Anything that yields rows: column names plus a re-openable row stream. Built in: `CsvDataSource`, `JsonDataSource` (an array of objects), `JsonlDataSource` (JSON Lines, streamed), `ListDataSource`; `tessera_xlsx` and `tessera_ods` add spreadsheets. Implement it to plug in your own format. |
 | **Schema / ColumnSpec** | Column types and parsing rules. Inferred from a sample of rows, then adjustable (change a type, exclude a column, supply a date format or a custom parser). |
 | **FactTable** | The imported data: immutable, columnar, dictionary-encoded. All rows live in memory. |
 | **Dimension** | Something you can group by. Derived from a column: the column value itself, a date part (`date.month`), or any mapping function. |
@@ -50,7 +50,7 @@ blank instead of showing `0`.
 | **FactFilter** | Which facts the cube sees. Structured filters (`ValueFilter`, `CompareFilter`, `RangeFilter`, `TextFilter`, `EmptyFilter`, combined with `AndFilter` / `OrFilter` / `NotFilter`) are plain data that render to an expression; `ExpressionFilter` takes any boolean expression; `PredicateFilter` wraps a Dart function. |
 | **CubeGrid** | A layout as a rectangular grid of cells (labels, values, merged areas) — what exporters render. |
 | **CubeExportTheme** | Fills, fonts and number format of an exported document, as plain ints — shared by the CSV/XLSX/… exporters. |
-| **CsvCubeExporter** | Writes a layout as CSV text (`export` returns a `String`; `writeTo` streams into a sink). The `tessera_xlsx`, `tessera_ods`, `tessera_html`, `tessera_svg` and `tessera_pdf` packages do the same for their formats. |
+| **CsvCubeExporter**, **JsonCubeExporter** | Write a layout as CSV text (`export` returns a `String`; `writeTo` streams into a sink) or as JSON records — an array (`export`) or JSON Lines (`exportLines`, `writeLines`), one object per grid row with fields named from the labels. The `tessera_xlsx`, `tessera_ods`, `tessera_html`, `tessera_svg` and `tessera_pdf` packages do the same for their formats. |
 | **ExpansionState** | Which groups are expanded on an axis. The summary is the root; the first level is visible when the root is expanded. `Cube.expandRowLevel` / `collapseRowLevel` (and the column twins) open or close a whole level. |
 | **CubeLayout** | The visible rows, columns and cells derived from facts + spec + expansion state. |
 | **AxisGeometry** | The merged header cells of an axis, for renderers (grids, exporters). |

@@ -1,3 +1,7 @@
+## Unreleased
+
+* Example app: JSON and JSON Lines in the export menu.
+
 ## 0.2.0
 
 Requires `tessera` 0.2.0 (the expression language, statistical and

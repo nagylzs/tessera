@@ -1,3 +1,18 @@
+## Unreleased
+
+* `JsonDataSource` (a JSON array of objects, parsed whole) and
+  `JsonlDataSource` (JSON Lines, streamed with a row estimate), with
+  `JsonOptions`: nested objects flattened into dotted columns (or kept as
+  JSON text), arrays as JSON text, `columns` to name the columns,
+  `scanAllRows` to union every record's keys. Values keep their JSON
+  types; strings go through the schema's parsers like CSV cells.
+* `JsonCubeExporter`: a layout as records — one object per grid row, the
+  row dimensions as fields named after their titles, one field per column
+  entry and aggregate named from the labels — as a JSON array (`export`,
+  optionally indented) or JSON Lines (`exportLines`, `writeLines`);
+  `records` gives the objects. `JsonExportOptions`: group labels repeated
+  (default) or once per group, the path separator, the indent.
+
 ## 0.2.0
 
 The expression language and everything built on it. One breaking change.

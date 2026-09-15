@@ -260,6 +260,26 @@ the root, ignored; members carry `resolution: workspace`):
   `ColumnBuilder` first. Little-endian hosts only. Tests:
   `test/snapshot_test.dart` (incl. a file assembled by hand from the
   spec); `bench.dart` prints encode/decode time and size.
+- JSON in the engine (`source/json_data_source.dart`,
+  `export/json_cube_exporter.dart`, `dart:convert` only): `JsonOptions`
+  (`flatten` nested objects to dotted names with `separator`, arrays
+  always JSON text, `columns`, `scanAllRows`); `JsonDataSource` decodes
+  the whole array once and caches the records (columns = union of keys,
+  exact row count), `JsonlDataSource` streams `LineSplitter` lines
+  (columns from the first record unless `scanAllRows`/`columns`,
+  estimate like CSV from the first 200 lines, errors name the line).
+  `JsonCubeExporter` renders `CubeGrid` as records: `fieldNames(grid)`
+  = row titles (empty → `row`) then per data column the header labels
+  joined by `pathSeparator` (a label merged downwards counts once in its
+  origin row, one merged sideways applies to every column under it) +
+  the aggregate name, made unique with ` (n)`; values: integral doubles
+  as ints, dates ISO, blanks null; `groupLabels` defaults to `repeat`
+  (records stand alone), and a row label merged sideways (collapsed group
+  spanning deeper header columns) is never repeated into the deeper
+  fields. `export` (array, `indent`), `exportLines`/`writeLines` (JSONL),
+  `records`. The example's export menu offers both. Tests:
+  `test/json_data_source_test.dart` (incl. a sales.csv → JSON → import
+  round trip), `test/json_cube_exporter_test.dart`.
 - Planned: further exporters the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a

@@ -37,6 +37,35 @@ and both line endings.
 Values arrive as strings; the schema decides what they become
 ([next chapter](03-schema.md)).
 
+## JSON and JSON Lines
+
+Two sources read JSON, with the same `fromString` / `fromData` /
+`fromBytes` constructors as CSV:
+
+```dart
+JsonDataSource.fromData(bytes, name: 'orders.json');     // a top-level array of objects
+JsonlDataSource.fromBytes(file.openRead, name: 'orders.jsonl',
+    length: file.lengthSync());                           // one object per line, streamed
+```
+
+JSON values are already typed: numbers, booleans and `null` are stored as
+such, and only strings go through the schema's parsers, which is how an
+ISO date string becomes a date. `JsonOptions` decides the rest:
+
+- Nested objects are **flattened** into dotted columns by default —
+  `{"address": {"city": "Berlin"}}` gives a column `address.city`;
+  `flatten: false` keeps the nested object as JSON text instead. Arrays
+  are always stored as JSON text.
+- **Column names** are the union of the objects' keys in first-seen order.
+  A JSON array is parsed whole, so that is free; JSON Lines takes the
+  keys of the first record unless `scanAllRows: true` asks for an extra
+  pass, or `columns:` names them outright.
+
+A JSON array is decoded with `jsonDecode` and the records are kept for the
+source's lifetime, so it suits documents that fit in memory comfortably.
+JSON Lines streams line by line, reports a row estimate from the file
+length, and names the line in any `FormatException`.
+
 ## Lists
 
 `ListDataSource` wraps rows you already have in memory — from a database
