@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.1
 
 * `JsonDataSource` (a JSON array of objects, parsed whole) and
   `JsonlDataSource` (JSON Lines, streamed with a row estimate), with

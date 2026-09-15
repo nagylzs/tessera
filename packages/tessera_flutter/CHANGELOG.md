@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.1
 
 * Example app: JSON and JSON Lines in the export menu.
 * Example app: a "Charts" page — a live chart beside the grid (below it
