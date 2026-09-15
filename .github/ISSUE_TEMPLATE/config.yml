@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: User guide
+    url: https://github.com/nagylzs/tessera/blob/main/docs/README.md
+    about: How the packages fit together, with examples for every layer.

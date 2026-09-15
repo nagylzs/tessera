@@ -199,6 +199,9 @@ the facts into a database only pays off if the whole cube moved there.
       pair the table with charts; tessera probably stays a table and
       leaves charts to the app (a `CubeLayout` → chart series helper would
       be the cheap middle ground).
-- [ ] Trust signals after publishing: a screenshot-led README, the user
+- [x] Trust signals after publishing: a screenshot-led README, the user
       guide, a CHANGELOG discipline and an issue template; the popular
-      grids win on track record for a while.
+      grids win on track record for a while. Done 2026-09-15: the README
+      opens with the screenshot, `docs/` is the guide, every commit adds
+      its CHANGELOG bullet under `## Unreleased`, bug / feature templates
+      in `.github/ISSUE_TEMPLATE/`, and CI on every push.
