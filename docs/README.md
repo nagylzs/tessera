@@ -25,6 +25,7 @@ the short version; this is the long one.
 | [12. Localization](12-localization.md) | Fourteen built-in languages, `TesseraLocalizations`, adding your own. |
 | [13. Saving and restoring](13-saving.md) | JSON for the pivot configuration; binary snapshots of the data. |
 | [14. Large data](14-large-data.md) | Isolates, progress, cancellation, what to expect from millions of rows. |
+| [15. Charts](15-charts.md) | `ChartData` and `ScatterData`: series for a chart library from a layout, from facts, or by drilling into a cell. |
 | [Snapshot format](snapshot.md) | The byte layout of `.tsnp` files, for writers in other languages. |
 
 Every example in the guide uses `sales.csv`, the 1000-row file that ships

@@ -39,9 +39,11 @@ file. The engine runs wherever Dart runs, so the same cube can be built on
 a server or in a CLI. A few things are deliberately out of scope; these
 packages cover them:
 
-- **Charts.** tessera draws tables only. Feed a `CubeLayout` (its row
-  entries and cell values) to a charting package such as
-  [`fl_chart`](https://pub.dev/packages/fl_chart) or
+- **Charts.** tessera draws tables only. The engine's `ChartData` and
+  `ScatterData` turn a layout, the facts or one cell's drill-down into
+  chart-ready series (labels, typed X values, doubles); draw them with a
+  charting package such as [`fl_chart`](https://pub.dev/packages/fl_chart)
+  or
   [`syncfusion_flutter_charts`](https://pub.dev/packages/syncfusion_flutter_charts).
 - **Editing cells and general data grids.** The grid is read-only and
   shaped by the cube. For an editable, general-purpose grid see

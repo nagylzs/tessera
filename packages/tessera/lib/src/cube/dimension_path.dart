@@ -1,4 +1,5 @@
 import '../facts/dimension.dart';
+import 'filter.dart';
 
 /// One dimension pinned to one of its values.
 final class DimensionValue {
@@ -98,6 +99,18 @@ final class Coordinate {
   /// Value the coordinate pins [dimension] to. Distinguish "pinned to the
   /// empty group" from "not pinned" with [constrains].
   Object? operator [](Dimension dimension) => values[dimension];
+
+  /// The coordinate as a [FactFilter]: one [ValueFilter] per dimension,
+  /// combined with [AndFilter]. `null` for the empty coordinate (the grand
+  /// total pins nothing). Combine it with the cube's own filter to select
+  /// exactly the facts behind a cell.
+  FactFilter? toFilter() {
+    if (values.isEmpty) return null;
+    final filters = [
+      for (final e in values.entries) ValueFilter(e.key, [e.value]),
+    ];
+    return filters.length == 1 ? filters.single : AndFilter(filters);
+  }
 
   @override
   bool operator ==(Object other) {

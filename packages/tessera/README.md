@@ -55,6 +55,7 @@ blank instead of showing `0`.
 | **ExpansionState** | Which groups are expanded on an axis. The summary is the root; the first level is visible when the root is expanded. `Cube.expandRowLevel` / `collapseRowLevel` (and the column twins) open or close a whole level. |
 | **CubeLayout** | The visible rows, columns and cells derived from facts + spec + expansion state. |
 | **AxisGeometry** | The merged header cells of an axis, for renderers (grids, exporters). |
+| **ChartData / ScatterData** | Chart-ready series for any chart library: categories × series of values (bar, line, pie) or (x, y) points (scatter), read from a layout as displayed, from a cube built for the purpose, or from the facts behind one cell — see the [charts chapter](https://github.com/nagylzs/tessera/blob/main/docs/15-charts.md). |
 | **CubeJson / CubeConfig** | JSON form of a pivot configuration (spec, expansion states, schema) for saving and restoring a layout; adapters for custom members. |
 | **TesseraSnapshot** | A fact table (and a configuration) as bytes: cache an import or ship a server-built table to clients; format in `docs/snapshot.md`. |
 | **TesseraStrings** | Localized texts and label/number formatting rules; fourteen languages built in. |

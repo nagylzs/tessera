@@ -286,6 +286,32 @@ the root, ignored; members carry `resolution: workspace`):
   `test/json_data_source_test.dart` (incl. a sales.csv → JSON → import
   round trip), `test/json_cube_exporter_test.dart`,
   `test/json_fact_exporter_test.dart`.
+- Charts (`packages/tessera/lib/src/chart/`, decided 2026-09-15: tessera
+  stays a table, the engine produces series, the app draws them):
+  `chart_entries.dart` (`ChartEntries` sealed: `leaves` = visible leaves,
+  i.e. not expanded and not summary — the summary alone on an axis without
+  dimensions; `level(n)`; `paths([...])` via `indexOf`, so hidden
+  subtotals are skipped; `all`), `chart_data.dart` (`ChartCategory` path/
+  label/raw `value`/factCount, `number`, `date`, `periodStart` composing
+  date parts of one column along the path — ISO week = Monday of that
+  week; `ChartSeries` path/label/value/factCount/`List<double?>` values,
+  null = blank cell; `ChartData.fromLayout(layout, aggregate:, rows:,
+  columns:, transpose:, strings:)`, `fromFacts(facts, category:, series:,
+  aggregate:, filter:, sort:, seriesSort:)` builds a 1-/2-D cube with
+  `ExpansionState.initial()` and reads it with `fromLayout`, `fromCell(
+  layout, cell, category:, …)` filters by `cellFilter(layout, cell)` =
+  spec filter ∧ `Coordinate.toFilter()`; `withoutEmpty()`,
+  `transposed()`; a cube without column dimensions gives one series
+  labelled with the aggregate) and `scatter_data.dart` (`ScatterPoint`
+  x/y/label + group `path`+`factCount` or fact `row`; `ScatterSeries`;
+  `ScatterData.fromLayout/fromFacts/fromCell` = two `ChartData`s zipped,
+  points with a null coordinate dropped, factCount from the intersection
+  cell; `ofFacts(facts, x: Measure, y: Measure, series:, pointLabel:,
+  filter:, rows:, limit:)` per fact, series keyed by dimension value and
+  sorted with `compareValues`). Labels through `TesseraStrings`
+  (`TesseraStringsEn` default, like the exporters). Tests:
+  `test/chart_test.dart`. Guide: `docs/15-charts.md`. No chart demo in
+  the example app yet.
 - Planned: further exporters the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a

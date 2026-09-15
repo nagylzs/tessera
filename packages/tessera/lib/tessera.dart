@@ -43,6 +43,12 @@
 /// As"); the engine computes them from the layout through a
 /// [LayoutCellContext].
 ///
+/// [ChartData] (categories × series) and [ScatterData] ((x, y) points)
+/// are chart-ready series for any charting package, read from a layout's
+/// cells ([ChartData.fromLayout]), from a cube built for the purpose
+/// ([ChartData.fromFacts]), or from the facts behind one cell
+/// ([ChartData.fromCell]); [ChartEntries] chooses the entries.
+///
 /// [TesseraSnapshot] writes a [FactTable] (and a [CubeConfig]) as one
 /// buffer of bytes that loads back without parsing — a cache, or a table
 /// built on a server and sent to clients; the format is documented in
@@ -63,6 +69,9 @@
 /// so renderers agree on how a cube is labelled.
 library;
 
+export 'src/chart/chart_data.dart';
+export 'src/chart/chart_entries.dart';
+export 'src/chart/scatter_data.dart';
 export 'src/color/hue_levels.dart';
 export 'src/color/oklch.dart';
 export 'src/cube/aggregate.dart';

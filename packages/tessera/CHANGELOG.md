@@ -21,6 +21,18 @@
   optionally indented) or JSON Lines (`exportLines`, `writeLines`);
   `records` gives the objects. `JsonExportOptions`: group labels repeated
   (default) or once per group, the path separator, the indent.
+* Chart series: `ChartData` (categories × series of doubles) and
+  `ScatterData` ((x, y) points in series) for feeding any chart library.
+  `fromLayout` reads a layout's cells as displayed (`ChartEntries`
+  selects the entries: visible leaves by default, one level, given
+  paths, or all), `fromFacts` builds a one- or two-dimensional cube for
+  the purpose, `fromCell` drills into the facts behind one cell by
+  another dimension, `ScatterData.ofFacts` plots individual facts (two
+  measures, optional series dimension, row set and limit). Categories
+  carry the raw dimension value (`DateTime`, `int`, `double` …) and
+  `periodStart` composes nested date parts for a time axis;
+  `withoutEmpty()`, `transposed()`. `Coordinate.toFilter()` and
+  `cellFilter(layout, cell)` give the filter behind a cell.
 * Continuous integration: a GitHub Actions workflow
   (`.github/workflows/ci.yml` at the repository root) runs the analyzer,
   the format check and every package's tests on each push and pull
