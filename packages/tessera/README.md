@@ -50,6 +50,7 @@ blank instead of showing `0`.
 | **FactFilter** | Which facts the cube sees. Structured filters (`ValueFilter`, `CompareFilter`, `RangeFilter`, `TextFilter`, `EmptyFilter`, combined with `AndFilter` / `OrFilter` / `NotFilter`) are plain data that render to an expression; `ExpressionFilter` takes any boolean expression; `PredicateFilter` wraps a Dart function. |
 | **CubeGrid** | A layout as a rectangular grid of cells (labels, values, merged areas) — what exporters render. |
 | **CubeExportTheme** | Fills, fonts and number format of an exported document, as plain ints — shared by the CSV/XLSX/… exporters. |
+| **JsonFactExporter** | Writes the fact table itself as JSON or JSON Lines records with its types kept, for handing cleaned data to another tool or reading it back with `JsonlDataSource`. |
 | **CsvCubeExporter**, **JsonCubeExporter** | Write a layout as CSV text (`export` returns a `String`; `writeTo` streams into a sink) or as JSON records — an array (`export`) or JSON Lines (`exportLines`, `writeLines`), one object per grid row with fields named from the labels. The `tessera_xlsx`, `tessera_ods`, `tessera_html`, `tessera_svg` and `tessera_pdf` packages do the same for their formats. |
 | **ExpansionState** | Which groups are expanded on an axis. The summary is the root; the first level is visible when the root is expanded. `Cube.expandRowLevel` / `collapseRowLevel` (and the column twins) open or close a whole level. |
 | **CubeLayout** | The visible rows, columns and cells derived from facts + spec + expansion state. |

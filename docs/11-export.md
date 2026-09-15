@@ -69,6 +69,14 @@ array, `exportLines` one record per line, `records` the objects for your
 own processing. The JSON Lines output is exactly what `JsonlDataSource`
 reads, so a cube can be re-imported as a table.
 
+**The fact table** itself, rather than a cube, goes out through
+`JsonFactExporter`: one object per fact with a field per column, integers
+kept as integers and dates as ISO text, so `JsonlDataSource` reads it
+back with the same types. `writeLines(sink, facts)` streams row by row
+for large tables; `columns` picks a subset and `useLabels` names the
+fields after the labels instead of the column names. It is the cheap way
+to hand cleaned, typed data to another tool.
+
 **XLSX and ODS** write one formatted sheet: merged header areas, fills
 and fonts from the theme, thin borders, frozen headers
 (`freezeHeaders`), column widths from the content clamped to

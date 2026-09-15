@@ -277,9 +277,15 @@ the root, ignored; members carry `resolution: workspace`):
   (records stand alone), and a row label merged sideways (collapsed group
   spanning deeper header columns) is never repeated into the deeper
   fields. `export` (array, `indent`), `exportLines`/`writeLines` (JSONL),
-  `records`. The example's export menu offers both. Tests:
+  `records`. The example's export menu offers both. `JsonFactExporter`
+  (`export/json_fact_exporter.dart`) writes the `FactTable` as records
+  (lazy `records`, streaming `writeLines`; `columns`, `useLabels`,
+  `indent`; `date` columns as `yyyy-MM-dd`, `dateTime` as full ISO) so a
+  JSONL round trip keeps every type — which needed the full ISO forms
+  (`.SSS`, `Z`) in `defaultDateFormats`. Tests:
   `test/json_data_source_test.dart` (incl. a sales.csv → JSON → import
-  round trip), `test/json_cube_exporter_test.dart`.
+  round trip), `test/json_cube_exporter_test.dart`,
+  `test/json_fact_exporter_test.dart`.
 - Planned: further exporters the same way.
 
 Why the split: pub resolves `flutter: sdk: flutter` per package, so a

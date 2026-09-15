@@ -6,6 +6,15 @@
   JSON text), arrays as JSON text, `columns` to name the columns,
   `scanAllRows` to union every record's keys. Values keep their JSON
   types; strings go through the schema's parsers like CSV cells.
+* `JsonFactExporter`: a `FactTable` as records — one object per fact with
+  a field per column (`columns` to pick, `useLabels` for label keys) —
+  as a JSON array (`export`, optionally indented) or JSON Lines
+  (`exportLines`, `writeLines` streams row by row; `records` is lazy).
+  Integers stay integers, dates become ISO text, so `JsonlDataSource`
+  reads the table back with its types.
+* The default date formats also recognize the full ISO 8601 forms JSON
+  producers write: `yyyy-MM-ddTHH:mm:ss.SSS`, with or without a trailing
+  `Z`.
 * `JsonCubeExporter`: a layout as records — one object per grid row, the
   row dimensions as fields named after their titles, one field per column
   entry and aggregate named from the labels — as a JSON array (`export`,

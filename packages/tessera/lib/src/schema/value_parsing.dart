@@ -137,6 +137,9 @@ bool? parseBoolean(String raw) => switch (raw.trim().toLowerCase()) {
 const defaultDateFormats = [
   'yyyy-MM-dd',
   'yyyy-MM-ddTHH:mm:ss',
+  'yyyy-MM-ddTHH:mm:ss.SSS',
+  'yyyy-MM-ddTHH:mm:ssZ',
+  'yyyy-MM-ddTHH:mm:ss.SSSZ',
   'yyyy-MM-dd HH:mm:ss',
   'yyyy-MM-dd HH:mm',
 ];

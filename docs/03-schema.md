@@ -30,8 +30,9 @@ final schema = await inferSchema(source,
 column, the narrowest type every sampled value fits: integer before
 number before text, date before dateTime, booleans only when every value
 is one of the recognized words. Dates are matched against
-`InferenceOptions.dateFormats`, a list of patterns tried in order
-(ISO first); the winning pattern lands in `ColumnSpec.format`. Values in
+`InferenceOptions.dateFormats`, a list of patterns tried in order (the
+ISO forms first, including `2024-01-05T10:30:00.000Z` as JSON producers
+write it); the winning pattern lands in `ColumnSpec.format`. Values in
 `nullValues` (`""`, `null`, `NULL`, `n/a`, `N/A`, `NA`, `-` by default)
 are ignored. A source with a `declaredSchema` skips all of this.
 
