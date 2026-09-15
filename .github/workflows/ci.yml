@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# A newer push to the same branch supersedes the running job.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # LibreOffice (calc is enough for the headless csv/xlsx/ods round
+      # trips), librsvg, poppler, qpdf and ghostscript are optional for the
+      # exporter tests — they skip when a tool is missing. Noto Sans lets
+      # the pdf tests exercise TrueType embedding; the tests look for it
+      # under /usr/share/fonts/noto, Ubuntu keeps it under truetype/noto.
+      - name: Install optional tools used by exporter round-trip tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreoffice-calc librsvg2-bin poppler-utils qpdf ghostscript fonts-noto-core
+          sudo ln -s /usr/share/fonts/truetype/noto /usr/share/fonts/noto
+
+      - name: Install dependencies (workspace)
+        run: dart pub get
+
+      - name: Analyze
+        run: dart analyze
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed packages
+
+      - name: Test tessera (engine)
+        run: dart test
+        working-directory: packages/tessera
+
+      - name: Test tessera_xlsx
+        run: dart test
+        working-directory: packages/tessera_xlsx
+
+      - name: Test tessera_ods
+        run: dart test
+        working-directory: packages/tessera_ods
+
+      - name: Test tessera_html
+        run: dart test
+        working-directory: packages/tessera_html
+
+      - name: Test tessera_svg
+        run: dart test
+        working-directory: packages/tessera_svg
+
+      - name: Test tessera_pdf
+        run: dart test
+        working-directory: packages/tessera_pdf
+
+      - name: Test tessera_flutter (widgets)
+        run: flutter test
+        working-directory: packages/tessera_flutter
+
+      - name: Test tessera_flutter example
+        run: flutter test
+        working-directory: packages/tessera_flutter/example

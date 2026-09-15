@@ -340,6 +340,8 @@ dart analyze                                   # at the root: all packages, must
 dart format packages                           # run before committing
 (cd packages/tessera && flutter pub publish --dry-run)          # keep at 0 warnings
 (cd packages/tessera_flutter && flutter pub publish --dry-run)  # (uncommitted files count)
+# CI: .github/workflows/ci.yml runs the same (analyze, format check, every package's tests) on every push and PR,
+# on Flutter stable with LibreOffice/poppler/qpdf/gs/rsvg/Noto installed so no exporter test skips.
 (cd packages/<p> && pana --no-warning .)       # pub.dev score; needs libwebp-utils (cwebp) for the screenshot check;
                                                # dependent packages score low until tessera itself is on pub.dev
 cd packages/tessera_flutter/example && dart run tool/gen_sales_csv.dart   # regenerates assets/sales.csv AND packages/tessera/test/data/sales.csv (seeded)

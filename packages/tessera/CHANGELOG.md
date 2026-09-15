@@ -21,6 +21,11 @@
   optionally indented) or JSON Lines (`exportLines`, `writeLines`);
   `records` gives the objects. `JsonExportOptions`: group labels repeated
   (default) or once per group, the path separator, the indent.
+* Continuous integration: a GitHub Actions workflow
+  (`.github/workflows/ci.yml` at the repository root) runs the analyzer,
+  the format check and every package's tests on each push and pull
+  request, with LibreOffice, poppler, qpdf, ghostscript, librsvg and Noto
+  Sans installed so the exporter round-trip tests run rather than skip.
 
 ## 0.2.0
 
