@@ -58,7 +58,11 @@
 /// Flutter `CubeView` shows it) for exporters; [CsvCubeExporter] writes it
 /// as CSV, [JsonCubeExporter] as JSON or JSON Lines records,
 /// `tessera_xlsx` as a workbook; [JsonFactExporter] writes the fact table
-/// itself the same way. [CubeExportTheme] is the
+/// itself the same way. [ExportTable] is a plain table instead of a cube
+/// (rows of values under [ExportColumn]s, or a fact table through
+/// [ExportTable.ofFacts]): [CsvTableExporter] writes it as CSV, the
+/// spreadsheet packages as a filterable sheet styled by
+/// [TableExportTheme]. [CubeExportTheme] is the
 /// format-neutral look every exporter takes, [GridMetrics] the pixel
 /// geometry for renderers that lay cells out themselves (SVG, PDF) and
 /// [GridPagination] cuts it into pages with repeated headers; [HueLevels] colours nesting
@@ -87,6 +91,8 @@ export 'src/cube/layout_aggregate.dart';
 export 'src/export/csv_cube_exporter.dart';
 export 'src/export/cube_export_theme.dart';
 export 'src/export/cube_grid.dart';
+export 'src/export/csv_table_exporter.dart';
+export 'src/export/export_table.dart';
 export 'src/export/grid_metrics.dart';
 export 'src/export/grid_pagination.dart';
 export 'src/export/json_cube_exporter.dart';

@@ -2,64 +2,56 @@ import 'dart:typed_data';
 
 import 'package:tessera/tessera.dart';
 
+import 'xlsx_cube_exporter.dart';
 import 'xlsx_writer.dart';
 
-/// One column of a table for [XlsxTableExporter]: its [header], an Excel
-/// number [format] code for its numbers and dates (`#,##0.00`,
-/// `#,##0 "Ft"`, `yyyy.mm.dd`; `null` for the exporter's defaults) and a
-/// fixed [width] in characters (`null`: sized to the content).
-final class XlsxColumn {
-  const XlsxColumn(this.header, {this.format, this.width});
-
-  final String header;
-  final String? format;
-  final double? width;
-}
-
-/// Writes plain rows — not a cube — as a worksheet that is a filterable
-/// data table: a bold header row with an autofilter over the whole range,
-/// the header frozen, real numbers, booleans and dates, content-sized
-/// columns. What an app hands over when the user wants "the grid in
-/// Excel" rather than a pivot ([XlsxCubeExporter]).
+/// Writes an [ExportTable] — plain rows or a fact table
+/// ([ExportTable.ofFacts]) — as a worksheet that is a filterable data
+/// table rather than a pivot ([XlsxCubeExporter]): a header row with an
+/// autofilter over the whole range, the header frozen, real numbers,
+/// booleans and dates, content-sized columns. What an app hands over when
+/// the user wants "the grid in Excel".
 ///
-/// A row is a list of cell values in column order: `num` (a numeric cell
-/// in the column's format), `bool`, `DateTime` (an Excel date: the
-/// column's format, else [dateFormat], or [dateTimeFormat] for a value
-/// with a time of day), `null` (an empty cell) and anything else as text
-/// (`toString()`). A row shorter than the columns leaves the rest empty.
+/// Numbers take the column's [ExportColumn.numberFormat] (as an Excel code,
+/// see [XlsxCubeExporter.formatCode]), else [numberFormatCode]; a
+/// `DateTime` is an Excel date in [dateFormat] or [dateTimeFormat]
+/// ([ExportColumn.showsTime]); [formatCodes] overrides both per column with
+/// a native Excel code. Dates before 1900, which Excel cannot show, are
+/// written as ISO 8601 text.
 ///
-/// [exportFacts] does the same for a [FactTable], with the column labels as
-/// headers.
+/// Excel's limits apply: 16 384 columns and 1 048 576 rows including the
+/// header — beyond them [export] throws an [ArgumentError] — and 32 767
+/// characters per cell, beyond which a text is cut. Characters XML does not
+/// allow (most control characters) are dropped from the text.
 final class XlsxTableExporter {
   const XlsxTableExporter({
-    this.headerFill = 0xFFD9E1F2,
-    this.headerFont = const ExportFont(bold: true),
-    this.font = const ExportFont(),
-    this.numberFormat = 'General',
+    this.theme = const TableExportTheme(),
+    this.numberFormatCode = 'General',
     this.dateFormat = 'yyyy-mm-dd',
     this.dateTimeFormat = 'yyyy-mm-dd hh:mm',
+    this.formatCodes = const {},
     this.autoFilter = true,
     this.freezeHeader = true,
-    this.borders = false,
-    this.borderColor = 0xFFBFBFBF,
     this.minColumnWidth = 6,
     this.maxColumnWidth = 60,
   });
 
-  /// The header row's fill (ARGB; `null` for none) and font.
-  final int? headerFill;
-  final ExportFont headerFont;
+  /// Header fill and font, the data font and the borders; shared with the
+  /// other table exporters.
+  final TableExportTheme theme;
 
-  /// The data cells' font.
-  final ExportFont font;
+  /// The Excel code of a number in a column without a
+  /// [ExportColumn.numberFormat]: `General` shows it as it is.
+  final String numberFormatCode;
 
-  /// The Excel format of a number in a column without a format of its own.
-  final String numberFormat;
-
-  /// The Excel formats of a date without and with a time of day, in a
-  /// column without a format of its own.
+  /// The Excel codes of a date without and with its time of day.
   final String dateFormat;
   final String dateTimeFormat;
+
+  /// Native Excel codes (`#,##0 "Ft"`, `yyyy.mm.dd`) by
+  /// [ExportColumn.key], for the numbers and dates of that column; they win
+  /// over everything above.
+  final Map<String, String> formatCodes;
 
   /// An autofilter on the header row over the whole table.
   final bool autoFilter;
@@ -67,84 +59,97 @@ final class XlsxTableExporter {
   /// The header row stays visible while scrolling.
   final bool freezeHeader;
 
-  /// Thin borders around every cell, in [borderColor].
-  final bool borders;
-  final int borderColor;
-
   /// Bounds of the content-sized column widths, in characters.
   final double minColumnWidth;
   final double maxColumnWidth;
 
-  /// The workbook bytes of [rows] under [columns]. [sheetName] is trimmed
-  /// to Excel's rules (31 characters, no `[]:*?/\`).
-  Uint8List export(
-    List<XlsxColumn> columns,
-    Iterable<List<Object?>> rows, {
-    String sheetName = 'Data',
-  }) {
+  /// Excel's sheet size.
+  static const maxRows = 1048576, maxColumns = 16384;
+
+  /// Excel's longest cell text.
+  static const maxTextLength = 32767;
+
+  /// The workbook bytes of [table]. [sheetName] is trimmed to Excel's rules
+  /// (31 characters, no `[]:*?/\`).
+  Uint8List export(ExportTable table, {String sheetName = 'Data'}) {
+    final columns = table.columns;
+    if (columns.length > maxColumns) {
+      throw ArgumentError(
+        'The table has ${columns.length} columns, a worksheet $maxColumns.',
+      );
+    }
     final writer = XlsxWriter(
       sheetName: _sheetName(sheetName),
-      numberFormat: numberFormat,
-      borderColor: borderColor,
+      numberFormat: numberFormatCode,
+      borderColor: theme.borderColor,
     );
-    final header = writer.style(headerFill, font: headerFont, border: borders);
+    final borders = theme.borders;
+    final header = writer.style(
+      theme.headerFill,
+      font: theme.headerFont,
+      border: borders,
+    );
     // Per column: text, number, date and date-time styles.
     final text = <int>[], number = <int>[], date = <int>[], dateTime = <int>[];
     final longest = <int>[];
     for (var c = 0; c < columns.length; c++) {
       final col = columns[c];
-      text.add(writer.style(null, font: font, border: borders));
+      final code = formatCodes[col.key];
+      final numberFormat = col.numberFormat;
+      int style(String format, {bool right = false}) => writer.style(
+        null,
+        font: theme.font,
+        border: borders,
+        right: right,
+        format: format,
+      );
+      text.add(writer.style(null, font: theme.font, border: borders));
       number.add(
-        writer.style(
-          null,
-          font: font,
-          border: borders,
+        style(
+          code ??
+              (numberFormat == null
+                  ? numberFormatCode
+                  : XlsxCubeExporter.formatCode(numberFormat)),
           right: true,
-          format: col.format ?? numberFormat,
         ),
       );
-      date.add(
-        writer.style(
-          null,
-          font: font,
-          border: borders,
-          format: col.format ?? dateFormat,
-        ),
-      );
-      dateTime.add(
-        writer.style(
-          null,
-          font: font,
-          border: borders,
-          format: col.format ?? dateTimeFormat,
-        ),
-      );
-      writer.cell(0, c, col.header, header);
+      date.add(style(code ?? dateFormat));
+      dateTime.add(style(code ?? dateTimeFormat));
+      writer.cell(0, c, _cut(col.header), header);
       longest.add(col.header.length + 2); // room for the filter button
     }
     var r = 0;
-    for (final row in rows) {
-      r++;
+    for (final row in table.rows) {
+      if (++r >= maxRows) {
+        throw ArgumentError(
+          'The table has more than the ${maxRows - 1} rows a worksheet '
+          'holds under its header.',
+        );
+      }
       for (var c = 0; c < columns.length; c++) {
         final value = c < row.length ? row[c] : null;
+        final int n;
         switch (value) {
           case null:
             continue;
-          case num():
-            writer.cell(r, c, value, number[c]);
+          case num v:
+            writer.cell(r, c, v, number[c]);
+            n = _numberLength(v, columns[c]);
           case DateTime v:
-            final timed =
-                v.hour != 0 ||
-                v.minute != 0 ||
-                v.second != 0 ||
-                v.millisecond != 0;
+            final timed = columns[c].showsTime(v);
             writer.dateCell(r, c, v, timed ? dateTime[c] : date[c]);
-          case bool():
-            writer.cell(r, c, value, text[c]);
+            n =
+                (formatCodes[columns[c].key] ??
+                        (timed ? dateTimeFormat : dateFormat))
+                    .length;
+          case bool v:
+            writer.cell(r, c, v, text[c]);
+            n = 5;
           default:
-            writer.cell(r, c, value.toString(), text[c]);
+            final s = _cut(value.toString());
+            writer.cell(r, c, s, text[c]);
+            n = _longestLine(s);
         }
-        final n = _displayLength(value, columns[c]);
         if (n > longest[c]) longest[c] = n;
       }
     }
@@ -162,42 +167,28 @@ final class XlsxTableExporter {
     return writer.build();
   }
 
-  /// Every fact of [facts] (or the [columns] named, in that order), the
-  /// columns' labels as headers, [formats] by column name.
-  Uint8List exportFacts(
-    FactTable facts, {
-    List<String>? columns,
-    Map<String, String> formats = const {},
-    String sheetName = 'Data',
-  }) {
-    final names = columns ?? [for (final c in facts.columns) c.name];
-    return export(
-      [
-        for (final n in names)
-          XlsxColumn(facts.column(n).label, format: formats[n]),
-      ],
-      [
-        for (var row = 0; row < facts.rowCount; row++)
-          [for (final n in names) facts.valueAt(row, n)],
-      ],
-      sheetName: sheetName,
-    );
+  static String _cut(String s) =>
+      s.length > maxTextLength ? s.substring(0, maxTextLength) : s;
+
+  /// About how many characters a number shows, with grouping.
+  static int _numberLength(num v, ExportColumn column) {
+    final f = column.numberFormat;
+    final digits = f == null
+        ? v.toString().length
+        : v.abs().truncate().toString().length +
+              (f.decimals > 0 ? f.decimals + 1 : 0) +
+              (v < 0 ? 1 : 0);
+    return digits + digits ~/ 3;
   }
 
-  /// The Excel serial number of [value] in the 1900 date system: whole
-  /// days since 1899-12-30, the time of day as the fraction; the
-  /// wall-clock fields are used as they are, without a time zone
-  /// conversion.
-  static num excelSerialOf(DateTime value) => XlsxWriter.excelSerial(value);
-
-  /// About how many characters the cell shows, for the column width.
-  static int _displayLength(Object? value, XlsxColumn column) =>
-      switch (value) {
-        null => 0,
-        DateTime() => (column.format ?? 'yyyy-mm-dd hh:mm').length,
-        num v => v.toString().length + 3, // grouping and a currency suffix
-        _ => value.toString().length,
-      };
+  static int _longestLine(String s) {
+    if (!s.contains('\n')) return s.length;
+    var max = 0;
+    for (final line in s.split('\n')) {
+      if (line.length > max) max = line.length;
+    }
+    return max;
+  }
 
   static String _sheetName(String name) {
     final cleaned = name.replaceAll(RegExp(r'[\[\]:*?/\\]'), ' ').trim();

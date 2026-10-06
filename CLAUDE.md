@@ -17,7 +17,13 @@ the root, ignored; members carry `resolution: workspace`):
   level, merge spans with origin/covered cells that repeat the value)
   and `CsvCubeExporter` (`CsvExportOptions`; `CsvGroupLabels.origin`
   mirrors the sheet, `.repeat` fills groups down for other tools;
-  `europeanExcel` preset) and `CubeExportTheme` (+ `ExportFont`,
+  `europeanExcel` preset; `CsvExportOptions.field` quotes) and
+  `export_table.dart`: `ExportTable` (columns + lazy rows;
+  `ofFacts(facts, columns:, rows:, filter:, useLabels:)`, `withColumn`),
+  `ExportColumn` (header, source `name`, `type`, `numberFormat`, `width`,
+  `key`, `showsTime`), `TableExportTheme` (header fill/font, font,
+  borders) — the shared input of `CsvTableExporter` (engine), and the
+  xlsx/ods table exporters; and `CubeExportTheme` (+ `ExportFont`,
   `NumberFormat`): the format-neutral look every exporter takes —
   fills, border, fonts per role, decimals/grouping; `brand(primary:)`,
   `gradient`, `mix`; `rowHeaderFills`/`columnHeaderFills` per level,
@@ -46,11 +52,14 @@ the root, ignored; members carry `resolution: workspace`):
   `XlsxCubeExporter` (renders a `CubeLayout` from `CubeGrid`,
   the engine's `CubeExportTheme`; `numberFormatCode`, `freezeHeaders`
   and the width bounds are exporter options — `TesseraStrings` labels)
-  and `XlsxTableExporter` (0.3.0: plain rows or a `FactTable` as a
-  filterable data table — autofilter + `_xlnm._FilterDatabase`, frozen
-  header, per-column `XlsxColumn.format`, real date cells via
-  `XlsxWriter.dateCell`; the writer's `style()` takes a nullable fill, a
-  `border` flag and a `format` code, the cube exporter's calls unchanged). Own OOXML
+  and `XlsxTableExporter` (an engine `ExportTable` as a filterable data
+  table — autofilter + `_xlnm._FilterDatabase`, frozen header, number
+  codes from `ExportColumn.numberFormat` via `XlsxCubeExporter.formatCode`
+  or `formatCodes` by `ExportColumn.key`, real date cells via
+  `XlsxWriter.dateCell`/`excelSerial` (1900 leap-year gap, null before
+  1900 → ISO text); rows > 1 048 575 or columns > 16 384 throw, text cut at
+  32 767; the writer's `style()` takes a nullable fill, a `border` flag
+  and a `format` code, the cube exporter's calls unchanged). Own OOXML
   code on `archive` + `xml`, no third-party spreadsheet layer.
   Reader implemented: `xlsx_workbook.dart` (`XlsxWorkbook.parse`: zip →
   sheets via workbook rels, shared strings incl. rich runs, `cellXfs` →
@@ -94,7 +103,13 @@ the root, ignored; members carry `resolution: workspace`):
   `number-columns/rows-spanned` + `covered-table-cell`, `settings.xml`
   view settings for frozen panes — LibreOffice's documented
   `HorizontalSplitMode=2` layout; unverifiable headless because a
-  headless conversion has no view and drops view settings both ways).
+  headless conversion has no view and drops view settings both ways) and
+  `OdsTableExporter` (an `ExportTable` as a filterable table: header in
+  `table:table-header-rows`, filter buttons via an anonymous
+  `table:database-range` `__Anonymous_Sheet_DB__0`, date styles D0/D1,
+  number styles per `NumberFormat`, texts as `text:p` per line with
+  `text:s`/`text:tab`). Shared package parts and the escaping (which
+  drops XML-illegal characters) live in `ods_parts.dart`.
   Test data `test/data/sales.ods` = `sales.csv` via `soffice
   --convert-to ods` (LibreOffice's hu locale kept decimals as strings,
   which inference parses like CSV); tests compare with the CSV import,
@@ -285,6 +300,7 @@ the root, ignored; members carry `resolution: workspace`):
   `records`. The example's export menu offers both. `JsonFactExporter`
   (`export/json_fact_exporter.dart`) writes the `FactTable` as records
   (lazy `records`, streaming `writeLines`; `columns`, `useLabels`,
+  `rows:`/`filter:` like `ExportTable.ofFacts`,
   `indent`; `date` columns as `yyyy-MM-dd`, `dateTime` as full ISO) so a
   JSONL round trip keeps every type — which needed the full ISO forms
   (`.SSS`, `Z`) in `defaultDateFormats`. Tests:
@@ -536,7 +552,9 @@ Paths below are relative to the package (`lib/src/...` means
   `file_picker`'s `FilePicker.saveFile(bytes:)`, which writes the file
   itself — needed on Android/iOS (document Uri, no path;
   `file_selector` has no save dialog there). Linux goes through the
-  xdg-desktop-portal.
+  xdg-desktop-portal. Its "Facts as a table" submenu writes the facts
+  passing the spec's filter (`ExportTable.ofFacts`) as .xlsx, .ods, CSV
+  or JSON Lines (`ExportFormat.tables`).
 - "Theming" (`example/lib/theming/`): the sales cube with an AppBar
   palette menu — `ThemePreset`s in `presets.dart` (`themePresets`:
   Material/default, Spreadsheet, Gradient, Hue levels, High contrast,

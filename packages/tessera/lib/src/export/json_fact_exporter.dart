@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../cube/filter.dart';
 import '../facts/fact_table.dart';
 import '../schema/column_type.dart';
 
@@ -25,12 +26,20 @@ final class JsonFactExporter {
   /// compact. JSON Lines are always one record per line.
   final String? indent;
 
-  /// The records, produced on demand.
-  Iterable<Map<String, Object?>> records(FactTable facts) sync* {
+  /// The records, produced on demand: every fact, or those of [rows] when
+  /// given (e.g. `CubeCell.factRows`), that pass [filter] (e.g. the
+  /// cube's `CubeSpec.filter`).
+  Iterable<Map<String, Object?>> records(
+    FactTable facts, {
+    Iterable<int>? rows,
+    FactFilter? filter,
+  }) sync* {
     final names = columns ?? [for (final c in facts.columns) c.name];
     final keys = [for (final n in names) useLabels ? facts.column(n).label : n];
     final types = [for (final n in names) facts.column(n).type];
-    for (var r = 0; r < facts.rowCount; r++) {
+    final pass = filter?.compile(facts);
+    for (final r in rows ?? Iterable<int>.generate(facts.rowCount)) {
+      if (pass != null && !pass(r)) continue;
       yield {
         for (var i = 0; i < names.length; i++)
           keys[i]: _value(facts.valueAt(r, names[i]), types[i]),
@@ -38,9 +47,13 @@ final class JsonFactExporter {
     }
   }
 
-  /// The JSON array text.
-  String export(FactTable facts) {
-    final list = records(facts).toList(growable: false);
+  /// The JSON array text; [rows] and [filter] as in [records].
+  String export(FactTable facts, {Iterable<int>? rows, FactFilter? filter}) {
+    final list = records(
+      facts,
+      rows: rows,
+      filter: filter,
+    ).toList(growable: false);
     final indent = this.indent;
     return indent == null
         ? jsonEncode(list)
@@ -48,15 +61,24 @@ final class JsonFactExporter {
   }
 
   /// The JSON Lines text: one record per line, `\n` after each.
-  String exportLines(FactTable facts) {
+  String exportLines(
+    FactTable facts, {
+    Iterable<int>? rows,
+    FactFilter? filter,
+  }) {
     final out = StringBuffer();
-    writeLines(out, facts);
+    writeLines(out, facts, rows: rows, filter: filter);
     return out.toString();
   }
 
   /// Like [exportLines], into [sink], one row at a time.
-  void writeLines(StringSink sink, FactTable facts) {
-    for (final r in records(facts)) {
+  void writeLines(
+    StringSink sink,
+    FactTable facts, {
+    Iterable<int>? rows,
+    FactFilter? filter,
+  }) {
+    for (final r in records(facts, rows: rows, filter: filter)) {
       sink.write(jsonEncode(r));
       sink.write('\n');
     }

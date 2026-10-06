@@ -1,3 +1,19 @@
+## Unreleased
+
+* `OdsTableExporter`: writes an `ExportTable` — plain rows, or a
+  `FactTable` through `ExportTable.ofFacts` — as a filterable data table
+  rather than a pivot, the counterpart of `XlsxTableExporter`: filter
+  buttons over the table (an anonymous database range, as LibreOffice
+  writes it), the header frozen and repeated on printed pages, typed
+  numbers, booleans and dates (date or date-time by the column's type),
+  a number style per `ExportColumn.numberFormat`, content-sized or fixed
+  widths, the look from the engine's `TableExportTheme`. Line breaks, tabs
+  and runs of spaces in texts are kept.
+* Text no longer carries characters XML 1.0 forbids (control characters,
+  unpaired surrogates, U+FFFE/U+FFFF), which made the document
+  unreadable. Affects `OdsCubeExporter` too.
+* Needs the `tessera` release with `ExportTable`.
+
 ## 0.2.0
 
 * Requires `tessera` 0.2.0; no changes of its own. Cubes with the new

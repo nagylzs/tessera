@@ -1,16 +1,17 @@
 # 11. Export
 
-Every exporter renders a `CubeLayout` — what the grid shows, including
-which groups are expanded — without Flutter. The engine has CSV; the
-other formats are packages of their own so that an app pulls in only the
-dependencies it uses.
+Every cube exporter renders a `CubeLayout` — what the grid shows,
+including which groups are expanded — without Flutter. The engine has CSV
+and JSON; the other formats are packages of their own so that an app
+pulls in only the dependencies it uses. Plain tables — the facts
+themselves, or any rows of your own — have exporters too, see
+[Plain tables](#plain-tables) below.
 
 | Format | Package | Call | Returns |
 |---|---|---|---|
 | CSV | `tessera` | `CsvCubeExporter().export(layout)` / `writeTo(sink, layout)` | `String` |
 | JSON, JSON Lines | `tessera` | `JsonCubeExporter().export(layout)` / `exportLines(layout)` / `records(layout)` | `String` / `List<Map>` |
 | XLSX | `tessera_xlsx` | `XlsxCubeExporter().export(layout)` | `Uint8List` |
-| XLSX, a plain table | `tessera_xlsx` | `XlsxTableExporter().export(columns, rows)` / `exportFacts(facts)` | `Uint8List` |
 | ODS | `tessera_ods` | `OdsCubeExporter().export(layout)` | `Uint8List` |
 | HTML | `tessera_html` | `HtmlCubeExporter().export(layout)` | `String` |
 | SVG | `tessera_svg` | `SvgCubeExporter().export(layout)` | `String` |
@@ -86,17 +87,6 @@ format (`numberFormatCode` for a custom Excel code). Both packages use
 their own OOXML and OpenDocument writers on `archive` and `xml`. The
 demo app's "Excel export theme" submenu picks the theme for these two.
 
-**A plain table to Excel.** Not every export is a pivot: `XlsxTableExporter`
-writes rows as they are — a list of `XlsxColumn`s (header, an Excel format
-code, an optional width) and the rows as lists of values, or a whole
-`FactTable` through `exportFacts` with the column labels as headers. The
-sheet is a filterable data table: a bold header with an autofilter over
-the whole range (and the `_xlnm._FilterDatabase` name other readers look
-for), the header frozen, numbers and booleans typed, a `DateTime` written
-as an Excel date in the column's format (`dateFormat` / `dateTimeFormat`
-otherwise), widths from the content. Characters XML does not allow are
-dropped from the text.
-
 **HTML** writes a `<table>` with `<thead>`, `rowspan` / `colspan` from
 the merged areas, `scope` on the header cells and a class per role and
 level (`tessera-header`, `tessera-level-2`, `tessera-num`, …).
@@ -122,6 +112,73 @@ Helvetica covers WinAnsi only; `PdfPageText` header and footer take
 scale and page count without rendering, for a preview.
 
 ![The first page of the PDF export](images/export_pdf.png)
+
+## Plain tables
+
+Not every export is a pivot. An `ExportTable` is rows of values under
+`ExportColumn`s, and three exporters write it:
+
+| Format | Package | Call | Returns |
+|---|---|---|---|
+| CSV | `tessera` | `CsvTableExporter().export(table)` / `writeTo(sink, table)` | `String` |
+| XLSX | `tessera_xlsx` | `XlsxTableExporter().export(table)` | `Uint8List` |
+| ODS | `tessera_ods` | `OdsTableExporter().export(table)` | `Uint8List` |
+
+`ExportTable.ofFacts(facts)` is the fact table — every column (or
+`columns:`), the labels as headers (`useLabels: false` for the names),
+each column's type — read lazily, so nothing is copied first. `rows:`
+limits it to some facts (`cell.factRows`, the facts behind the current
+cell) and `filter:` to those passing a filter (`cube.spec.filter`, what
+the pivot is built from). Your own rows work the same way:
+
+```dart
+final table = ExportTable([
+  const ExportColumn('Name'),
+  const ExportColumn('Amount', numberFormat: NumberFormat(decimals: 2)),
+  const ExportColumn('Due', type: ColumnType.date),
+], [
+  ['Anna', 1234.5, DateTime.utc(2026, 3, 9)],
+  ['Béla', 99, null],
+]);
+
+final facts = ExportTable.ofFacts(
+  controller.cube.facts,
+  filter: controller.cube.spec.filter,
+).withColumn(
+  'total',
+  (c) => c.copyWith(numberFormat: const NumberFormat(decimals: 2)),
+);
+final xlsx = const XlsxTableExporter().export(facts, sheetName: 'Sales');
+```
+
+A value is a number, a boolean, a `DateTime`, `null` (an empty cell) or
+anything else as text. An `ExportColumn`'s `type` decides whether a date
+is shown as a day or with its time (`showsTime`; without a type, a value
+at midnight is a day); its `numberFormat` and `width` are display hints
+for the spreadsheets. `TableExportTheme` is their shared look: the header
+fill and font, the data font, borders.
+
+**XLSX and ODS** write a filterable data table: a bold header row with
+filter buttons over the whole range (Excel's autofilter with its
+`_xlnm._FilterDatabase` name; an anonymous database range in ODS), the
+header frozen (`freezeHeader`), typed numbers, booleans and dates, widths
+from the content. In Excel a column can take a native format code instead
+(`formatCodes: {'total': '#,##0 "Ft"'}`, by column name), and
+`dateFormat` / `dateTimeFormat` set the date codes; Excel's limits are
+checked — more than 1 048 575 rows or 16 384 columns throw, texts are cut
+at 32 767 characters, dates before 1900 become ISO text. ODS repeats the
+header on printed pages and keeps line breaks and runs of spaces.
+Characters XML does not allow are dropped in both.
+
+**CSV** is data, not a display: numbers plainly with the options' decimal
+mark, days as `yyyy-MM-dd`, points in time as ISO 8601, so the file reads
+back with the same types. `CsvExportOptions` works as for cubes
+(`europeanExcel` included); `header: false` leaves out the header row.
+JSON Lines of the facts is `JsonFactExporter` (above), which takes the
+same `rows:` and `filter:`.
+
+The demo app's export menu has a "Facts as a table" submenu: the facts
+passing the current filter, as .xlsx, .ods, CSV or JSON Lines.
 
 ## Under the hood
 

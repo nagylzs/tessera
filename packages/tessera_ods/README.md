@@ -11,6 +11,12 @@ support for the [tessera](../tessera) pivot-table engine:
   "rotated L" shape, level shading, bold summaries, frozen headers,
   localized labels through `TesseraStrings`, looks from the engine's
   `CubeExportTheme` (shared with `tessera_xlsx`).
+* `OdsTableExporter` — writes an `ExportTable` (plain rows, or a whole
+  `FactTable` through `ExportTable.ofFacts`) as a filterable data table
+  rather than a pivot: filter buttons on the header row, the header frozen
+  and repeated on printed pages, real numbers, booleans and dates, number
+  formats per column, the engine's `TableExportTheme` — the counterpart of
+  `tessera_xlsx`'s `XlsxTableExporter`.
 
 Pure Dart, no Flutter dependency — works in Flutter apps, on servers and in
 command-line tools alike.
@@ -25,6 +31,10 @@ final ods = OdsCubeExporter(
   strings: TesseraStrings.forLanguage('hu')!,
   theme: CubeExportTheme.brand(primary: 0xFF00695C),
 ).export(cube.layout);
+
+final table = const OdsTableExporter().export(
+  ExportTable.ofFacts(result.facts, filter: cube.spec.filter),
+);
 ```
 
 `export` returns the document as a `Uint8List`, ready to write to a file

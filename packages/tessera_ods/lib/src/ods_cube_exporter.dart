@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:tessera/tessera.dart';
 
+import 'ods_parts.dart';
+
 /// Writes a [CubeLayout] — the rows and columns exactly as expanded — as a
 /// formatted OpenDocument sheet, rendered from [CubeGrid] like the other
 /// exporters: merged "rotated L" group headers, one column per exported
@@ -69,24 +71,32 @@ final class _Writer {
   final _styleIndex = <_CellStyle, int>{};
   final _fonts = <String>{};
 
-  static const _mime = 'application/vnd.oasis.opendocument.spreadsheet';
-
   Uint8List build() {
     final rows = _rows(); // registers styles and fonts
     final archive = Archive();
     archive.add(
-      ArchiveFile.string('mimetype', _mime)..compression = CompressionType.none,
+      ArchiveFile.string('mimetype', odsMimeType)
+        ..compression = CompressionType.none,
     );
     archive.add(
       ArchiveFile.string(
         'META-INF/manifest.xml',
-        _manifest(withSettings: exporter.freezeHeaders),
+        odsManifest(withSettings: exporter.freezeHeaders),
       ),
     );
     archive.add(ArchiveFile.string('content.xml', _content(rows)));
-    archive.add(ArchiveFile.string('styles.xml', _stylesXml));
+    archive.add(ArchiveFile.string('styles.xml', odsStylesXml));
     if (exporter.freezeHeaders) {
-      archive.add(ArchiveFile.string('settings.xml', _settings()));
+      archive.add(
+        ArchiveFile.string(
+          'settings.xml',
+          odsFreezeSettings(
+            sheetName,
+            rows: grid.headerRows,
+            columns: grid.headerColumns,
+          ),
+        ),
+      );
     }
     return ZipEncoder().encodeBytes(archive);
   }
@@ -151,7 +161,7 @@ final class _Writer {
               'office:value-type="string">',
             );
         }
-        b.write('<text:p>${_escape(text)}</text:p></table:table-cell>');
+        b.write('<text:p>${odsEscape(text)}</text:p></table:table-cell>');
         if (cell.columnSpan == 1 && text.length > _longest[c]) {
           _longest[c] = text.length;
         }
@@ -164,22 +174,11 @@ final class _Writer {
   // ---------------------------------------------------------------- parts
 
   String _content(String rows) {
-    final b = StringBuffer(
-      '<?xml version="1.0" encoding="UTF-8"?>\n'
-      '<office:document-content '
-      'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
-      'xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" '
-      'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" '
-      'xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" '
-      'xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" '
-      'xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" '
-      'xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" '
-      'office:version="1.3">',
-    );
+    final b = StringBuffer(odsContentStart);
     b.write('<office:font-face-decls>');
     for (final f in _fonts) {
       b.write(
-        '<style:font-face style:name="${_escape(f)}" svg:font-family="${_escape(f)}"/>',
+        '<style:font-face style:name="${odsEscape(f)}" svg:font-family="${odsEscape(f)}"/>',
       );
     }
     b.write('</office:font-face-decls>');
@@ -202,17 +201,17 @@ final class _Writer {
         '</style:style>',
       );
     }
-    final border = '0.5pt solid ${_rgb(theme.borderColor)}';
+    final border = '0.5pt solid ${odsRgb(theme.borderColor)}';
     for (var i = 0; i < _styles.length; i++) {
       final s = _styles[i];
       b.write(
         '<style:style style:name="ce$i" style:family="table-cell" '
         'style:data-style-name="N1">'
-        '<style:table-cell-properties fo:background-color="${_rgb(s.fill)}" '
+        '<style:table-cell-properties fo:background-color="${odsRgb(s.fill)}" '
         'fo:border="$border" style:vertical-align="middle"/>'
         '<style:paragraph-properties fo:text-align="${s.right ? 'end' : 'start'}"/>'
-        '<style:text-properties style:font-name="${_escape(s.font.family)}" '
-        'fo:font-size="${_pt(s.font.size)}pt" fo:color="${_rgb(s.font.color)}"'
+        '<style:text-properties style:font-name="${odsEscape(s.font.family)}" '
+        'fo:font-size="${odsPt(s.font.size)}pt" fo:color="${odsRgb(s.font.color)}"'
         '${s.font.bold ? ' fo:font-weight="bold"' : ''}'
         '${s.font.italic ? ' fo:font-style="italic"' : ''}/>'
         '</style:style>',
@@ -220,7 +219,7 @@ final class _Writer {
     }
     b.write('</office:automatic-styles>');
     b.write('<office:body><office:spreadsheet>');
-    b.write('<table:table table:name="${_escape(sheetName)}">');
+    b.write('<table:table table:name="${odsEscape(sheetName)}">');
     for (var c = 0; c < grid.columnCount; c++) {
       b.write('<table:table-column table:style-name="co$c"/>');
     }
@@ -229,59 +228,6 @@ final class _Writer {
     b.write('</office:document-content>');
     return b.toString();
   }
-
-  static String _manifest({required bool withSettings}) =>
-      '<?xml version="1.0" encoding="UTF-8"?>\n'
-      '<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.3">'
-      '<manifest:file-entry manifest:full-path="/" manifest:version="1.3" manifest:media-type="$_mime"/>'
-      '<manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>'
-      '<manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>'
-      '${withSettings ? '<manifest:file-entry manifest:full-path="settings.xml" manifest:media-type="text/xml"/>' : ''}'
-      '</manifest:manifest>';
-
-  static const _stylesXml =
-      '<?xml version="1.0" encoding="UTF-8"?>\n'
-      '<office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
-      'office:version="1.3"><office:styles/></office:document-styles>';
-
-  /// Freezes [CubeGrid.headerRows] rows and [CubeGrid.headerColumns]
-  /// columns of the sheet.
-  String _settings() {
-    final cols = grid.headerColumns, rows = grid.headerRows;
-    String item(String name, String type, Object value) =>
-        '<config:config-item config:name="$name" config:type="$type">$value</config:config-item>';
-    return '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<office:document-settings xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
-        'xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" office:version="1.3">'
-        '<office:settings><config:config-item-set config:name="ooo:view-settings">'
-        '<config:config-item-map-indexed config:name="Views"><config:config-item-map-entry>'
-        '${item('ViewId', 'string', 'view1')}'
-        '<config:config-item-map-named config:name="Tables">'
-        '<config:config-item-map-entry config:name="${_escape(sheetName)}">'
-        '${item('CursorPositionX', 'int', cols)}${item('CursorPositionY', 'int', rows)}'
-        '${item('HorizontalSplitMode', 'short', 2)}${item('VerticalSplitMode', 'short', 2)}'
-        '${item('HorizontalSplitPosition', 'int', cols)}${item('VerticalSplitPosition', 'int', rows)}'
-        '${item('ActiveSplitRange', 'short', 2)}'
-        '${item('PositionLeft', 'int', 0)}${item('PositionRight', 'int', cols)}'
-        '${item('PositionTop', 'int', 0)}${item('PositionBottom', 'int', rows)}'
-        '</config:config-item-map-entry></config:config-item-map-named>'
-        '${item('ActiveTable', 'string', _escape(sheetName))}'
-        '</config:config-item-map-entry></config:config-item-map-indexed>'
-        '</config:config-item-set></office:settings></office:document-settings>';
-  }
-
-  static String _rgb(int argb) =>
-      '#${(argb & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
-
-  static String _pt(double size) => size == size.truncateToDouble()
-      ? size.toInt().toString()
-      : size.toString();
-
-  static String _escape(String s) => s
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;');
 }
 
 final class _CellStyle {

@@ -101,16 +101,18 @@ final class XlsxWriter {
     _extend(row, column);
   }
 
-  /// Writes [value] as an Excel serial date (days since 1899-12-30, the
-  /// time of day as the fraction) at 0-based ([row], [column]); the style
-  /// should carry a date [style] `format`. The wall-clock fields are used
-  /// as they are, without a time zone conversion.
+  /// Writes [value] as an Excel serial date ([excelSerial]) at 0-based
+  /// ([row], [column]); the style should carry a date `format`. A date
+  /// before 1900, which Excel cannot show, is written as ISO 8601 text.
   void dateCell(int row, int column, DateTime value, int styleIndex) {
+    final serial = excelSerial(value);
+    if (serial == null) {
+      cell(row, column, value.toIso8601String(), styleIndex);
+      return;
+    }
     final ref = cellRef(row, column);
     final out = _rows.putIfAbsent(row, StringBuffer.new);
-    out.write(
-      '<c r="$ref" s="${styleIndex + 1}"><v>${excelSerial(value)}</v></c>',
-    );
+    out.write('<c r="$ref" s="${styleIndex + 1}"><v>$serial</v></c>');
     _extend(row, column);
   }
 
@@ -119,11 +121,18 @@ final class XlsxWriter {
     if (column > _lastColumn) _lastColumn = column;
   }
 
-  /// The Excel serial number of [value] (1900 date system): whole days
-  /// since 1899-12-30 plus the time of day as a fraction.
-  static num excelSerial(DateTime value) {
+  /// The Excel serial number of [value] in the 1900 date system: whole
+  /// days plus the time of day as a fraction, the wall-clock fields taken
+  /// as they are (no time zone conversion). Serial 1 is 1900-01-01 and 60
+  /// the 1900-02-29 Excel believes in, so days from March 1900 count from
+  /// 1899-12-30 and earlier ones from 1899-12-31; `null` before 1900.
+  static num? excelSerial(DateTime value) {
+    if (value.year < 1900) return null;
     final day = DateTime.utc(value.year, value.month, value.day);
-    final days = day.difference(DateTime.utc(1899, 12, 30)).inDays;
+    final epoch = day.isBefore(DateTime.utc(1900, 3))
+        ? DateTime.utc(1899, 12, 31)
+        : DateTime.utc(1899, 12, 30);
+    final days = day.difference(epoch).inDays;
     final ms =
         ((value.hour * 60 + value.minute) * 60 + value.second) * 1000 +
         value.millisecond;

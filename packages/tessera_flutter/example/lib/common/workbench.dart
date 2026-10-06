@@ -377,6 +377,49 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
           utf8.encode(JsonCubeExporter(strings: strings).exportLines(layout)),
         );
     }
+    await _save(bytes, base, format);
+  }
+
+  /// Writes the facts behind the cube — every column, the rows that pass
+  /// the spec's filter — as a plain filterable table (.xlsx, .ods) or as
+  /// records (CSV, JSON Lines), not as a pivot.
+  Future<void> _exportFacts(ExportFormat format) async {
+    final controller = _controller;
+    if (controller == null) return;
+    final base = widget.source.name.replaceFirst(RegExp(r'\.[^.]*$'), '');
+    final cube = controller.cube;
+    final table = ExportTable.ofFacts(cube.facts, filter: cube.spec.filter);
+    final Uint8List bytes;
+    switch (format) {
+      case ExportFormat.xlsx:
+        bytes = const XlsxTableExporter().export(table, sheetName: base);
+      case ExportFormat.ods:
+        bytes = const OdsTableExporter().export(table, sheetName: base);
+      case ExportFormat.csv:
+        bytes = Uint8List.fromList(
+          utf8.encode(
+            const CsvTableExporter(
+              options: CsvExportOptions(byteOrderMark: true),
+            ).export(table),
+          ),
+        );
+      case ExportFormat.jsonl:
+        bytes = Uint8List.fromList(
+          utf8.encode(
+            const JsonFactExporter().exportLines(
+              cube.facts,
+              filter: cube.spec.filter,
+            ),
+          ),
+        );
+      default:
+        throw ArgumentError.value(format, 'format', 'not a table format');
+    }
+    await _save(bytes, '$base facts', format);
+  }
+
+  /// Saves [bytes] as `<base>.<extension>` through the save dialog.
+  Future<void> _save(Uint8List bytes, String base, ExportFormat format) async {
     final uri = await FilePicker.saveFile(
       dialogTitle: 'Export',
       fileName: '$base.${format.extension}',
@@ -445,6 +488,19 @@ class _CubeWorkbenchState extends State<CubeWorkbench> {
                 onPressed: _controller == null ? null : () => _export(format),
                 child: Text('${format.label} (.${format.extension})…'),
               ),
+            const Divider(),
+            SubmenuButton(
+              menuChildren: [
+                for (final format in ExportFormat.tables)
+                  MenuItemButton(
+                    onPressed: _controller == null
+                        ? null
+                        : () => _exportFacts(format),
+                    child: Text('${format.label} (.${format.extension})…'),
+                  ),
+              ],
+              child: const Text('Facts as a table'),
+            ),
           ],
           builder: (context, menu, _) => IconButton(
             icon: const Icon(Icons.file_download_outlined),
@@ -628,6 +684,9 @@ enum ExportFormat {
   jsonl('JSON Lines', 'jsonl', 'application/jsonl');
 
   const ExportFormat(this.label, this.extension, this.mimeType);
+
+  /// The formats the facts export as a plain table to.
+  static const tables = [xlsx, ods, csv, jsonl];
 
   final String label;
   final String extension;

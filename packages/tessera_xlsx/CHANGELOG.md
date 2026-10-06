@@ -1,14 +1,21 @@
-## 0.3.0
+## Unreleased
 
-* `XlsxTableExporter`: writes plain rows (`export(columns, rows)`) or a
-  `FactTable` (`exportFacts`) as a filterable data table — bold header
-  row with an autofilter over the table (plus the `_xlnm._FilterDatabase`
-  defined name), frozen header, numbers, booleans and real Excel dates,
-  an Excel number format per column (`XlsxColumn.format`), content-sized
-  or fixed widths, optional borders.
+* `XlsxTableExporter`: writes an `ExportTable` — plain rows, or a
+  `FactTable` through `ExportTable.ofFacts` — as a filterable data table
+  rather than a pivot: header row with an autofilter over the table (plus
+  the `_xlnm._FilterDatabase` defined name), frozen header, numbers,
+  booleans and real Excel dates (date or date-time by the column's type),
+  a number format per column from `ExportColumn.numberFormat` or a native
+  Excel code through `formatCodes`, content-sized or fixed widths, header
+  fill, fonts and borders from the engine's `TableExportTheme`. Excel's
+  limits are enforced: more than 1 048 575 rows or 16 384 columns throw
+  an `ArgumentError`, longer texts than 32 767 characters are cut; dates
+  before 1900 are written as ISO text, and January–February 1900 get
+  Excel's serials despite its 1900 leap-year bug.
 * The writer's text no longer carries characters XML 1.0 forbids (control
   characters, unpaired surrogates, U+FFFE/U+FFFF): one such character in a
   value made the whole sheet unreadable. Affects `XlsxCubeExporter` too.
+* Needs the `tessera` release with `ExportTable`.
 
 ## 0.2.0
 

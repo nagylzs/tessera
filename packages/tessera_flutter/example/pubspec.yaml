@@ -40,7 +40,7 @@ dependencies:
   tessera_flutter: ^0.2.0
   flutter_localizations:
     sdk: flutter
-  tessera_xlsx: ^0.3.0
+  tessera_xlsx: ^0.2.0
   tessera_ods: ^0.2.0
   tessera_html: ^0.2.0
   tessera_svg: ^0.2.0

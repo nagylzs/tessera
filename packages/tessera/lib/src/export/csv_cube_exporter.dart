@@ -48,6 +48,20 @@ final class CsvExportOptions {
   /// Prefix the output with U+FEFF, which makes Excel read it as UTF-8.
   final bool byteOrderMark;
 
+  /// [s] as one field: quoted (the quote doubled inside) when it holds the
+  /// delimiter, the quote or a line break, or starts or ends with a space.
+  String field(String s) {
+    final needsQuoting =
+        s.contains(delimiter) ||
+        s.contains(quote) ||
+        s.contains('\n') ||
+        s.contains('\r') ||
+        (s.isNotEmpty && (s.startsWith(' ') || s.endsWith(' ')));
+    return needsQuoting
+        ? '$quote${s.replaceAll(quote, '$quote$quote')}$quote'
+        : s;
+  }
+
   /// Excel-friendly for locales with a comma decimal mark.
   static const europeanExcel = CsvExportOptions(
     delimiter: ';',
@@ -106,7 +120,7 @@ final class CsvCubeExporter {
       final row = grid.row(r);
       for (var c = 0; c < row.length; c++) {
         if (c > 0) sink.write(options.delimiter);
-        sink.write(_field(_text(row[c])));
+        sink.write(options.field(_text(row[c])));
       }
       sink.write(options.lineEnding);
     }
@@ -140,16 +154,5 @@ final class CsvCubeExporter {
         ? double.parse(v.toStringAsPrecision(15)).toString()
         : v.toString();
     return decimalSeparator == '.' ? s : s.replaceAll('.', decimalSeparator);
-  }
-
-  String _field(String s) {
-    final q = options.quote;
-    final needsQuoting =
-        s.contains(options.delimiter) ||
-        s.contains(q) ||
-        s.contains('\n') ||
-        s.contains('\r') ||
-        (s.isNotEmpty && (s.startsWith(' ') || s.endsWith(' ')));
-    return needsQuoting ? '$q${s.replaceAll(q, '$q$q')}$q' : s;
   }
 }

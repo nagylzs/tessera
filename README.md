@@ -17,8 +17,8 @@ with these packages:
 |---|---|---|
 | [`packages/tessera`](packages/tessera) | nothing | The engine: data sources, schema inference, fact table, cube, layout, localized strings. Pure Dart — servers, CLIs, isolates and the web. |
 | [`packages/tessera_flutter`](packages/tessera_flutter) | `tessera`, Flutter | `CubeView`, the axis and aggregate editors, picker dialogs, `CubeTheme`, `TesseraLocalizations`. Its `example/` is the demo app. |
-| [`packages/tessera_xlsx`](packages/tessera_xlsx) | `tessera`, `archive`, `xml` | `XlsxDataSource` (import a worksheet) and `XlsxCubeExporter` (write a cube as a formatted worksheet). Pure Dart. |
-| [`packages/tessera_ods`](packages/tessera_ods) | `tessera`, `archive`, `xml` | `OdsDataSource` and `OdsCubeExporter`: the same for OpenDocument spreadsheets (LibreOffice Calc). Pure Dart. |
+| [`packages/tessera_xlsx`](packages/tessera_xlsx) | `tessera`, `archive`, `xml` | `XlsxDataSource` (import a worksheet), `XlsxCubeExporter` (write a cube as a formatted worksheet) and `XlsxTableExporter` (plain rows or the facts as a filterable table). Pure Dart. |
+| [`packages/tessera_ods`](packages/tessera_ods) | `tessera`, `archive`, `xml` | `OdsDataSource`, `OdsCubeExporter` and `OdsTableExporter`: the same for OpenDocument spreadsheets (LibreOffice Calc). Pure Dart. |
 | [`packages/tessera_html`](packages/tessera_html) | `tessera` | `HtmlCubeExporter`: a cube as an HTML table with merged headers and a stylesheet from `CubeExportTheme`. Pure Dart. |
 | [`packages/tessera_svg`](packages/tessera_svg) | `tessera` | `SvgCubeExporter`: a cube as a scalable image, content-sized columns, themed with `CubeExportTheme`. Pure Dart. |
 | [`packages/tessera_pdf`](packages/tessera_pdf) | `tessera`, `pdf` | `PdfCubeExporter`: paginated pages with repeated headers, fit to width or tiling, embedded fonts, page header/footer. Pure Dart. |

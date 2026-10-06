@@ -46,3 +46,6 @@ under `## Unreleased` in the affected package's CHANGELOG.
 - Median and percentiles: cells never store row lists.
 - Cell editing and spreadsheet features.
 - A bundled chart widget: the engine produces series, the app draws.
+- A general spreadsheet writer: the table exporters (`XlsxTableExporter`,
+  `OdsTableExporter`, `CsvTableExporter`) write one filterable table of
+  values — no formulas, several sheets, conditional formats or charts.

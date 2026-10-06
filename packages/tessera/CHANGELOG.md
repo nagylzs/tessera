@@ -1,5 +1,21 @@
 ## Unreleased
 
+* `ExportTable`: a plain table — not a cube — for the new table exporters:
+  `ExportColumn`s (header, source `name`, `type`, `numberFormat`, `width`;
+  `showsTime` decides date vs. date-time by the type) and rows of values.
+  `ExportTable.ofFacts(facts, columns:, rows:, filter:, useLabels:)` reads
+  a fact table lazily (e.g. the facts behind a cell, or those passing the
+  cube's filter); `withColumn` adjusts one column. `TableExportTheme` is
+  the format-neutral look (header fill and font, data font, borders) that
+  `tessera_xlsx`'s `XlsxTableExporter` and `tessera_ods`'s
+  `OdsTableExporter` take.
+* `CsvTableExporter`: an `ExportTable` as CSV — header row, numbers
+  plainly with the options' decimal mark, days as `yyyy-MM-dd`, points in
+  time as ISO 8601 — so a fact table survives a CSV round trip with its
+  types. `CsvExportOptions.field` quotes one field (what both CSV
+  exporters use).
+* `JsonFactExporter`: `records`, `export`, `exportLines` and `writeLines`
+  take `rows:` and `filter:` like `ExportTable.ofFacts`.
 * `Schema.structureKey`: a canonical key for the structure of a source
   (the JSON list of its column names, in order), so that applications
   can remember schema edits or layouts per structure and apply them to
