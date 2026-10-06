@@ -45,7 +45,12 @@ the root, ignored; members carry `resolution: workspace`):
   typed cells, `fromData`/`fromBytes`, `XlsxOptions`) and
   `XlsxCubeExporter` (renders a `CubeLayout` from `CubeGrid`,
   the engine's `CubeExportTheme`; `numberFormatCode`, `freezeHeaders`
-  and the width bounds are exporter options — `TesseraStrings` labels). Own OOXML
+  and the width bounds are exporter options — `TesseraStrings` labels)
+  and `XlsxTableExporter` (0.3.0: plain rows or a `FactTable` as a
+  filterable data table — autofilter + `_xlnm._FilterDatabase`, frozen
+  header, per-column `XlsxColumn.format`, real date cells via
+  `XlsxWriter.dateCell`; the writer's `style()` takes a nullable fill, a
+  `border` flag and a `format` code, the cube exporter's calls unchanged). Own OOXML
   code on `archive` + `xml`, no third-party spreadsheet layer.
   Reader implemented: `xlsx_workbook.dart` (`XlsxWorkbook.parse`: zip →
   sheets via workbook rels, shared strings incl. rich runs, `cellXfs` →

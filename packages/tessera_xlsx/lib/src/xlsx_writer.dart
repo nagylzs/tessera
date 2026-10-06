@@ -4,9 +4,10 @@ import 'package:archive/archive.dart';
 import 'package:tessera/tessera.dart';
 
 /// A minimal `.xlsx` package writer: one worksheet, shared strings, a
-/// style registry (fills, bold, alignment, one number format, thin
-/// borders), merged cells, column widths and frozen panes. Internal to
-/// `XlsxCubeExporter`; knows nothing about cubes.
+/// style registry (fills, fonts, alignment, number formats, thin borders or
+/// none), merged cells, column widths, frozen panes and an autofilter.
+/// Internal to `XlsxCubeExporter` and `XlsxTableExporter`; knows nothing
+/// about cubes.
 final class XlsxWriter {
   XlsxWriter({
     required this.sheetName,
@@ -21,6 +22,7 @@ final class XlsxWriter {
   final _sharedStrings = <String>[];
   final _sharedIndex = <String, int>{};
   final _fills = <int>[];
+  final _formats = <String>[];
   final _fonts = <ExportFont>[];
   final _styles = <_Xf>[];
   final _styleIndex = <_Xf, int>{};
@@ -29,25 +31,41 @@ final class XlsxWriter {
   final _widths = <int, double>{};
   int _lastRow = 0, _lastColumn = 0;
   ({int rows, int columns})? _freeze;
+  String? _autoFilter;
 
-  /// Style index for a cell with [fill] (ARGB) and [font], right- or
-  /// left-aligned; registered on first use.
+  /// Style index for a cell with [fill] (ARGB; `null` for none) and
+  /// [font], right- or left-aligned, with thin [border]s or none, and the
+  /// Excel number [format] code (`#,##0.00`, `yyyy-mm-dd`; `null` for the
+  /// writer's [numberFormat]); registered on first use.
   int style(
-    int fill, {
+    int? fill, {
     ExportFont font = const ExportFont(),
     bool right = false,
+    bool border = true,
+    String? format,
   }) {
-    var fillId = _fills.indexOf(fill);
-    if (fillId < 0) {
-      _fills.add(fill);
-      fillId = _fills.length - 1;
+    var fillId = -1;
+    if (fill != null) {
+      fillId = _fills.indexOf(fill);
+      if (fillId < 0) {
+        _fills.add(fill);
+        fillId = _fills.length - 1;
+      }
+    }
+    var formatId = -1;
+    if (format != null) {
+      formatId = _formats.indexOf(format);
+      if (formatId < 0) {
+        _formats.add(format);
+        formatId = _formats.length - 1;
+      }
     }
     var fontId = _fonts.indexOf(font);
     if (fontId < 0) {
       _fonts.add(font);
       fontId = _fonts.length - 1;
     }
-    final xf = _Xf(fillId, fontId, right);
+    final xf = _Xf(fillId, fontId, right, border, formatId);
     return _styleIndex.putIfAbsent(xf, () {
       _styles.add(xf);
       return _styles.length - 1;
@@ -80,8 +98,36 @@ final class XlsxWriter {
         });
         out.write('<c r="$ref" s="$style" t="s"><v>$i</v></c>');
     }
+    _extend(row, column);
+  }
+
+  /// Writes [value] as an Excel serial date (days since 1899-12-30, the
+  /// time of day as the fraction) at 0-based ([row], [column]); the style
+  /// should carry a date [style] `format`. The wall-clock fields are used
+  /// as they are, without a time zone conversion.
+  void dateCell(int row, int column, DateTime value, int styleIndex) {
+    final ref = cellRef(row, column);
+    final out = _rows.putIfAbsent(row, StringBuffer.new);
+    out.write(
+      '<c r="$ref" s="${styleIndex + 1}"><v>${excelSerial(value)}</v></c>',
+    );
+    _extend(row, column);
+  }
+
+  void _extend(int row, int column) {
     if (row > _lastRow) _lastRow = row;
     if (column > _lastColumn) _lastColumn = column;
+  }
+
+  /// The Excel serial number of [value] (1900 date system): whole days
+  /// since 1899-12-30 plus the time of day as a fraction.
+  static num excelSerial(DateTime value) {
+    final day = DateTime.utc(value.year, value.month, value.day);
+    final days = day.difference(DateTime.utc(1899, 12, 30)).inDays;
+    final ms =
+        ((value.hour * 60 + value.minute) * 60 + value.second) * 1000 +
+        value.millisecond;
+    return ms == 0 ? days : days + ms / Duration.millisecondsPerDay;
   }
 
   /// Merges the rectangle from ([row], [column]) spanning [rowSpan] ×
@@ -100,6 +146,13 @@ final class XlsxWriter {
   /// Keeps the first [rows] rows and [columns] columns visible.
   void freeze({required int rows, required int columns}) =>
       _freeze = (rows: rows, columns: columns);
+
+  /// An autofilter over the rectangle from ([row], [column]) spanning
+  /// [rowCount] × [columnCount] cells, the first row being the header.
+  void autoFilter(int row, int column, int rowCount, int columnCount) =>
+      _autoFilter =
+          '${cellRef(row, column)}:'
+          '${cellRef(row + rowCount - 1, column + columnCount - 1)}';
 
   Uint8List build() {
     final archive = Archive();
@@ -133,11 +186,21 @@ final class XlsxWriter {
     return String.fromCharCodes(out);
   }
 
+  /// XML-escapes [s], dropping the characters XML 1.0 does not allow at
+  /// all (control characters other than tab, line feed and carriage
+  /// return, unpaired surrogates, U+FFFE and U+FFFF) — a database text
+  /// may contain them, and one would make the whole sheet unreadable.
   static String escape(String s) => s
+      .replaceAll(_illegal, '')
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;');
+
+  static final _illegal = RegExp(
+    r'[\x00-\x08\x0B\x0C\x0E-\x1F\uFFFE\uFFFF]|'
+    r'[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]',
+  );
 
   static String _argb(int color) =>
       color.toUnsigned(32).toRadixString(16).toUpperCase().padLeft(8, '0');
@@ -169,16 +232,47 @@ final class XlsxWriter {
       '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>'
       '</Relationships>';
 
-  String _workbook() =>
+  String _workbook() {
+    final b = StringBuffer(
       '<workbook xmlns="$_ns" xmlns:r="$_rns"><sheets>'
       '<sheet name="${escape(sheetName)}" sheetId="1" r:id="rId1"/>'
-      '</sheets></workbook>';
+      '</sheets>',
+    );
+    // The name Excel itself keeps for an autofilter's range; other
+    // readers (LibreOffice) find the filter through it.
+    final filter = _autoFilter;
+    if (filter != null) {
+      final abs = filter
+          .split(':')
+          .map(
+            (r) => r.replaceAllMapped(
+              RegExp(r'([A-Z]+)(\d+)'),
+              (m) => '\$${m[1]}\$${m[2]}',
+            ),
+          )
+          .join(':');
+      final quoted = "'${sheetName.replaceAll("'", "''")}'";
+      b.write(
+        '<definedNames><definedName name="_xlnm._FilterDatabase" '
+        'localSheetId="0" hidden="1">${escape('$quoted!$abs')}</definedName>'
+        '</definedNames>',
+      );
+    }
+    b.write('</workbook>');
+    return b.toString();
+  }
 
   String _stylesXml() {
     final b = StringBuffer('<styleSheet xmlns="$_ns">');
-    b.write(
-      '<numFmts count="1"><numFmt numFmtId="164" formatCode="${escape(numberFormat)}"/></numFmts>',
-    );
+    // 164 is the writer's default format, the registered ones follow
+    b.write('<numFmts count="${_formats.length + 1}">');
+    b.write('<numFmt numFmtId="164" formatCode="${escape(numberFormat)}"/>');
+    for (var i = 0; i < _formats.length; i++) {
+      b.write(
+        '<numFmt numFmtId="${165 + i}" formatCode="${escape(_formats[i])}"/>',
+      );
+    }
+    b.write('</numFmts>');
     // font 0 is the workbook default; the registered ones follow
     b.write('<fonts count="${_fonts.length + 1}">');
     b.write('<font><sz val="10"/><name val="Arial"/></font>');
@@ -214,9 +308,11 @@ final class XlsxWriter {
     b.write('<cellXfs count="${_styles.length + 1}">');
     b.write('<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>');
     for (final s in _styles) {
+      final fillId = s.fillId < 0 ? 0 : s.fillId + 2;
+      final numFmtId = s.formatId < 0 ? 164 : 165 + s.formatId;
       b.write(
-        '<xf numFmtId="164" fontId="${s.fontId + 1}" fillId="${s.fillId + 2}" '
-        'borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" '
+        '<xf numFmtId="$numFmtId" fontId="${s.fontId + 1}" fillId="$fillId" '
+        'borderId="${s.border ? 1 : 0}" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" '
         'applyBorder="1" applyAlignment="1">'
         '<alignment horizontal="${s.right ? 'right' : 'left'}" vertical="center"/></xf>',
       );
@@ -273,6 +369,9 @@ final class XlsxWriter {
       b.write('</row>');
     }
     b.write('</sheetData>');
+    // autoFilter comes before mergeCells in the schema's order
+    final filter = _autoFilter;
+    if (filter != null) b.write('<autoFilter ref="$filter"/>');
     if (_merges.isNotEmpty) {
       b.write('<mergeCells count="${_merges.length}">');
       for (final m in _merges) {
@@ -286,19 +385,26 @@ final class XlsxWriter {
 }
 
 final class _Xf {
-  const _Xf(this.fillId, this.fontId, this.right);
+  const _Xf(this.fillId, this.fontId, this.right, this.border, this.formatId);
 
+  /// -1: no fill.
   final int fillId;
   final int fontId;
   final bool right;
+  final bool border;
+
+  /// -1: the writer's default number format.
+  final int formatId;
 
   @override
   bool operator ==(Object other) =>
       other is _Xf &&
       other.fillId == fillId &&
       other.fontId == fontId &&
-      other.right == right;
+      other.right == right &&
+      other.border == border &&
+      other.formatId == formatId;
 
   @override
-  int get hashCode => Object.hash(fillId, fontId, right);
+  int get hashCode => Object.hash(fillId, fontId, right, border, formatId);
 }

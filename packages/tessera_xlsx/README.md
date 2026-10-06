@@ -15,6 +15,12 @@ Excel (`.xlsx`) support for the [tessera](../tessera) pivot-table engine:
   one company colour, `gradient` builds level fills. Excel-only choices
   (`numberFormatCode`, `freezeHeaders`, column-width bounds) are on the
   exporter.
+* `XlsxTableExporter` — writes plain rows (or a whole `FactTable`) as a
+  filterable data table rather than a pivot: a bold header row with an
+  **autofilter** over the table, the header frozen, real numbers, booleans
+  and dates, an Excel number format per column (`#,##0.00`, `yyyy.mm.dd`,
+  `#,##0 "Ft"`), content-sized columns, optional borders. What an app hands
+  over when the user wants "the grid in Excel".
 
 Pure Dart, no Flutter dependency — works in Flutter apps, on servers and in
 command-line tools alike. Both directions live in one package because they
@@ -31,6 +37,11 @@ final result = await loadFacts(source);
 
 final xlsx = XlsxCubeExporter(strings: TesseraStrings.forLanguage('hu')!)
     .export(cube.layout);
+
+final table = const XlsxTableExporter().export(
+  const [XlsxColumn('Name'), XlsxColumn('Amount', format: '#,##0.00')],
+  [['Anna', 1234.5], ['Béla', 99.0]],
+);
 ```
 
 `export` returns the workbook as a `Uint8List`, ready to write to a file

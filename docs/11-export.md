@@ -10,6 +10,7 @@ dependencies it uses.
 | CSV | `tessera` | `CsvCubeExporter().export(layout)` / `writeTo(sink, layout)` | `String` |
 | JSON, JSON Lines | `tessera` | `JsonCubeExporter().export(layout)` / `exportLines(layout)` / `records(layout)` | `String` / `List<Map>` |
 | XLSX | `tessera_xlsx` | `XlsxCubeExporter().export(layout)` | `Uint8List` |
+| XLSX, a plain table | `tessera_xlsx` | `XlsxTableExporter().export(columns, rows)` / `exportFacts(facts)` | `Uint8List` |
 | ODS | `tessera_ods` | `OdsCubeExporter().export(layout)` | `Uint8List` |
 | HTML | `tessera_html` | `HtmlCubeExporter().export(layout)` | `String` |
 | SVG | `tessera_svg` | `SvgCubeExporter().export(layout)` | `String` |
@@ -84,6 +85,17 @@ and fonts from the theme, thin borders, frozen headers
 format (`numberFormatCode` for a custom Excel code). Both packages use
 their own OOXML and OpenDocument writers on `archive` and `xml`. The
 demo app's "Excel export theme" submenu picks the theme for these two.
+
+**A plain table to Excel.** Not every export is a pivot: `XlsxTableExporter`
+writes rows as they are — a list of `XlsxColumn`s (header, an Excel format
+code, an optional width) and the rows as lists of values, or a whole
+`FactTable` through `exportFacts` with the column labels as headers. The
+sheet is a filterable data table: a bold header with an autofilter over
+the whole range (and the `_xlnm._FilterDatabase` name other readers look
+for), the header frozen, numbers and booleans typed, a `DateTime` written
+as an Excel date in the column's format (`dateFormat` / `dateTimeFormat`
+otherwise), widths from the content. Characters XML does not allow are
+dropped from the text.
 
 **HTML** writes a `<table>` with `<thead>`, `rowspan` / `colspan` from
 the merged areas, `scope` on the header cells and a class per role and

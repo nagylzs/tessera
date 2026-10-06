@@ -1,3 +1,15 @@
+## 0.3.0
+
+* `XlsxTableExporter`: writes plain rows (`export(columns, rows)`) or a
+  `FactTable` (`exportFacts`) as a filterable data table — bold header
+  row with an autofilter over the table (plus the `_xlnm._FilterDatabase`
+  defined name), frozen header, numbers, booleans and real Excel dates,
+  an Excel number format per column (`XlsxColumn.format`), content-sized
+  or fixed widths, optional borders.
+* The writer's text no longer carries characters XML 1.0 forbids (control
+  characters, unpaired surrogates, U+FFFE/U+FFFF): one such character in a
+  value made the whole sheet unreadable. Affects `XlsxCubeExporter` too.
+
 ## 0.2.0
 
 * Requires `tessera` 0.2.0; no changes of its own. Cubes with the new
