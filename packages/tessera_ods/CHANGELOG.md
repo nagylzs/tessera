@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.1
 
 * `OdsTableExporter`: writes an `ExportTable` — plain rows, or a
   `FactTable` through `ExportTable.ofFacts` — as a filterable data table
@@ -12,7 +12,7 @@
 * Text no longer carries characters XML 1.0 forbids (control characters,
   unpaired surrogates, U+FFFE/U+FFFF), which made the document
   unreadable. Affects `OdsCubeExporter` too.
-* Needs the `tessera` release with `ExportTable`.
+* Requires `tessera` 0.2.2 (`ExportTable`, `TableExportTheme`).
 
 ## 0.2.0
 

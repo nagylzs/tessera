@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.2
 
 * `ExportTable`: a plain table — not a cube — for the new table exporters:
   `ExportColumn`s (header, source `name`, `type`, `numberFormat`, `width`;

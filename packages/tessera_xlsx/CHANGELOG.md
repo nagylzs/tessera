@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.1
 
 * `XlsxTableExporter`: writes an `ExportTable` — plain rows, or a
   `FactTable` through `ExportTable.ofFacts` — as a filterable data table
@@ -15,7 +15,7 @@
 * The writer's text no longer carries characters XML 1.0 forbids (control
   characters, unpaired surrogates, U+FFFE/U+FFFF): one such character in a
   value made the whole sheet unreadable. Affects `XlsxCubeExporter` too.
-* Needs the `tessera` release with `ExportTable`.
+* Requires `tessera` 0.2.2 (`ExportTable`, `TableExportTheme`).
 
 ## 0.2.0
 
