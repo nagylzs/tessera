@@ -33,6 +33,18 @@ under `## Unreleased` in the affected package's CHANGELOG.
       all. Current position: no, tessera is in-memory; the snapshot format
       is the server-to-client path.
 
+## Exporters
+
+- [ ] tessera_pdf: per-character font fallback. `PdfFonts` holds one
+      font per style and every string is drawn in it, so a document
+      mixing scripts that no single font covers breaks: the CJK Noto
+      fonts (Noto Sans JP/SC/TC) lack ő, ű and Cyrillic, Noto Sans lacks
+      CJK. Add fallback fonts per style (e.g. `PdfFonts(fallbacks:)`),
+      split each string into runs by the first font that has the glyph,
+      measure (`TextMeasurer`, column widths, ellipsis) and draw run by
+      run, embed only the fonts used. Asked for by Tessera Studio, which
+      wants Japanese and Chinese PDFs (sizes measured in its TODO.md).
+
 ## Visibility
 
 - [ ] Announce 0.2.x: a short post with the screenshot and the two-minute
