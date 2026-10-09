@@ -22,7 +22,7 @@ import 'page_setup.dart';
 /// page width, but never below [minScale] — beyond that the columns are
 /// tiled across pages (down first, then across, like a spreadsheet).
 /// [header] and [footer] draw up to three texts each at the top and
-/// bottom of every page.
+/// bottom of every page, in [pageTextColor].
 final class PdfCubeExporter {
   const PdfCubeExporter({
     this.strings = const TesseraStringsEn(),
@@ -32,6 +32,7 @@ final class PdfCubeExporter {
     this.header = const PdfPageText(left: '{title}'),
     this.footer = const PdfPageText(right: '{page} / {pages}'),
     this.pageTextSize = 9,
+    this.pageTextColor,
     this.fitToWidth = true,
     this.minScale = 0.6,
     this.minColumnWidth = 60,
@@ -61,6 +62,11 @@ final class PdfCubeExporter {
 
   /// Font size of [header] and [footer], in points.
   final double pageTextSize;
+
+  /// Colour of [header] and [footer] (ARGB). `null` takes the theme's
+  /// cell font colour: the page texts stand on the paper like the data
+  /// cells' text, not on a header fill (whose font may well be white).
+  final int? pageTextColor;
 
   /// Shrink the grid so every column fits the page width (down to
   /// [minScale]).
@@ -274,7 +280,9 @@ final class _Export {
   void _pageTexts(PdfGraphics g, int page, int pages) {
     final size = exporter.pageTextSize;
     final font = _regular;
-    g.setFillColor(PdfColor.fromInt(theme.headerFont.color));
+    g.setFillColor(
+      PdfColor.fromInt(exporter.pageTextColor ?? theme.cellFont.color),
+    );
     void band(PdfPageText text, double baseline) {
       if (text.isEmpty) return;
       String fill(String t) => PdfPageText.resolve(

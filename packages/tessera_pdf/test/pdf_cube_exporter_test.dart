@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
@@ -65,6 +66,30 @@ PdfFonts fontsOrBuiltIn() => noto.existsSync()
       )
     : const PdfFonts.builtIn();
 
+/// The fill colour (r, g, b in 0..1) in effect where the page content
+/// draws [text] — read from the inflated content streams, so no tool is
+/// needed (the built-in font writes text as `[(text)]TJ`).
+List<double> fillColourOf(List<int> pdf, String text) {
+  final raw = latin1.decode(pdf);
+  for (final m in RegExp(r'stream\r?\n').allMatches(raw)) {
+    final end = raw.indexOf('endstream', m.end);
+    if (end < 0) continue;
+    final String content;
+    try {
+      content = latin1.decode(zlib.decode(pdf.sublist(m.end, end)));
+    } on FormatException {
+      continue; // not deflated, e.g. a font
+    }
+    final at = content.indexOf('[($text)]TJ');
+    if (at < 0) continue;
+    final rg = RegExp(r'([\d.]+) ([\d.]+) ([\d.]+) rg')
+        .allMatches(content.substring(0, at))
+        .last;
+    return [for (var i = 1; i <= 3; i++) double.parse(rg.group(i)!)];
+  }
+  throw StateError('"$text" not drawn');
+}
+
 /// `pdfinfo` page count.
 int pages(File pdf) {
   final out = Process.runSync('pdfinfo', [pdf.path]).stdout as String;
@@ -122,6 +147,32 @@ void main() {
     );
     expect(const PdfPageText().isEmpty, isTrue);
     expect(const PdfPageText(center: 'x').isEmpty, isFalse);
+  });
+
+  test('page texts in the cell font colour, not the header cells\'', () async {
+    // a brand theme writes header cells white on its colour; on the
+    // paper, the title and page numbers must not be white too
+    final brand = CubeExportTheme.brand(primary: 0xFF00856E);
+    final date = DateTime(2026, 10, 9);
+    Future<List<int>> export(PdfCubeExporter e) =>
+        e.export(cube().layout, title: 'Sales', date: date);
+
+    final plain = await export(PdfCubeExporter(theme: brand));
+    expect(fillColourOf(plain, 'Sales'), [0, 0, 0]);
+    expect(fillColourOf(plain, '1 / 1'), [0, 0, 0]);
+
+    final navy = brand.copyWith(
+      cellFont: brand.cellFont.copyWith(color: 0xFF000080),
+    );
+    final themed = await export(PdfCubeExporter(theme: navy));
+    expect(fillColourOf(themed, 'Sales')[2], closeTo(0.5, 0.01));
+
+    final grey = await export(
+      PdfCubeExporter(theme: brand, pageTextColor: 0xFF808080),
+    );
+    for (final c in fillColourOf(grey, 'Sales')) {
+      expect(c, closeTo(0.5, 0.01));
+    }
   });
 
   test('page setup: sizes, orientation, margins', () {

@@ -108,7 +108,9 @@ cuts fall on whole rows and columns, pages run down then across.
 orientation, margins in mm; default A4 landscape); `PdfFonts` embeds
 TrueType files — needed for anything outside Latin-1, the built-in
 Helvetica covers WinAnsi only; `PdfPageText` header and footer take
-`{title}`, `{page}`, `{pages}` and `{date}`. `plan(layout)` returns the
+`{title}`, `{page}`, `{pages}` and `{date}`, and are written in the
+theme's cell font colour (they stand on the paper, not on a header
+fill) unless `pageTextColor` says otherwise. `plan(layout)` returns the
 scale and page count without rendering, for a preview.
 
 ![The first page of the PDF export](images/export_pdf.png)

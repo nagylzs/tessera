@@ -11,7 +11,8 @@ the row header repeat on every page like a spreadsheet's print titles.
 The grid is scaled to fit the page width down to a minimum scale, and
 tiled across pages beyond that (`fitToWidth`, `minScale`). A minimal
 page header and footer take three texts each with `{title}`, `{page}`,
-`{pages}` and `{date}` placeholders. Labels and numbers come from
+`{pages}` and `{date}` placeholders, in the cell text's colour (or
+`pageTextColor`). Labels and numbers come from
 `TesseraStrings`, so the export is localized like the widgets.
 
 Fonts: pass TrueType files as `PdfFonts` — they are embedded (subsetted)

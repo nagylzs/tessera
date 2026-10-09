@@ -170,7 +170,10 @@ the root, ignored; members carry `resolution: workspace`):
   bold→regular etc.; `ExportFont.family` ignored), `PdfPageText`
   header/footer (left/center/right, `{title}` `{page}` `{pages}`
   `{date}`; defaults title top-left, `{page} / {pages}` bottom-right;
-  a band of `pageTextSize × 1.8` pt is reserved only when non-empty).
+  a band of `pageTextSize × 1.8` pt is reserved only when non-empty;
+  colour `pageTextColor ?? theme.cellFont.color` — not the header
+  font's, which a brand theme makes white; the test reads the fill
+  colour from the inflated content stream, no tool needed).
   Tests use poppler (`pdfinfo`, `pdftotext -f/-l`, `pdffonts`), `qpdf
   --check` and ghostscript when installed, Noto Sans from
   `/usr/share/fonts/noto` when present. `example/main.dart` takes an
