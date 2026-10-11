@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.1
 
 * Fix: the page header and footer were drawn in the header cells' font
   colour, so a theme with light text on dark header fills (e.g.

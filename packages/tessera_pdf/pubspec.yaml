@@ -1,6 +1,6 @@
 name: tessera_pdf
 description: "PDF export for the tessera pivot-table engine: paginated pages with repeated headers, fit-to-width or tiling, themed with CubeExportTheme. Pure Dart, built on package:pdf."
-version: 0.2.0
+version: 0.2.1
 repository: https://github.com/nagylzs/tessera/tree/main/packages/tessera_pdf
 issue_tracker: https://github.com/nagylzs/tessera/issues
 topics:

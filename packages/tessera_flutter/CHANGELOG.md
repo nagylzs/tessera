@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.2
 
 * The menus of `CubeView` (dimension titles), `AxisEditor` (the
   caption), `AggregateEditor` (the chips' "Show values as") and the
@@ -7,6 +7,9 @@
   sheet or dialog under them. A page with `PopScope(canPop: false)`
   still claims that back first; let it through with `canPop:
   ModalRoute.of(context)!.willHandlePopInternally`.
+* Example app: the export menu's "Facts as a table" submenu writes the
+  facts passing the cube's filter as a filterable .xlsx or .ods sheet,
+  CSV or JSON Lines (`ExportTable.ofFacts` and the table exporters).
 
 ## 0.2.1
 
