@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'back_closing_menu_anchor.dart';
 import 'cube_controller.dart';
 import 'dimension_picker.dart';
 
@@ -67,7 +68,7 @@ class AxisEditor extends StatelessWidget {
     ThemeData theme,
   ) {
     final axis = _axisOf(spec, side);
-    return MenuAnchor(
+    return BackClosingMenuAnchor(
       menuChildren: [
         for (final (position, text) in [
           (SummaryPosition.end, strings.totalsAtEnd),

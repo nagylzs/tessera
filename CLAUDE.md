@@ -859,6 +859,15 @@ consistent otherwise.
   author lives in README and LICENSE.
 - Widgets import `package:tessera/tessera.dart` (never
   `package:tessera/src/...`); the engine package must stay Flutter-free.
+- Menus in the widgets are `BackClosingMenuAnchor`
+  (`widgets/back_closing_menu_anchor.dart`, not exported), never a bare
+  `MenuAnchor`: Flutter's menus ignore the system back, which then pops
+  the page, sheet or dialog under the open menu (flutter#80052; seen
+  in Tessera Studio on Android). While open it holds a
+  `LocalHistoryEntry` on its route, like a drawer, so back closes only
+  the menu. A route with `PopScope(canPop: false)` still claims the
+  back first; apps let it through with `canPop:
+  ModalRoute.of(context)!.willHandlePopInternally`.
 - Example app org id: `eu.nagylzs` (`eu.nagylzs.tessera_example`).
 - Icon: `icon/*.svg` at the repo root are the sources (the "Band"
   design: a teal L header band and nine tiles in the level hues on

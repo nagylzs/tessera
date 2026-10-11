@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'back_closing_menu_anchor.dart';
 import 'expression_field.dart';
 
 /// What [FilterEditor] reports on every change: the filter built from the
@@ -364,7 +365,7 @@ class _FilterEditorState extends State<FilterEditor> {
                   selected: g.negated,
                   onSelected: (v) => _changed(() => g.negated = v),
                 ),
-                MenuAnchor(
+                BackClosingMenuAnchor(
                   menuChildren: [
                     MenuItemButton(
                       onPressed: () => _changed(() {

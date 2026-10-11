@@ -6,6 +6,7 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'back_closing_menu_anchor.dart';
 import 'cell_border.dart';
 import 'column_widths.dart';
 import 'cube_controller.dart';
@@ -461,7 +462,7 @@ class _CubeGridState extends State<_CubeGrid> {
     final axis = isRow ? spec.rows : spec.columns;
     final dimension = axis.dimensions[level];
     final sort = axis.sortAt(level);
-    return MenuAnchor(
+    return BackClosingMenuAnchor(
       menuChildren: _titleMenu(context, isRow: isRow, level: level),
       builder: (context, menu, _) => InkWell(
         onTap: view.sortable

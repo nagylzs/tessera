@@ -72,6 +72,44 @@ void main() {
     ),
   );
 
+  testWidgets('back closes the chip menu, not the route under it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    Scaffold(body: AggregateEditor(controller: controller)),
+              ),
+            ),
+            child: const Text('Push'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Push'));
+    await tester.pumpAndSettle();
+    await tester.longPress(find.widgetWithText(InputChip, 'sum of qty'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Show values as'));
+    await tester.pumpAndSettle();
+    expect(find.text('Plain value'), findsOneWidget);
+
+    // Android's back: the menu and its submenu close, the page stays
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Plain value'), findsNothing);
+    expect(find.text('Show values as'), findsNothing);
+    expect(find.text('Values'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Push'), findsOneWidget);
+  });
+
   testWidgets('shows one chip per aggregate', (tester) async {
     await tester.pumpWidget(host());
     expect(find.text('Values'), findsOneWidget);

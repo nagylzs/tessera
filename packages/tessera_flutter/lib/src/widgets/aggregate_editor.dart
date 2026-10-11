@@ -3,6 +3,7 @@ import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
 import 'aggregate_picker.dart';
+import 'back_closing_menu_anchor.dart';
 import 'cube_controller.dart';
 
 /// Edits the aggregates of a [CubeController]'s cube as a row of chips.
@@ -87,7 +88,7 @@ class AggregateEditor extends StatelessWidget {
                 runSpacing: 4,
                 children: [
                   for (final a in aggregates)
-                    MenuAnchor(
+                    BackClosingMenuAnchor(
                       menuChildren: [
                         SubmenuButton(
                           menuChildren: [

@@ -1,3 +1,13 @@
+## Unreleased
+
+* The menus of `CubeView` (dimension titles), `AxisEditor` (the
+  caption), `AggregateEditor` (the chips' "Show values as") and the
+  filter editor close on the system back (Android's back button or
+  gesture, the browser's back) instead of leaving it to pop the page,
+  sheet or dialog under them. A page with `PopScope(canPop: false)`
+  still claims that back first; let it through with `canPop:
+  ModalRoute.of(context)!.willHandlePopInternally`.
+
 ## 0.2.1
 
 * Example app: JSON and JSON Lines in the export menu.
