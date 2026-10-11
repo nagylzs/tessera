@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.2
 
 * Fix: with `archive` 4.4.0 or later, exported files could not be opened
   by LibreOffice ("source file could not be loaded"): that version's
