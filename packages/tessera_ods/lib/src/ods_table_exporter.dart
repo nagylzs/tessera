@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:tessera/tessera.dart';
 
 import 'ods_cube_exporter.dart';
 import 'ods_parts.dart';
+import 'zip_writer.dart';
 
 /// Writes an [ExportTable] — plain rows or a fact table
 /// ([ExportTable.ofFacts]) — as an OpenDocument sheet that is a filterable
@@ -71,28 +71,19 @@ final class _Writer {
 
   Uint8List build() {
     final rows = _rows(); // registers styles
-    final archive = Archive();
-    archive.add(
-      ArchiveFile.string('mimetype', odsMimeType)
-        ..compression = CompressionType.none,
-    );
-    archive.add(
-      ArchiveFile.string(
+    // The mimetype first and stored, as OpenDocument requires.
+    final zip = ZipWriter()
+      ..addText('mimetype', odsMimeType, store: true)
+      ..addText(
         'META-INF/manifest.xml',
         odsManifest(withSettings: exporter.freezeHeader),
-      ),
-    );
-    archive.add(ArchiveFile.string('content.xml', _content(rows)));
-    archive.add(ArchiveFile.string('styles.xml', odsStylesXml));
+      )
+      ..addText('content.xml', _content(rows))
+      ..addText('styles.xml', odsStylesXml);
     if (exporter.freezeHeader) {
-      archive.add(
-        ArchiveFile.string(
-          'settings.xml',
-          odsFreezeSettings(sheetName, rows: 1),
-        ),
-      );
+      zip.addText('settings.xml', odsFreezeSettings(sheetName, rows: 1));
     }
-    return ZipEncoder().encodeBytes(archive);
+    return zip.finish();
   }
 
   int _style(_CellStyle style) => _styleIndex.putIfAbsent(style, () {

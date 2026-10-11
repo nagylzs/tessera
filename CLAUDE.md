@@ -79,7 +79,14 @@ the root, ignored; members carry `resolution: workspace`):
   `xlsx_writer.dart` (`XlsxWriter`, a minimal package writer — shared
   strings, style registry keyed by (fill, bold, right) with fills 0/1
   reserved and cellXfs 0 the default so indices are offset by one,
-  thin borders, one custom numFmt 164, merges, `<cols>`, frozen pane)
+  thin borders, one custom numFmt 164, merges, `<cols>`, frozen pane;
+  zipped by `zip_writer.dart` — `ZipWriter`, CRC and sizes in the local
+  headers, no data descriptors, fixed 1980 timestamps so output is
+  deterministic, raw deflate cut from `ZLibEncoder`'s zlib stream; the
+  same file is in tessera_ods. Not archive's `ZipEncoder`: since 4.4.0 it
+  streams entries with a data descriptor that only the local header
+  announces, and LibreOffice rejects the file — `test/zip_writer_test.dart`
+  walks the headers so this cannot come back unnoticed)
   and `_Export` in `xlsx_cube_exporter.dart` mirroring `CubeView`'s
   geometry (`AxisGeometry` areas → merges, a column entry spans
   `aggregates.length` sheet columns, corner titles, cell level = row
@@ -96,7 +103,8 @@ the root, ignored; members carry `resolution: workspace`):
   skipped, `number-columns-repeated` expanded, `number-rows-repeated`
   yielded that many times unless the row is empty — that is how sheets
   pad to 1 M rows; self-closing rows still count for `skipRows`) and
-  `OdsCubeExporter` (renders `CubeGrid`: `mimetype` stored first, manifest,
+  `OdsCubeExporter` (renders `CubeGrid`: `mimetype` stored first through
+  the shared `ZipWriter`, manifest,
   `content.xml` with automatic styles per (fill, font, align) →
   `ce<n>`, `number:number-style` N1 from `NumberFormat`, column styles
   in cm from the longest text, merges via
@@ -148,9 +156,10 @@ the root, ignored; members carry `resolution: workspace`):
 - `packages/tessera_pdf` — pure Dart, depends on `tessera` and
   `package:pdf` (accepted for TrueType embedding + subsetting and real
   glyph metrics; the built-in Helvetica is WinAnsi only, so Hungarian
-  ő/ű need a TTF). `pdf` pins `archive <4.1.0`, hence tessera_xlsx/ods
-  declare `archive: ">=4.0.7 <5.0.0"` (their API use is identical in
-  4.0.9 and 4.2). `PdfCubeExporter` (`export` is async → `Uint8List`;
+  ő/ű need a TTF). `pdf` pinned `archive <4.1.0` up to 3.13.0 (3.13.1
+  allows `<5.0.0`), hence tessera_xlsx/ods declare `archive: ">=4.0.7
+  <5.0.0"` (they use only `ZipDecoder`, `Deflate`, `ZLibEncoder` and
+  `getCrc32`, identical from 4.0.7 to 4.5). `PdfCubeExporter` (`export` is async → `Uint8List`;
   `plan` returns `PdfPlan` = scale + `GridPagination` without
   rendering): geometry from `GridMetrics` with a `TextMeasurer` from the
   embedded fonts (`stringMetrics().advanceWidth × font px`), page cuts

@@ -1,3 +1,13 @@
+## Unreleased
+
+* Fix: with `archive` 4.4.0 or later, exported files could not be opened
+  by LibreOffice ("source file could not be loaded"): that version's
+  `ZipEncoder` writes every entry with a data descriptor which only the
+  local header announces. The exporters now zip with a small writer of
+  their own — CRC and sizes in the local headers, no data descriptors —
+  that works the same with every `archive` 4.x. Output is also
+  deterministic now (fixed entry timestamps).
+
 ## 0.2.1
 
 * `XlsxTableExporter`: writes an `ExportTable` — plain rows, or a

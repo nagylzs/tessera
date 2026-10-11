@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:tessera/tessera.dart';
+
+import 'zip_writer.dart';
 
 /// A minimal `.xlsx` package writer: one worksheet, shared strings, a
 /// style registry (fills, fonts, alignment, number formats, thin borders or
@@ -164,12 +165,10 @@ final class XlsxWriter {
           '${cellRef(row + rowCount - 1, column + columnCount - 1)}';
 
   Uint8List build() {
-    final archive = Archive();
-    void add(String path, String xml) => archive.add(
-      ArchiveFile.string(
-        path,
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n$xml',
-      ),
+    final zip = ZipWriter();
+    void add(String path, String xml) => zip.addText(
+      path,
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n$xml',
     );
     add('[Content_Types].xml', _contentTypes);
     add('_rels/.rels', _rootRels);
@@ -178,7 +177,7 @@ final class XlsxWriter {
     add('xl/styles.xml', _stylesXml());
     add('xl/sharedStrings.xml', _sharedStringsXml());
     add('xl/worksheets/sheet1.xml', _sheetXml());
-    return ZipEncoder().encodeBytes(archive);
+    return zip.finish();
   }
 
   static String cellRef(int row, int column) =>
