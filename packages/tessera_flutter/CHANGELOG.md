@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.3
 
 * The dimension picker, the aggregate picker and the filter editor's
   value list are usable on a phone in landscape. On a screen shorter
