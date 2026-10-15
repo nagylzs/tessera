@@ -33,6 +33,13 @@ under `## Unreleased` in the affected package's CHANGELOG.
       all. Current position: no, tessera is in-memory; the snapshot format
       is the server-to-client path.
 
+## Widgets
+
+- [x] `DimensionPickerDialog`, `AggregatePickerDialog` and the filter
+      editor's value list on short screens (a phone in landscape: the
+      keyboard left the list no room; Tessera Studio on an iPhone 14,
+      2026-10-15): full screen under 480 dp, no autofocus there.
+
 ## Exporters
 
 - [ ] tessera_pdf: per-character font fallback. `PdfFonts` holds one

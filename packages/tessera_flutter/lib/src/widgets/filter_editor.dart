@@ -4,6 +4,7 @@ import 'package:tessera/tessera.dart';
 import '../l10n/tessera_localizations.dart';
 import 'back_closing_menu_anchor.dart';
 import 'expression_field.dart';
+import 'picker_frame.dart';
 
 /// What [FilterEditor] reports on every change: the filter built from the
 /// editor's rows (`null` when there are none) and whether every row is
@@ -813,6 +814,49 @@ class _ValuePickerDialogState extends State<_ValuePickerDialog> {
       for (final v in widget.values)
         if (q.isEmpty || widget.labelOf(v).toLowerCase().contains(q)) v,
     ];
+    final short = isShortScreen(context);
+    final search = TextField(
+      autofocus: !short,
+      decoration: InputDecoration(
+        isDense: true,
+        prefixIcon: const Icon(Icons.search),
+        hintText: strings.search,
+      ),
+      onChanged: (v) => setState(() => _query = v),
+    );
+    final list = ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      children: [
+        for (final v in shown)
+          CheckboxListTile(
+            dense: true,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: _selected.contains(v),
+            title: Text(widget.labelOf(v)),
+            onChanged: (on) => setState(() {
+              if (on == true) {
+                _selected.add(v);
+              } else {
+                _selected.remove(v);
+              }
+            }),
+          ),
+      ],
+    );
+    final ok = MaterialLocalizations.of(context).okButtonLabel;
+    if (short) {
+      return FullScreenPicker(
+        title: widget.title,
+        control: search,
+        body: list,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, _selected),
+            child: Text(ok),
+          ),
+        ],
+      );
+    }
     return AlertDialog(
       title: Text(widget.title),
       content: SizedBox(
@@ -820,36 +864,9 @@ class _ValuePickerDialogState extends State<_ValuePickerDialog> {
         height: 480,
         child: Column(
           children: [
-            TextField(
-              autofocus: true,
-              decoration: InputDecoration(
-                isDense: true,
-                prefixIcon: const Icon(Icons.search),
-                hintText: strings.search,
-              ),
-              onChanged: (v) => setState(() => _query = v),
-            ),
+            search,
             const SizedBox(height: 8),
-            Expanded(
-              child: ListView(
-                children: [
-                  for (final v in shown)
-                    CheckboxListTile(
-                      dense: true,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      value: _selected.contains(v),
-                      title: Text(widget.labelOf(v)),
-                      onChanged: (on) => setState(() {
-                        if (on == true) {
-                          _selected.add(v);
-                        } else {
-                          _selected.remove(v);
-                        }
-                      }),
-                    ),
-                ],
-              ),
-            ),
+            Expanded(child: list),
           ],
         ),
       ),
@@ -860,7 +877,7 @@ class _ValuePickerDialogState extends State<_ValuePickerDialog> {
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, _selected),
-          child: Text(MaterialLocalizations.of(context).okButtonLabel),
+          child: Text(ok),
         ),
       ],
     );

@@ -94,6 +94,13 @@ with the dimensions already in use disabled:
 
 ![The dimension picker](images/dimension_picker.png)
 
+On a screen shorter than 480 dp (a phone in landscape) this picker, the
+aggregate picker and the filter editor's value list open full screen
+instead: the title and the search field (or the function dropdown) share
+the top bar with a close button, the list fills the rest, and the
+keyboard stays closed until the search field is tapped — a fixed-size
+dialog there would leave the list no room above the keyboard.
+
 ## AggregateEditor and the aggregate picker
 
 A chip per aggregate; the delete icon removes one (never the last; a sort

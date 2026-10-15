@@ -3,6 +3,7 @@ import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
 import 'expression_field.dart';
+import 'picker_frame.dart';
 
 /// The numeric columns of [facts] as measures.
 List<Measure> standardMeasures(FactTable facts) => [
@@ -116,8 +117,41 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
   @override
   Widget build(BuildContext context) {
     final strings = TesseraLocalizations.of(context);
+    final title = widget.title ?? strings.addAggregate;
+    final function = DropdownButtonFormField<_Function>(
+      initialValue: _function,
+      isExpanded: true,
+      decoration: InputDecoration(isDense: true, labelText: strings.function),
+      items: [
+        for (final k in AggregateKind.values)
+          DropdownMenuItem(
+            value: _Function(k),
+            child: Text(
+              strings.aggregateKindLabel(k),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        if (widget.facts != null)
+          DropdownMenuItem(
+            value: _Function.formula,
+            child: Text(strings.formula, overflow: TextOverflow.ellipsis),
+          ),
+      ],
+      onChanged: (f) => setState(() {
+        _function = f!;
+        _measureExpression = false;
+        _resetExpression();
+      }),
+    );
+    if (isShortScreen(context)) {
+      return FullScreenPicker(
+        title: title,
+        control: function,
+        body: _targets(context, strings),
+      );
+    }
     return AlertDialog(
-      title: Text(widget.title ?? strings.addAggregate),
+      title: Text(title),
       contentPadding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
       content: SizedBox(
         width: 360,
@@ -126,37 +160,7 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: DropdownButtonFormField<_Function>(
-                initialValue: _function,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  isDense: true,
-                  labelText: strings.function,
-                ),
-                items: [
-                  for (final k in AggregateKind.values)
-                    DropdownMenuItem(
-                      value: _Function(k),
-                      child: Text(
-                        strings.aggregateKindLabel(k),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  if (widget.facts != null)
-                    DropdownMenuItem(
-                      value: _Function.formula,
-                      child: Text(
-                        strings.formula,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-                onChanged: (f) => setState(() {
-                  _function = f!;
-                  _measureExpression = false;
-                  _resetExpression();
-                }),
-              ),
+              child: function,
             ),
             const SizedBox(height: 8),
             Expanded(child: _targets(context, strings)),
@@ -187,20 +191,26 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
     final dimensionLabel = widget.dimensionLabel ?? (Dimension d) => d.label;
     final facts = widget.facts;
     if (_function == _Function.formula && facts != null) {
-      return _expressionForm(
-        context,
-        strings,
-        scope: ExpressionScope.cellsOf(facts, functions: widget.functions),
-        hint: 'sum(x) / count',
-        build: () => Aggregate.expression(
-          _source,
-          label: _label.trim().isEmpty ? null : _label.trim(),
-          functions: widget.functions,
-        ),
+      return ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        children: [
+          _expressionForm(
+            context,
+            strings,
+            scope: ExpressionScope.cellsOf(facts, functions: widget.functions),
+            hint: 'sum(x) / count',
+            build: () => Aggregate.expression(
+              _source,
+              label: _label.trim().isEmpty ? null : _label.trim(),
+              functions: widget.functions,
+            ),
+          ),
+        ],
       );
     }
     if (_kind.needsMeasure) {
       return ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: [
           for (final m in widget.measures)
             _tile(
@@ -237,13 +247,13 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
                   functions: widget.functions,
                 ),
               ),
-              shrink: true,
             ),
         ],
       );
     }
     if (_kind.needsDimension) {
       return ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: [
           for (final d in widget.dimensions)
             _tile(
@@ -271,14 +281,13 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
     required ExpressionScope scope,
     required String hint,
     required Aggregate Function() build,
-    bool shrink = false,
   }) {
     final valid = _error == null && _source.trim().isNotEmpty;
     final used = valid && widget.used.contains(build());
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
       child: Column(
-        mainAxisSize: shrink ? MainAxisSize.min : MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ExpressionField(

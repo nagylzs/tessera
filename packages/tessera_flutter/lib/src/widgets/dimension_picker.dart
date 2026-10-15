@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'picker_frame.dart';
 
 /// Shows a searchable list of [dimensions] and returns the one picked, or
 /// `null` if dismissed. Dimensions in [used] are listed but disabled, with
 /// [usedHint] as their subtitle. Texts default to the [TesseraStrings]
 /// of [context]; [labelOf] overrides how a dimension is named (default:
-/// [Dimension.label]).
+/// [Dimension.label]). On a short screen (a phone in landscape) the
+/// picker takes the whole screen and leaves the keyboard closed until
+/// the search field is tapped.
 Future<Dimension?> showDimensionPicker(
   BuildContext context, {
   required List<Dimension> dimensions,
@@ -67,8 +70,37 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
             d.id.toLowerCase().contains(q))
           d,
     ];
+    final title = widget.title ?? strings.addDimension;
+    final short = isShortScreen(context);
+    final search = TextField(
+      autofocus: !short,
+      decoration: InputDecoration(
+        hintText: widget.searchHint ?? strings.search,
+        prefixIcon: const Icon(Icons.search),
+        isDense: true,
+      ),
+      onChanged: (v) => setState(() => _query = v),
+    );
+    final list = ListView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      itemCount: shown.length,
+      itemBuilder: (context, i) {
+        final d = shown[i];
+        final used = widget.used.contains(d);
+        return ListTile(
+          dense: true,
+          enabled: !used,
+          title: Text(labelOf(d)),
+          subtitle: Text(used ? widget.usedHint ?? strings.alreadyInUse : d.id),
+          onTap: used ? null : () => Navigator.pop(context, d),
+        );
+      },
+    );
+    if (short) {
+      return FullScreenPicker(title: title, control: search, body: list);
+    }
     return AlertDialog(
-      title: Text(widget.title ?? strings.addDimension),
+      title: Text(title),
       contentPadding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
       content: SizedBox(
         width: 360,
@@ -77,35 +109,10 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: widget.searchHint ?? strings.search,
-                  prefixIcon: const Icon(Icons.search),
-                  isDense: true,
-                ),
-                onChanged: (v) => setState(() => _query = v),
-              ),
+              child: search,
             ),
             const SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                itemCount: shown.length,
-                itemBuilder: (context, i) {
-                  final d = shown[i];
-                  final used = widget.used.contains(d);
-                  return ListTile(
-                    dense: true,
-                    enabled: !used,
-                    title: Text(labelOf(d)),
-                    subtitle: Text(
-                      used ? widget.usedHint ?? strings.alreadyInUse : d.id,
-                    ),
-                    onTap: used ? null : () => Navigator.pop(context, d),
-                  );
-                },
-              ),
-            ),
+            Expanded(child: list),
           ],
         ),
       ),

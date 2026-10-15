@@ -1,3 +1,13 @@
+## Unreleased
+
+* The dimension picker, the aggregate picker and the filter editor's
+  value list are usable on a phone in landscape. On a screen shorter
+  than 480 dp they open full screen — title and search field (or the
+  function dropdown) in the bar, the list below — and no longer open
+  the keyboard by themselves, which left the list no room; dragging
+  the list closes the keyboard. Taller screens keep the dialogs as
+  they were.
+
 ## 0.2.2
 
 * The menus of `CubeView` (dimension titles), `AxisEditor` (the
