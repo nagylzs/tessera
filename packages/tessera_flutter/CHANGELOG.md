@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.4
 
 * Computed dimensions in the dimension picker: with `facts` given,
   `showDimensionPicker` / `DimensionPickerDialog` pin an "Expression…"
