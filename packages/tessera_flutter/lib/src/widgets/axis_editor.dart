@@ -26,8 +26,9 @@ final class DimensionDrag {
 ///   and the columns editor.
 /// * The chip's delete icon removes the dimension from the axis.
 /// * The `+` button opens [showDimensionPicker] with [available] (default:
-///   [standardDimensions] of the cube's facts); dimensions already on the
-///   other axis are moved over.
+///   [standardDimensions] of the cube's facts) and its "Expression…" entry
+///   for a computed dimension; dimensions already on the other axis are
+///   moved over.
 ///
 /// Sort settings travel with the dimension.
 class AxisEditor extends StatelessWidget {
@@ -39,6 +40,7 @@ class AxisEditor extends StatelessWidget {
     this.label,
     this.emptyHint,
     this.addTooltip,
+    this.functions,
   });
 
   final CubeController controller;
@@ -54,6 +56,9 @@ class AxisEditor extends StatelessWidget {
   /// Defaults to the localized texts.
   final String? emptyHint;
   final String? addTooltip;
+
+  /// Functions beyond the built-in ones a computed dimension may call.
+  final FunctionRegistry? functions;
 
   CubeAxis _axisOf(CubeSpec spec, AxisSide s) =>
       s == AxisSide.rows ? spec.rows : spec.columns;
@@ -259,6 +264,8 @@ class AxisEditor extends StatelessWidget {
       dimensions: available ?? standardDimensions(cube.facts),
       used: used,
       labelOf: (d) => strings.dimensionLabel(d, cube.facts),
+      facts: cube.facts,
+      functions: functions,
     );
     if (picked != null) _move(DimensionDrag(picked));
   }

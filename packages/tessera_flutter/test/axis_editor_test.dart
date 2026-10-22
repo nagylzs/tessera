@@ -6,6 +6,7 @@ const region = ColumnDimension('region');
 const country = ColumnDimension('country');
 const category = ColumnDimension('category');
 const qty = Measure('qty');
+final qtySum = Aggregate.sum(qty);
 
 Future<FactTable> facts() async {
   final source = ListDataSource(
@@ -204,8 +205,9 @@ void main() {
     expect(used.enabled, isFalse);
     await tester.enterText(find.byType(TextField), 'qt');
     await tester.pumpAndSettle();
-    expect(find.byType(ListTile), findsOneWidget);
-    await tester.tap(find.byType(ListTile));
+    // qty, and the expression entry, which stays whatever the search
+    expect(find.byType(ListTile), findsNWidgets(2));
+    await tester.tap(find.widgetWithText(ListTile, 'qty').first);
     await tester.pumpAndSettle();
     expect(ids(controller.cube.spec.rows), ['region', 'country', 'qty']);
     expect(find.text('Add dimension'), findsNothing);
@@ -227,9 +229,130 @@ void main() {
     expect(find.text('Oszlopok'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
-    expect(find.byType(ListTile), findsOneWidget);
-    await tester.tap(find.byType(ListTile));
+    // the month, and the expression entry
+    expect(find.byType(ListTile), findsNWidgets(2));
+    await tester.tap(find.byType(ListTile).first);
     await tester.pumpAndSettle();
     expect(ids(controller.cube.spec.columns), ['category', 'date.month']);
+  });
+
+  group('computed dimensions', () {
+    bool addEnabled(WidgetTester tester) => tester
+        .widget<FilledButton>(
+          find.widgetWithText(FilledButton, 'Add dimension'),
+        )
+        .enabled;
+
+    Future<void> tapAdd(WidgetTester tester) async {
+      final button = find.widgetWithText(FilledButton, 'Add dimension');
+      await tester.ensureVisible(button);
+      await tester.pumpAndSettle();
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> openExpression(WidgetTester tester) async {
+      await tester.tap(find.byIcon(Icons.add).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Expression…'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('an expression with a label joins the axis', (tester) async {
+      await tester.pumpWidget(host());
+      await openExpression(tester);
+      expect(find.byType(ExpressionField), findsOneWidget);
+      expect(addEnabled(tester), isFalse);
+      await tester.enterText(find.byType(ExpressionField), 'year(qty)');
+      await tester.pumpAndSettle();
+      expect(
+        find.text('argument 1 of year must be date, not number'),
+        findsOneWidget,
+      );
+      expect(addEnabled(tester), isFalse);
+      await tester.enterText(
+        find.byType(ExpressionField),
+        'if(qty > 1, "big", "small")',
+      );
+      await tester.enterText(find.widgetWithText(TextField, 'Label'), 'size');
+      await tester.pumpAndSettle();
+      expect(addEnabled(tester), isTrue);
+      await tapAdd(tester);
+      final added = controller.cube.spec.columns.dimensions.last.dimension;
+      expect(
+        added,
+        isA<ExpressionDimension>()
+            .having((d) => d.source, 'source', 'if(qty > 1, "big", "small")')
+            .having((d) => d.label, 'label', 'size'),
+      );
+      expect(find.widgetWithText(InputChip, 'size'), findsOneWidget);
+      // grouped like a column: the facts split into "big" and "small"
+      final cube = Cube(
+        facts: f,
+        spec: CubeSpec(rows: CubeAxis.of([added]), aggregates: [qtySum]),
+      );
+      expect(
+        [
+          for (final e in cube.layout.rows.entries)
+            if (!e.isSummary) (e.label, e.factCount),
+        ],
+        [('big', 1), ('small', 1)],
+      );
+    });
+
+    testWidgets('without a label the chip shows the expression', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host());
+      await openExpression(tester);
+      await tester.enterText(
+        find.byType(ExpressionField),
+        'floor(qty / 10) * 10',
+      );
+      await tester.pumpAndSettle();
+      await tapAdd(tester);
+      expect(
+        find.widgetWithText(InputChip, 'floor(qty / 10) * 10'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the same expression twice is already in use', (tester) async {
+      await tester.pumpWidget(host());
+      await openExpression(tester);
+      await tester.enterText(find.byType(ExpressionField), 'qty % 2');
+      await tester.pumpAndSettle();
+      await tapAdd(tester);
+      await openExpression(tester);
+      await tester.enterText(find.byType(ExpressionField), 'qty % 2');
+      await tester.enterText(find.widgetWithText(TextField, 'Label'), 'odd');
+      await tester.pumpAndSettle();
+      expect(addEnabled(tester), isFalse);
+      // whatever the label: the id is the expression
+      expect(find.text('already in use'), findsOneWidget);
+      // the entry swaps the form back for the list
+      await tester.tap(find.text('Expression…'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ExpressionField), findsNothing);
+      expect(find.widgetWithText(ListTile, 'region'), findsOneWidget);
+    });
+
+    testWidgets('no expression entry without facts', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () =>
+                  showDimensionPicker(context, dimensions: const [region]),
+              child: const Text('pick'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('pick'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ListTile), findsOneWidget);
+      expect(find.text('Expression…'), findsNothing);
+    });
   });
 }

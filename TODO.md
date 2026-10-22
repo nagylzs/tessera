@@ -35,6 +35,12 @@ under `## Unreleased` in the affected package's CHANGELOG.
 
 ## Widgets
 
+- [ ] Computed dimensions, follow-ups to the picker's "Expression…"
+      entry (Tessera Studio, 2026-10-22): edit the expression or label
+      of a computed dimension from its chip (now: remove and add again),
+      and say `true`/`false` values in the current language (a boolean
+      expression such as `rating >= 8` heads its groups "false" and
+      "true" in every locale, as boolean columns do).
 - [x] `DimensionPickerDialog`, `AggregatePickerDialog` and the filter
       editor's value list on short screens (a phone in landscape: the
       keyboard left the list no room; Tessera Studio on an iPhone 14,

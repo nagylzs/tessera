@@ -24,6 +24,11 @@ sum(total) / sum(quantity)                               cell formula
 | Computed dimension | `ExpressionDimension(source)` | one fact; any type |
 | Cell formula | `Aggregate.expression(source)` | one cell; names are aggregates; must be a number |
 
+In the widgets, the filter editor, the aggregate picker (calculated
+measures and cell formulas) and the dimension picker (computed
+dimensions) each have an expression field that is checked as the user
+types.
+
 The first three see the columns of the fact table by name. A cell
 formula sees `sum(x)`, `avg(x)`, `min(x)`, `max(x)`, `count`, `count(x)`,
 `stdev(x)`, `stdevp(x)`, `var(x)`, `varp(x)` and `distinct(x)` instead,

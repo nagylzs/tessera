@@ -474,7 +474,11 @@ Paths below are relative to the package (`lib/src/...` means
   inserts before it, drop on the editor appends, works across the two
   editors; delete icon removes; `+` opens the picker) and
   `showDimensionPicker` / `DimensionPickerDialog`
-  (`widgets/dimension_picker.dart`; searchable, used dimensions disabled).
+  (`widgets/dimension_picker.dart`; searchable, used dimensions disabled;
+  with `facts` an "Expression…" tile pinned under the list swaps it for
+  an `ExpressionField` in row scope, any type, + label + "Add dimension"
+  → `ExpressionDimension`, refused while its id — the source — is in
+  use; `AxisEditor` passes the cube's facts and its `functions`).
   Both verified on Linux desktop. The caption ("Rows"/"Columns") is a
   `MenuAnchor` setting `CubeAxis.summaryPosition` (end/start/hidden;
   strings `totalsAtEnd` …) and `subtotalPosition` (`subtotalsAbove`/`Below` on rows,

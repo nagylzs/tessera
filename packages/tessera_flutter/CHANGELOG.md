@@ -1,3 +1,16 @@
+## Unreleased
+
+* Computed dimensions in the dimension picker: with `facts` given,
+  `showDimensionPicker` / `DimensionPickerDialog` pin an "Expression…"
+  entry under the list, which swaps the list for an expression field
+  (validated as the user types, any result type), a label field and an
+  add button, and returns an `ExpressionDimension` — `floor(year / 10)
+  * 10` groups years into decades, `rating >= 8` splits by a condition.
+  `AxisEditor` passes the cube's facts, so its `+` offers the entry;
+  its new `functions` parameter adds functions the expressions may
+  call. No new strings: "Expression", "Label", "Add dimension" and
+  "already in use" were there in every language.
+
 ## 0.2.3
 
 * The dimension picker, the aggregate picker and the filter editor's

@@ -94,6 +94,14 @@ with the dimensions already in use disabled:
 
 ![The dimension picker](images/dimension_picker.png)
 
+Given `facts` (which `AxisEditor` passes), the picker pins an
+"Expression…" entry under the list for a computed dimension: it swaps
+the list for an expression field checked as the user types, a label
+field and an add button, and returns an `ExpressionDimension`
+(`floor(year / 10) * 10` for decades, `if(total > 500, "big", "small")`;
+see the [expression chapter](08-expressions.md)). `AxisEditor(functions:
+…)` adds functions the expressions may call.
+
 On a screen shorter than 480 dp (a phone in landscape) this picker, the
 aggregate picker and the filter editor's value list open full screen
 instead: the title and the search field (or the function dropdown) share

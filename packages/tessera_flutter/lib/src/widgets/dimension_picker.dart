@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'expression_field.dart';
 import 'picker_frame.dart';
 
 /// Shows a searchable list of [dimensions] and returns the one picked, or
@@ -11,6 +12,12 @@ import 'picker_frame.dart';
 /// [Dimension.label]). On a short screen (a phone in landscape) the
 /// picker takes the whole screen and leaves the keyboard closed until
 /// the search field is tapped.
+///
+/// With [facts] given, an "Expression…" entry ends the list: a computed
+/// dimension ([ExpressionDimension], `floor(year / 10) * 10`) over the
+/// columns of [facts], validated as the user types, with an optional
+/// label; [functions] are the functions beyond the built-in ones it may
+/// call.
 Future<Dimension?> showDimensionPicker(
   BuildContext context, {
   required List<Dimension> dimensions,
@@ -19,6 +26,8 @@ Future<Dimension?> showDimensionPicker(
   String? searchHint,
   String? usedHint,
   String Function(Dimension)? labelOf,
+  FactTable? facts,
+  FunctionRegistry? functions,
 }) => showDialog<Dimension>(
   context: context,
   builder: (context) => DimensionPickerDialog(
@@ -28,6 +37,8 @@ Future<Dimension?> showDimensionPicker(
     searchHint: searchHint,
     usedHint: usedHint,
     labelOf: labelOf,
+    facts: facts,
+    functions: functions,
   ),
 );
 
@@ -42,6 +53,8 @@ class DimensionPickerDialog extends StatefulWidget {
     this.searchHint,
     this.usedHint,
     this.labelOf,
+    this.facts,
+    this.functions,
   });
 
   final List<Dimension> dimensions;
@@ -51,12 +64,28 @@ class DimensionPickerDialog extends StatefulWidget {
   final String? usedHint;
   final String Function(Dimension)? labelOf;
 
+  /// Enables the "Expression…" entry; the columns its expression may use.
+  final FactTable? facts;
+
+  /// Functions beyond the built-in ones the expression may call.
+  final FunctionRegistry? functions;
+
   @override
   State<DimensionPickerDialog> createState() => _DimensionPickerDialogState();
 }
 
 class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
   var _query = '';
+
+  /// The expression entry is open.
+  var _expression = false;
+  var _source = '';
+  ExpressionError? _error = const ExpressionError(
+    ExpressionErrorKind.unexpectedEnd,
+    offset: 0,
+    length: 0,
+  );
+  var _label = '';
 
   @override
   Widget build(BuildContext context) {
@@ -81,23 +110,63 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
       ),
       onChanged: (v) => setState(() => _query = v),
     );
-    final list = ListView.builder(
+    final facts = widget.facts;
+    final open = facts != null && _expression;
+    final list = ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      itemCount: shown.length,
-      itemBuilder: (context, i) {
-        final d = shown[i];
-        final used = widget.used.contains(d);
-        return ListTile(
-          dense: true,
-          enabled: !used,
-          title: Text(labelOf(d)),
-          subtitle: Text(used ? widget.usedHint ?? strings.alreadyInUse : d.id),
-          onTap: used ? null : () => Navigator.pop(context, d),
-        );
-      },
+      children: [
+        if (open)
+          _expressionForm(context, facts)
+        else
+          for (final d in shown)
+            ListTile(
+              dense: true,
+              enabled: !widget.used.contains(d),
+              title: Text(labelOf(d)),
+              subtitle: Text(
+                widget.used.contains(d)
+                    ? widget.usedHint ?? strings.alreadyInUse
+                    : d.id,
+              ),
+              onTap: widget.used.contains(d)
+                  ? null
+                  : () => Navigator.pop(context, d),
+            ),
+      ],
     );
+    // Pinned under the list, where a long list cannot hide it; it swaps
+    // the list for the expression form and back.
+    final body = facts == null
+        ? list
+        : Column(
+            children: [
+              Expanded(child: list),
+              const Divider(height: 1),
+              ListTile(
+                dense: true,
+                leading: const Icon(Icons.functions),
+                title: Text('${strings.expression}…'),
+                trailing: open ? const Icon(Icons.close) : null,
+                selected: open,
+                onTap: () => setState(() {
+                  _expression = !_expression;
+                  _source = '';
+                  _label = '';
+                  _error = const ExpressionError(
+                    ExpressionErrorKind.unexpectedEnd,
+                    offset: 0,
+                    length: 0,
+                  );
+                }),
+              ),
+            ],
+          );
     if (short) {
-      return FullScreenPicker(title: title, control: search, body: list);
+      return FullScreenPicker(
+        title: title,
+        control: open ? null : search,
+        body: body,
+      );
     }
     return AlertDialog(
       title: Text(title),
@@ -107,12 +176,14 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
         height: 420,
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: search,
-            ),
-            const SizedBox(height: 8),
-            Expanded(child: list),
+            if (!open) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: search,
+              ),
+              const SizedBox(height: 8),
+            ],
+            Expanded(child: body),
           ],
         ),
       ),
@@ -122,6 +193,62 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
       ],
+    );
+  }
+
+  /// An expression field, a label field and an add button, like the
+  /// aggregate picker's calculated measure. The expression may have any
+  /// type: numbers, texts, dates and booleans all group.
+  Widget _expressionForm(BuildContext context, FactTable facts) {
+    final strings = TesseraLocalizations.of(context);
+    final valid = _error == null && _source.trim().isNotEmpty;
+    Dimension build() => ExpressionDimension(
+      _source,
+      label: _label.trim().isEmpty ? null : _label.trim(),
+      functions: widget.functions,
+    );
+    final used = valid && widget.used.contains(build());
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ExpressionField(
+            scope: ExpressionScope.ofFacts(facts, functions: widget.functions),
+            initialValue: _source,
+            hintText: 'floor(year / 10) * 10',
+            autofocus: true,
+            onChanged: (v) => setState(() {
+              _source = v.source;
+              _error = v.error;
+            }),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            decoration: InputDecoration(
+              isDense: true,
+              labelText: strings.labelField,
+            ),
+            onChanged: (v) => setState(() => _label = v),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: FilledButton(
+              onPressed: valid && !used
+                  ? () => Navigator.pop(context, build())
+                  : null,
+              child: Text(strings.addDimension),
+            ),
+          ),
+          if (used)
+            Text(
+              widget.usedHint ?? strings.alreadyInUse,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+        ],
+      ),
     );
   }
 }
