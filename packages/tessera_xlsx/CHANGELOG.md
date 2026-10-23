@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.3
 
 * `XlsxDataSource.sheets()` lists the worksheets in order as
   `XlsxSheetInfo` records: `name`, `hidden` (`state` hidden or

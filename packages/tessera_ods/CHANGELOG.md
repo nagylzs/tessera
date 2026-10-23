@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.3
 
 * `OdsDataSource.sheets()` lists the sheets in order as `OdsSheetInfo`
   records: `name`, `hidden` (a table style with `table:display="false"`),
