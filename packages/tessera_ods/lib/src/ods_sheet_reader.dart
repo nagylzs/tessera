@@ -17,10 +17,26 @@ Iterable<SheetRow> readOdsRows(
   String contentXml,
   String? sheet, {
   required bool trim,
+}) => readOdsSheets(
+  contentXml,
+  (index, name) => sheet == null ? index == 0 : name == sheet,
+  trim: trim,
+  once: true,
+).map((r) => r.row);
+
+/// The rows of every sheet [select] accepts — called with each sheet's
+/// 0-based position and name — as [readOdsRows] reads them, tagged with
+/// the sheet's position. With [once], stops after the first accepted
+/// sheet. Tables nested in cells are neither sheets nor read.
+Iterable<({int sheet, SheetRow row})> readOdsSheets(
+  String contentXml,
+  bool Function(int index, String name) select, {
+  required bool trim,
+  bool once = false,
 }) sync* {
-  var tableDepth = 0; // > 0 inside the selected table
-  var seenTables = 0;
-  var found = false;
+  var depth = 0; // of table:table elements; 1 inside a sheet
+  var sheets = 0; // seen so far
+  var selected = false; // the current sheet is read
   var rowNumber = 0;
   var rowRepeat = 1;
   Map<int, Object?>? cells;
@@ -67,22 +83,22 @@ Iterable<SheetRow> readOdsRows(
   for (final e in parseEvents(contentXml)) {
     switch (e) {
       case XmlStartElementEvent(name: 'table:table'):
-        if (found && tableDepth > 0) {
-          tableDepth++; // a nested table inside a cell: ignore
+        if (e.isSelfClosing) {
+          if (depth == 0) sheets++;
           continue;
         }
-        final name = e.attribute('name');
-        if (sheet == null ? seenTables == 0 : name == sheet) {
-          found = true;
-          tableDepth = 1;
+        if (depth++ == 0) {
+          selected = select(sheets++, e.attribute('name') ?? '');
+          rowNumber = 0;
+          cells = null;
         }
-        seenTables++;
       case XmlEndElementEvent(name: 'table:table'):
-        if (found && tableDepth > 0) {
-          tableDepth--;
-          if (tableDepth == 0) return;
+        if (--depth == 0) {
+          if (selected && once) return;
+          selected = false;
         }
-      case XmlStartElementEvent(name: 'table:table-row') when tableDepth == 1:
+      case XmlStartElementEvent(name: 'table:table-row')
+          when depth == 1 && selected:
         rowRepeat =
             int.tryParse(e.attribute('number-rows-repeated') ?? '') ?? 1;
         if (e.isSelfClosing) {
@@ -91,11 +107,15 @@ Iterable<SheetRow> readOdsRows(
         }
         cells = {};
         column = 0;
-      case XmlEndElementEvent(name: 'table:table-row') when tableDepth == 1:
+      case XmlEndElementEvent(name: 'table:table-row')
+          when depth == 1 && selected:
         if (cells != null) {
           if (cells.isNotEmpty) {
             for (var k = 0; k < rowRepeat; k++) {
-              yield (number: rowNumber + 1 + k, cells: cells);
+              yield (
+                sheet: sheets - 1,
+                row: (number: rowNumber + 1 + k, cells: cells),
+              );
             }
           }
           rowNumber += rowRepeat;
@@ -104,7 +124,7 @@ Iterable<SheetRow> readOdsRows(
       case XmlStartElementEvent(
             name: 'table:table-cell' || 'table:covered-table-cell',
           )
-          when tableDepth == 1 && cells != null:
+          when depth == 1 && selected && cells != null:
         inCell = true;
         cellRepeat =
             int.tryParse(e.attribute('number-columns-repeated') ?? '') ?? 1;
@@ -128,7 +148,7 @@ Iterable<SheetRow> readOdsRows(
       case XmlEndElementEvent(
             name: 'table:table-cell' || 'table:covered-table-cell',
           )
-          when tableDepth == 1 && inCell:
+          when depth == 1 && selected && inCell:
         final v = cellValue();
         if (v != null && cells != null) {
           for (var k = 0; k < cellRepeat; k++) {

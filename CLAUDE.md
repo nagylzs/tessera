@@ -67,7 +67,12 @@ the root, ignored; members carry `resolution: workspace`):
   `dateOf(serial)` with the 1900 gap) and `xlsx_sheet_reader.dart`
   (`readSheetRows`: `parseEvents` over the sheet XML, no DOM; typed
   cells, ints when written integral so inference matches CSV; rows keyed
-  by sheet row number so blank title rows count for `skipRows`). The
+  by sheet row number so blank title rows count for `skipRows`).
+  `XlsxDataSource.sheets()` (since 0.2.3) lists `XlsxSheetInfo` records —
+  name, hidden (`state`), empty (no value until the sheet's end, so it
+  unzips every sheet), active (`workbookView activeTab`, an index over
+  every `<sheet>` element, else the first) — the same record shape as
+  `OdsSheetInfo`, so an app handles both alike. The
   whole decompressed sheet XML is in memory (archive has no streaming
   entry read) — known limit. Test data: `test/data/sales.xlsx` is
   `sales.csv` converted by LibreOffice (`soffice --headless --convert-to
@@ -102,7 +107,13 @@ the root, ignored; members carry `resolution: workspace`):
   paragraphs joined with `\n`, `text:s`/`tab`/`line-break`, annotations
   skipped, `number-columns-repeated` expanded, `number-rows-repeated`
   yielded that many times unless the row is empty — that is how sheets
-  pad to 1 M rows; self-closing rows still count for `skipRows`) and
+  pad to 1 M rows; self-closing rows still count for `skipRows`;
+  `readOdsSheets` reads several sheets in one pass, with a depth count so
+  tables nested in cells are neither sheets nor rows;
+  `OdsDataSource.sheets()` takes hidden from the table styles' `display`,
+  empty from that one pass, active from `settings.xml`'s first
+  `ActiveTable` — absent in headless LibreOffice conversions, which have
+  no view) and
   `OdsCubeExporter` (renders `CubeGrid`: `mimetype` stored first through
   the shared `ZipWriter`, manifest,
   `content.xml` with automatic styles per (fill, font, align) →

@@ -29,6 +29,12 @@ final class OdsOptions {
   final bool trim;
 }
 
+/// A sheet as listed by [OdsDataSource.sheets]: its [name], whether it
+/// is [hidden], whether it is [empty] (no cell has a value) and whether
+/// it is [active], the one a spreadsheet application shows first: the
+/// sheet the document was saved on, else the first.
+typedef OdsSheetInfo = ({String name, bool hidden, bool empty, bool active});
+
 /// A [DataSource] over one sheet of an OpenDocument spreadsheet.
 ///
 /// Cells are delivered typed where the sheet is: numbers as [int] when
@@ -82,6 +88,34 @@ final class OdsDataSource implements DataSource {
       OdsDocument.parse(_data ?? await _openBytes!());
 
   int get _firstRow => options.skipRows + 1;
+
+  /// Every sheet of the document in order, whichever one [options]
+  /// selects. The whole document is read once to find the empty ones.
+  Future<List<OdsSheetInfo>> sheets() async {
+    final doc = await _document();
+    final withValues = {
+      for (final r in readOdsSheets(
+        doc.contentXml,
+        (_, _) => true,
+        trim: options.trim,
+      ))
+        r.sheet,
+    };
+    final sheets = doc.sheets;
+    final saved = doc.activeSheet;
+    final active = sheets.any((s) => s.name == saved)
+        ? saved
+        : sheets.firstOrNull?.name;
+    return [
+      for (final (i, s) in sheets.indexed)
+        (
+          name: s.name,
+          hidden: s.hidden,
+          empty: !withValues.contains(i),
+          active: s.name == active,
+        ),
+    ];
+  }
 
   Iterable<SheetRow> _rows(OdsDocument doc) {
     if (options.sheet != null && !doc.sheetNames.contains(options.sheet)) {

@@ -1,3 +1,13 @@
+## Unreleased
+
+* `OdsDataSource.sheets()` lists the sheets in order as `OdsSheetInfo`
+  records: `name`, `hidden` (a table style with `table:display="false"`),
+  `empty` (no cell with a value) and `active`, the sheet the document was
+  saved on (`ActiveTable` in `settings.xml`, else the first), which
+  LibreOffice opens on. Same shape as tessera_xlsx's `XlsxSheetInfo`.
+* Fix: a table nested in a cell counted as a sheet (`sheet:` could name
+  it and read its rows); only top-level tables are sheets now.
+
 ## 0.2.2
 
 * Fix: with `archive` 4.4.0 or later, exported files could not be opened

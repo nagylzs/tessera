@@ -1,3 +1,13 @@
+## Unreleased
+
+* `XlsxDataSource.sheets()` lists the worksheets in order as
+  `XlsxSheetInfo` records: `name`, `hidden` (`state` hidden or
+  veryHidden), `empty` (no cell with a value — chart sheets, styled but
+  blank sheets) and `active`, the sheet the workbook was saved on
+  (`workbookView activeTab`, else the first), which Excel opens on. For
+  apps that offer a choice of sheets and pick a sensible first one.
+  `XlsxSheet.hidden` and `XlsxWorkbook.activeSheet` are the parts behind it.
+
 ## 0.2.2
 
 * Fix: with `archive` 4.4.0 or later, exported files could not be opened

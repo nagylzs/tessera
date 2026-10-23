@@ -11,6 +11,7 @@ final class XlsxWorkbook {
   XlsxWorkbook._(
     this._archive,
     this.sheets,
+    this.activeSheet,
     this.sharedStrings,
     this.dateStyles,
     this.date1904,
@@ -31,6 +32,10 @@ final class XlsxWorkbook {
     }
     final rels = _relationships(part('xl/_rels/workbook.xml.rels') ?? '');
     final sheets = <XlsxSheet>[];
+    // activeTab counts every <sheet>, including those without a part
+    final byTab = <int, XlsxSheet>{};
+    var tab = 0;
+    int? activeTab;
     var date1904 = false;
     for (final e in parseEvents(
       workbookXml,
@@ -39,6 +44,8 @@ final class XlsxWorkbook {
         case 'workbookPr':
           final v = e.attribute('date1904');
           date1904 = v == '1' || v == 'true';
+        case 'workbookView' when activeTab == null:
+          activeTab = int.tryParse(e.attribute('activeTab') ?? '') ?? 0;
         case 'sheet':
           final id = e.attributes
               .where((a) => a.localName == 'id')
@@ -46,13 +53,22 @@ final class XlsxWorkbook {
               .firstOrNull;
           final target = id == null ? null : rels[id];
           if (target != null) {
-            sheets.add(XlsxSheet(e.attribute('name') ?? '', _resolve(target)));
+            final state = e.attribute('state');
+            final sheet = XlsxSheet(
+              e.attribute('name') ?? '',
+              _resolve(target),
+              hidden: state == 'hidden' || state == 'veryHidden',
+            );
+            sheets.add(sheet);
+            byTab[tab] = sheet;
           }
+          tab++;
       }
     }
     return XlsxWorkbook._(
       archive,
       sheets,
+      (byTab[activeTab ?? 0] ?? sheets.firstOrNull)?.name,
       _sharedStrings(part('xl/sharedStrings.xml') ?? ''),
       _dateStyles(part('xl/styles.xml') ?? ''),
       date1904,
@@ -63,6 +79,10 @@ final class XlsxWorkbook {
 
   /// Worksheets in workbook order.
   final List<XlsxSheet> sheets;
+
+  /// The name of the sheet Excel shows first: the one the workbook was
+  /// saved on (`activeTab`), else the first; `null` without sheets.
+  final String? activeSheet;
 
   final List<String> sharedStrings;
 
@@ -217,10 +237,13 @@ final class XlsxWorkbook {
 
 /// A worksheet's name and the path of its part inside the package.
 final class XlsxSheet {
-  const XlsxSheet(this.name, this.path);
+  const XlsxSheet(this.name, this.path, {this.hidden = false});
 
   final String name;
   final String path;
+
+  /// Hidden from the sheet tabs (`state` hidden or veryHidden).
+  final bool hidden;
 }
 
 extension XlsxStartElement on XmlStartElementEvent {

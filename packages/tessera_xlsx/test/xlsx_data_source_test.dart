@@ -9,13 +9,16 @@ import 'package:tessera_xlsx/tessera_xlsx.dart';
 Future<List<List<Object?>>> rowsOf(DataSource s) => s.rows().toList();
 
 /// A minimal workbook: [sheets] maps sheet names to the XML inside
-/// `<sheetData>`; cells reference [sharedStrings] by index.
+/// `<sheetData>`; cells reference [sharedStrings] by index. [hidden]
+/// sheets get `state="hidden"`; [activeTab] goes into a `workbookView`.
 Uint8List buildXlsx({
   required Map<String, String> sheets,
   List<String> sharedStrings = const [],
   String numFmts = '',
   String cellXfs = '<xf numFmtId="0"/>',
   bool date1904 = false,
+  Set<String> hidden = const {},
+  int? activeTab,
 }) {
   final archive = Archive();
   void add(String path, String xml) =>
@@ -25,8 +28,10 @@ Uint8List buildXlsx({
     'xl/workbook.xml',
     '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
         'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-        '<workbookPr date1904="${date1904 ? 1 : 0}"/><sheets>'
-        '${[for (var i = 0; i < names.length; i++) '<sheet name="${names[i]}" sheetId="${i + 1}" r:id="rId${i + 1}"/>'].join()}'
+        '<workbookPr date1904="${date1904 ? 1 : 0}"/>'
+        '${activeTab == null ? '' : '<bookViews><workbookView activeTab="$activeTab"/></bookViews>'}'
+        '<sheets>'
+        '${[for (var i = 0; i < names.length; i++) '<sheet name="${names[i]}" sheetId="${i + 1}"${hidden.contains(names[i]) ? ' state="hidden"' : ''} r:id="rId${i + 1}"/>'].join()}'
         '</sheets></workbook>',
   );
   add(
@@ -221,6 +226,49 @@ void main() {
                 .columnNames(),
         throwsA(anything),
       );
+    });
+
+    test('sheets: names, hidden, empty, the active one', () async {
+      final bytes = buildXlsx(
+        sharedStrings: ['Title', '   ', 'n'],
+        hidden: {'Secret'},
+        activeTab: 3,
+        sheets: {
+          // a styled cell without a value, then a chart sheet's lack of data
+          'Cover': '<sheetData><row r="1"><c r="A1" s="0"/></row></sheetData>',
+          'Chart': '',
+          // whitespace only: empty once trimmed
+          'Blank': '<sheetData><row r="2"><c r="B2" t="s"><v>1</v></c></row></sheetData>',
+          'Data':
+              '<sheetData><row r="1"><c r="A1" t="s"><v>2</v></c></row>'
+              '<row r="2"><c r="A2"><v>1</v></c></row></sheetData>',
+          'Secret': '<sheetData><row r="1"><c r="A1" t="s"><v>0</v></c></row></sheetData>',
+        },
+      );
+      // whichever sheet the options select
+      final source = XlsxDataSource.fromData(
+        bytes,
+        options: const XlsxOptions(sheet: 'Secret'),
+      );
+      expect(await source.sheets(), [
+        (name: 'Cover', hidden: false, empty: true, active: false),
+        (name: 'Chart', hidden: false, empty: true, active: false),
+        (name: 'Blank', hidden: false, empty: true, active: false),
+        (name: 'Data', hidden: false, empty: false, active: true),
+        (name: 'Secret', hidden: true, empty: false, active: false),
+      ]);
+      final untrimmed = XlsxDataSource.fromData(
+        bytes,
+        options: const XlsxOptions(trim: false),
+      );
+      expect((await untrimmed.sheets())[2].empty, isFalse);
+      // no workbookView, or a tab that is not there: the first sheet
+      for (final tab in [null, 9]) {
+        final infos = await XlsxDataSource.fromData(
+          buildXlsx(sheets: {'A': '', 'B': ''}, activeTab: tab),
+        ).sheets();
+        expect([for (final i in infos) i.active], [true, false]);
+      }
     });
 
     test('fromBytes re-opens per iteration', () async {

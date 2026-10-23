@@ -29,6 +29,12 @@ final class XlsxOptions {
   final bool trim;
 }
 
+/// A worksheet as listed by [XlsxDataSource.sheets]: its [name], whether
+/// it is [hidden] from the sheet tabs, whether it is [empty] (no cell has
+/// a value; chart sheets never have one) and whether it is [active], the
+/// one Excel shows first: the sheet the workbook was saved on.
+typedef XlsxSheetInfo = ({String name, bool hidden, bool empty, bool active});
+
 /// A [DataSource] over one worksheet of an `.xlsx` workbook.
 ///
 /// Cells are delivered typed where the sheet is: numbers as [int] when
@@ -81,6 +87,26 @@ final class XlsxDataSource implements DataSource {
 
   Future<XlsxWorkbook> _workbook() async =>
       XlsxWorkbook.parse(_data ?? await _openBytes!());
+
+  /// Every worksheet of the workbook in order, whichever one [options]
+  /// selects. Each sheet is unzipped and read up to its first value, so
+  /// this costs about one pass over the workbook.
+  Future<List<XlsxSheetInfo>> sheets() async {
+    final workbook = await _workbook();
+    return [
+      for (final sheet in workbook.sheets)
+        (
+          name: sheet.name,
+          hidden: sheet.hidden,
+          empty: !readSheetRows(
+            workbook,
+            workbook.sheetXml(sheet.name),
+            trim: options.trim,
+          ).any((row) => row.cells.values.any((v) => v != null)),
+          active: sheet.name == workbook.activeSheet,
+        ),
+    ];
+  }
 
   /// Sheet row number of the header (or of the first data row when there is
   /// no header).

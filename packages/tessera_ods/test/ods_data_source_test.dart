@@ -9,7 +9,13 @@ import 'package:tessera_ods/tessera_ods.dart';
 Future<List<List<Object?>>> rowsOf(DataSource s) => s.rows().toList();
 
 /// A minimal document: [sheets] maps sheet names to the rows XML.
-Uint8List buildOds(Map<String, String> sheets) {
+/// [hidden] sheets get a table style that hides them; [activeTable]
+/// goes into `settings.xml` as LibreOffice writes it.
+Uint8List buildOds(
+  Map<String, String> sheets, {
+  Set<String> hidden = const {},
+  String? activeTable,
+}) {
   final archive = Archive();
   archive.add(
     ArchiveFile.string(
@@ -23,12 +29,40 @@ Uint8List buildOds(Map<String, String> sheets) {
       '<office:document-content '
           'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
           'xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" '
-          'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">'
+          'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" '
+          'xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0">'
+          '<office:automatic-styles>'
+          '<style:style style:name="ta1" style:family="table">'
+          '<style:table-properties table:display="true"/></style:style>'
+          '<style:style style:name="ta2" style:family="table">'
+          '<style:table-properties table:display="false"/></style:style>'
+          '</office:automatic-styles>'
           '<office:body><office:spreadsheet>'
-          '${[for (final e in sheets.entries) '<table:table table:name="${e.key}">${e.value}</table:table>'].join()}'
+          '${[for (final e in sheets.entries) '<table:table table:name="${e.key}" table:style-name="${hidden.contains(e.key) ? 'ta2' : 'ta1'}">${e.value}</table:table>'].join()}'
           '</office:spreadsheet></office:body></office:document-content>',
     ),
   );
+  if (activeTable != null) {
+    archive.add(
+      ArchiveFile.string(
+        'settings.xml',
+        '<office:document-settings '
+            'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+            'xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0">'
+            '<office:settings>'
+            '<config:config-item-set config:name="ooo:view-settings">'
+            '<config:config-item-map-indexed config:name="Views">'
+            '<config:config-item-map-entry>'
+            '<config:config-item config:name="ViewId" config:type="string">view1</config:config-item>'
+            '<config:config-item-map-named config:name="Tables"/>'
+            '<config:config-item config:name="ActiveTable" config:type="string">$activeTable</config:config-item>'
+            '</config:config-item-map-entry>'
+            '</config:config-item-map-indexed>'
+            '</config:config-item-set></office:settings>'
+            '</office:document-settings>',
+      ),
+    );
+  }
   return ZipEncoder().encodeBytes(archive);
 }
 
@@ -122,6 +156,63 @@ void main() {
             OdsDataSource.fromData(Uint8List.fromList([1, 2, 3])).columnNames(),
         throwsA(anything),
       );
+    });
+
+    test('sheets: names, hidden, empty, the active one', () async {
+      final bytes = buildOds(
+        {
+          // padding only, then whitespace (empty once trimmed)
+          'Cover':
+              '<table:table-row table:number-rows-repeated="9">'
+              '<table:table-cell table:number-columns-repeated="5"/></table:table-row>',
+          'Blank': '<table:table-row>${str('  ')}</table:table-row>',
+          'Data':
+              '<table:table-row>${str('n')}</table:table-row>'
+              // a table nested in a cell is not a sheet
+              '<table:table-row><table:table-cell><table:table table:name="Inner">'
+              '<table:table-row>${str('x')}</table:table-row>'
+              '</table:table></table:table-cell></table:table-row>'
+              '<table:table-row>${num_('1')}</table:table-row>',
+          'Secret': '<table:table-row>${str('s')}</table:table-row>',
+        },
+        hidden: {'Secret'},
+        activeTable: 'Data',
+      );
+      final source = OdsDataSource.fromData(
+        bytes,
+        options: const OdsOptions(sheet: 'Secret'),
+      );
+      expect(await source.sheets(), [
+        (name: 'Cover', hidden: false, empty: true, active: false),
+        (name: 'Blank', hidden: false, empty: true, active: false),
+        (name: 'Data', hidden: false, empty: false, active: true),
+        (name: 'Secret', hidden: true, empty: false, active: false),
+      ]);
+      // its rows are not Data's; its text is the cell's, as before
+      expect(
+        await rowsOf(
+          OdsDataSource.fromData(
+            bytes,
+            options: const OdsOptions(sheet: 'Data'),
+          ),
+        ),
+        [
+          ['x'],
+          [1],
+        ],
+      );
+      final untrimmed = OdsDataSource.fromData(
+        bytes,
+        options: const OdsOptions(trim: false),
+      );
+      expect((await untrimmed.sheets())[1].empty, isFalse);
+      // no settings, or a sheet that is not there: the first sheet
+      for (final active in [null, 'Gone']) {
+        final infos = await OdsDataSource.fromData(
+          buildOds({'A': '', 'B': ''}, activeTable: active),
+        ).sheets();
+        expect([for (final i in infos) i.active], [true, false]);
+      }
     });
 
     test('skipped rows, no header, blank and duplicate names, trim', () async {

@@ -4,7 +4,8 @@ Excel (`.xlsx`) support for the [tessera](../tessera) pivot-table engine:
 
 * `XlsxDataSource` — a `DataSource` that streams the rows of one worksheet,
   so a workbook can be inferred and imported like a CSV file (including in
-  an isolate, via `loadFactsInIsolate`).
+  an isolate, via `loadFactsInIsolate`). `sheets()` lists the worksheets:
+  hidden, empty, and the one Excel opens on.
 * `XlsxCubeExporter` — writes a `CubeLayout` (the expanded rows and
   columns exactly as shown) as a formatted worksheet: merged group headers
   in the "rotated L" shape, level shading, bold summaries, frozen headers,

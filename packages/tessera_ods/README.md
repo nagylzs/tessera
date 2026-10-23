@@ -5,7 +5,8 @@ support for the [tessera](../tessera) pivot-table engine:
 
 * `OdsDataSource` — a `DataSource` that streams the rows of one sheet, so a
   document can be inferred and imported like a CSV file (including in an
-  isolate, via `loadFactsInIsolate`).
+  isolate, via `loadFactsInIsolate`). `sheets()` lists the sheets: hidden,
+  empty, and the one LibreOffice opens on.
 * `OdsCubeExporter` — writes a `CubeLayout` (the expanded rows and columns
   exactly as shown) as a formatted sheet: merged group headers in the
   "rotated L" shape, level shading, bold summaries, frozen headers,

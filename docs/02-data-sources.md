@@ -107,8 +107,25 @@ final source = XlsxDataSource.fromData(bytes, name: 'sales.xlsx',
 
 `XlsxOptions` / `OdsOptions`: `sheet` (name; `null` = the first one),
 `hasHeader` (when `false` columns are named `A`, `B`, …), `skipRows` for
-title rows above the header (blank rows count), `trim`. Both packages are
-pure Dart, built on `archive` and `xml`, and both also *write* sheets
+title rows above the header (blank rows count), `trim`.
+
+To let the user choose, `sheets()` lists every sheet of the file, whichever
+one the options select:
+
+```dart
+final sheets = await XlsxDataSource.fromData(bytes).sheets();
+// [(name: README, hidden: false, empty: false, active: false),
+//  (name: Data, hidden: false, empty: false, active: true), …]
+final first = sheets.firstWhere((s) => s.active && !s.empty,
+    orElse: () => sheets.firstWhere((s) => !s.hidden && !s.empty));
+```
+
+`hidden` sheets are hidden from the tabs, `empty` ones have no cell with a
+value (chart sheets, blank ones), and `active` marks the sheet the file was
+saved on — the one Excel or LibreOffice opens on —, else the first.
+`OdsDataSource.sheets()` returns the same record shape.
+
+Both packages are pure Dart, built on `archive` and `xml`, and both also *write* sheets
 ([export chapter](11-export.md)). The whole decompressed sheet XML is held
 in memory while reading, so a 500 MB sheet is not a good idea; CSV
 streams.
