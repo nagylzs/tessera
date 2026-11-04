@@ -87,6 +87,11 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
   );
   var _label = '';
 
+  /// Moves the expression form between the dialog and the full-screen
+  /// page (a phone rotated mid-edit), so its fields keep their text and
+  /// the help can still insert; a fresh one each time the form opens.
+  var _formKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final strings = TesseraLocalizations.of(context);
@@ -121,6 +126,7 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
       selected: open,
       onTap: () => setState(() {
         _expression = !_expression;
+        _formKey = GlobalKey();
         _source = '';
         _label = '';
         _error = const ExpressionError(
@@ -213,6 +219,7 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
     );
     final used = valid && widget.used.contains(build());
     return Padding(
+      key: _formKey,
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,

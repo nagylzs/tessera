@@ -77,7 +77,11 @@ class _FilterEditorDialogState extends State<FilterEditorDialog> {
     isValid: true,
   );
   FactFilter? _initial;
-  var _generation = 0;
+
+  /// Moves the editor, rows and fields, between the dialog and the
+  /// full-screen page when the screen crosses the short-screen height (a
+  /// phone rotated mid-edit); Clear replaces it with a fresh one.
+  var _editorKey = GlobalKey();
 
   @override
   void initState() {
@@ -90,7 +94,7 @@ class _FilterEditorDialogState extends State<FilterEditorDialog> {
     final strings = TesseraLocalizations.of(context);
     final title = widget.title ?? strings.filter;
     final editor = FilterEditor(
-      key: ValueKey(_generation),
+      key: _editorKey,
       facts: widget.facts,
       initial: _initial,
       functions: widget.functions,
@@ -99,7 +103,7 @@ class _FilterEditorDialogState extends State<FilterEditorDialog> {
     );
     void clear() => setState(() {
       _initial = null;
-      _generation++;
+      _editorKey = GlobalKey();
       _value = const FilterEditorValue(null, isValid: true);
     });
     final apply = _value.isValid

@@ -112,6 +112,11 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
   );
   var _label = '';
 
+  /// Moves the expression form between the dialog and the full-screen
+  /// page (a phone rotated mid-edit), so its fields keep their text and
+  /// the help can still insert; a fresh one with each reset.
+  var _formKey = GlobalKey();
+
   AggregateKind get _kind => _function.kind ?? AggregateKind.sum;
 
   @override
@@ -177,6 +182,7 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
   }
 
   void _resetExpression() {
+    _formKey = GlobalKey();
     _source = '';
     _label = '';
     _error = const ExpressionError(
@@ -285,6 +291,7 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
     final valid = _error == null && _source.trim().isNotEmpty;
     final used = valid && widget.used.contains(build());
     return Padding(
+      key: _formKey,
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,

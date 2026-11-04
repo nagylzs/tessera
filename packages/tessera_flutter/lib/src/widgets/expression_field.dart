@@ -121,6 +121,11 @@ class _ExpressionFieldState extends State<ExpressionField> {
       // the field coming back from the help (an insert, or Esc) had all
       // of it selected and the next key replaced the expression.
       selectAllOnFocus: false,
+      // Scrolled into view with the caret: the error line under it too,
+      // where the keyboard leaves little room (a phone in landscape; with
+      // the default 20 its descenders stayed under the keyboard after an
+      // insert from the help).
+      scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 48),
       style: const TextStyle(fontFamily: 'monospace'),
       decoration: InputDecoration(
         isDense: true,

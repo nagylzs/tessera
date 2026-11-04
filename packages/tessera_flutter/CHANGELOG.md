@@ -6,11 +6,19 @@
   two inserts in a row kept only the second.
 * The filter dialog takes the whole screen on a short screen (a phone in
   landscape), with Clear and Apply in its top bar: with the keyboard up,
-  the dialog's title and buttons left its rows no room at all.
+  the dialog's title and buttons left its rows no room at all. Its rows
+  move along when a rotation crosses into or out of that layout.
+* Rotating a phone with an expression form open in the dimension or the
+  aggregate picker keeps the label (the field came back empty while the
+  picker kept using the old one), and the expression help, if open,
+  still inserts into the field.
 * The dimension picker's expression form: while open, its "Expression…"
   entry heads the form and scrolls with it instead of staying pinned at
   the bottom, which on a phone in landscape left the field and its error
   line hidden behind the keyboard.
+* `ExpressionField` scrolls its error line into view along with the
+  caret: after an insert from the help, its lower edge stayed under the
+  keyboard.
 
 ## 0.2.5
 

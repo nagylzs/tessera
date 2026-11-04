@@ -542,7 +542,14 @@ Paths below are relative to the package (`lib/src/...` means
   value list and, since 0.2.6, the filter dialog itself (Clear and Apply
   in the bar) go full screen; `test/short_screen_pickers_test.dart`
   checks the expression forms on the Android emulator's landscape size
-  with a 235 dp keyboard (field and error hit-testable above it).
+  with a 235 dp keyboard (field and error hit-testable above it). The
+  dialog and the page are different trees, so what holds input sits
+  under a `GlobalKey` (the filter dialog's `_editorKey`, renewed by
+  Clear; the pickers' `_formKey`, renewed when the form resets) and a
+  rotation across 480 dp moves it instead of rebuilding it — without
+  that, the filter dropped unapplied rows while Apply still applied
+  them, and the help's insert went to a disposed field (tests:
+  "rotation keeps what is being edited").
 - `ExpressionField` (`widgets/expression_field.dart`, also
   `ExpressionTextController`): validates in a given `ExpressionScope` /
   `expected` on each keystroke, reports `ExpressionFieldValue(source,
@@ -585,6 +592,8 @@ Paths below are relative to the package (`lib/src/...` means
   default, so in 0.2.5 every return from the help (an insert, or Esc)
   left the whole expression selected and the next key replaced it
   (found on Linux; tests run on `TargetPlatformVariant.desktop()`).
+  `scrollPadding` 48 below the caret brings the error line into view
+  above a keyboard (20, the default, clipped it after an insert).
   Texts: the engine's
   `l10n/expression_help.dart` (abstract `ExpressionHelpStrings` + the
   enums, switched over exhaustively in `expression_help_xx.dart`), reached

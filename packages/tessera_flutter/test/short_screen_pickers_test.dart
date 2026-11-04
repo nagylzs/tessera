@@ -291,4 +291,232 @@ void main() {
     // label and id: both "region"
     expect(find.widgetWithText(ListTile, 'region'), findsWidgets);
   });
+
+  testWidgets('an insert that errors at once shows the whole error line', (
+    tester,
+  ) async {
+    landscapeAndroid(tester);
+    await pumpOpener(
+      tester,
+      (context) =>
+          showDimensionPicker(context, dimensions: const [region], facts: f),
+    );
+    await tester.tap(find.text('Expression…'));
+    await tester.pumpAndSettle();
+    // the help hides the keyboard; it comes back with the insert
+    await tester.tap(find.byTooltip('Expression help'));
+    await tester.pumpAndSettle();
+    final max = find.text('min(x, y, …)');
+    await tester.scrollUntilVisible(
+      max,
+      200,
+      scrollable: find.descendant(
+        of: find.byType(ExpressionHelp),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.tap(max);
+    await tester.pump();
+    for (var inset = 0.0; inset < keyboard; inset += 47) {
+      tester.view.viewInsets = FakeViewPadding(bottom: inset);
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    tester.view.viewInsets = const FakeViewPadding(bottom: keyboard);
+    await tester.pumpAndSettle();
+    expectAboveKeyboard(tester, find.text(errorOf('min()')));
+  });
+
+  // Crossing 480 dp swaps a dialog for a full-screen page around the same
+  // content; a phone rotated mid-edit must keep what is on it (found on
+  // the Android emulator, 2026-11-04: the filter forgot its rows while
+  // Apply still applied them, and the help inserted nothing).
+  group('rotation keeps what is being edited', () {
+    const portrait = Size(411, 914);
+    const landscape = Size(914, 411);
+
+    void start(WidgetTester tester, Size size) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      tester.view.padding = const FakeViewPadding(top: 24);
+      addTearDown(tester.view.reset);
+    }
+
+    Future<void> rotate(WidgetTester tester, Size size) async {
+      tester.view.physicalSize = size;
+      await tester.pumpAndSettle();
+    }
+
+    Finder applyButton() => find.byWidgetPredicate(
+      (w) =>
+          w is ButtonStyleButton &&
+          w.child is Text &&
+          (w.child! as Text).data == 'Apply',
+    );
+
+    Future<void> addExpressionRow(WidgetTester tester) async {
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add expression'));
+      await tester.pumpAndSettle();
+    }
+
+    String fieldText(WidgetTester tester) => tester
+        .widget<EditableText>(
+          find.descendant(
+            of: find.byType(ExpressionField),
+            matching: find.byType(EditableText),
+          ),
+        )
+        .controller
+        .text;
+
+    /// Opens the help of the only expression field, rotates to [size],
+    /// taps [entry].
+    Future<void> insertAcrossRotation(
+      WidgetTester tester,
+      Size size,
+      String entry,
+    ) async {
+      await tester.tap(find.byTooltip('Expression help'));
+      await tester.pumpAndSettle();
+      await rotate(tester, size);
+      final target = find.text(entry);
+      await tester.scrollUntilVisible(
+        target,
+        200,
+        scrollable: find.descendant(
+          of: find.byType(ExpressionHelp),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      await tester.tap(target);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('filter: an unapplied row survives portrait to landscape', (
+      tester,
+    ) async {
+      start(tester, portrait);
+      FilterEditorResult? result;
+      await pumpOpener(
+        tester,
+        (context) async => result = await showFilterEditor(context, facts: f),
+      );
+      expect(find.byType(AlertDialog), findsOneWidget);
+      await addExpressionRow(tester);
+      await tester.enterText(find.byType(ExpressionField), 'qty > 1');
+      await tester.pumpAndSettle();
+      await rotate(tester, landscape);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(fieldText(tester), 'qty > 1');
+      await tester.tap(applyButton());
+      await tester.pumpAndSettle();
+      expect(
+        result!.filter,
+        isA<ExpressionFilter>().having((e) => e.source, 'source', 'qty > 1'),
+      );
+    });
+
+    testWidgets('filter: a removed row stays removed landscape to portrait', (
+      tester,
+    ) async {
+      start(tester, landscape);
+      FilterEditorResult? result;
+      await pumpOpener(
+        tester,
+        (context) async => result = await showFilterEditor(
+          context,
+          facts: f,
+          initial: ExpressionFilter('qty > 1'),
+        ),
+      );
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+      expect(find.text('No filter'), findsOneWidget);
+      await rotate(tester, portrait);
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.text('No filter'), findsOneWidget);
+      expect(find.byType(ExpressionField), findsNothing);
+      await tester.tap(applyButton());
+      await tester.pumpAndSettle();
+      expect(result, isNotNull);
+      expect(result!.filter, isNull);
+    });
+
+    testWidgets('filter: Clear still starts afresh', (tester) async {
+      start(tester, landscape);
+      FilterEditorResult? result;
+      await pumpOpener(
+        tester,
+        (context) async => result = await showFilterEditor(
+          context,
+          facts: f,
+          initial: ExpressionFilter('qty > 1'),
+        ),
+      );
+      await tester.tap(find.text('Clear'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ExpressionField), findsNothing);
+      await rotate(tester, portrait);
+      expect(find.byType(ExpressionField), findsNothing);
+      await tester.tap(applyButton());
+      await tester.pumpAndSettle();
+      expect(result!.filter, isNull);
+    });
+
+    testWidgets('filter: the help inserts after a rotation', (tester) async {
+      start(tester, portrait);
+      await pumpOpener(
+        tester,
+        (context) => showFilterEditor(context, facts: f),
+      );
+      await addExpressionRow(tester);
+      await insertAcrossRotation(tester, landscape, 'qty > 100');
+      expect(fieldText(tester), 'qty > 100');
+    });
+
+    testWidgets('dimension picker: the form keeps its texts and its help', (
+      tester,
+    ) async {
+      start(tester, portrait);
+      await pumpOpener(
+        tester,
+        (context) =>
+            showDimensionPicker(context, dimensions: const [region], facts: f),
+      );
+      await tester.tap(find.text('Expression…'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(ExpressionField), 'qty % 2');
+      await tester.enterText(find.widgetWithText(TextField, 'Label'), 'odd');
+      await tester.pumpAndSettle();
+      await rotate(tester, landscape);
+      expect(fieldText(tester), 'qty % 2');
+      expect(find.widgetWithText(TextField, 'odd'), findsOneWidget);
+      await tester.enterText(find.byType(ExpressionField), '');
+      await insertAcrossRotation(tester, portrait, 'left(text, n)');
+      expect(fieldText(tester), 'left()');
+      expect(find.widgetWithText(TextField, 'odd'), findsOneWidget);
+    });
+
+    testWidgets('aggregate picker: the form keeps its texts and its help', (
+      tester,
+    ) async {
+      start(tester, portrait);
+      await pumpOpener(
+        tester,
+        (context) => showAggregatePicker(context, facts: f),
+      );
+      await tester.tap(find.text('Expression…'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(ExpressionField), 'qty * 2');
+      await tester.enterText(find.widgetWithText(TextField, 'Label'), 'double');
+      await tester.pumpAndSettle();
+      await rotate(tester, landscape);
+      expect(fieldText(tester), 'qty * 2');
+      expect(find.widgetWithText(TextField, 'double'), findsOneWidget);
+      await tester.enterText(find.byType(ExpressionField), '');
+      await insertAcrossRotation(tester, portrait, 'abs(x)');
+      expect(fieldText(tester), 'abs()');
+    });
+  });
 }
