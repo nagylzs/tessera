@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.6
 
 * `ExpressionField` on desktop and the web: coming back from the
   expression help no longer selects the whole expression. Every insert
