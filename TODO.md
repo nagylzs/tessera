@@ -35,7 +35,7 @@ under `## Unreleased` in the affected package's CHANGELOG.
 
 ## Widgets
 
-- [ ] Expression help (Tessera Studio, 2026-11-04: a tester did not know
+- [x] Expression help (Tessera Studio, 2026-11-04: a tester did not know
       the syntax or the functions, and an app may run offline). A help
       button in `ExpressionField` opens `showExpressionHelp`: an intro
       for the use (filter, calculated measure, computed dimension, cell

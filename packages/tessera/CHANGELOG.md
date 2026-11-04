@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.3
 
 * `ExpressionHelpStrings`: the texts of the expression help that
   `tessera_flutter` shows (what an expression does as a filter, a

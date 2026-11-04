@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.5
 
 * Expression help: `ExpressionField` has a ? button that opens
   `showExpressionHelp`, a reference to the expression language for the
@@ -13,6 +13,7 @@
   `ExpressionSnippet` is what a tap gives. `help: false` leaves the
   button out. The filter editor, the aggregate picker and the dimension
   picker pass their columns' labels.
+* Requires `tessera` 0.2.3 (`ExpressionHelpStrings`).
 
 ## 0.2.4
 
