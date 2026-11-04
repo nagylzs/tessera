@@ -112,12 +112,33 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
     );
     final facts = widget.facts;
     final open = facts != null && _expression;
+    // Swaps the list for the expression form and back.
+    final entry = ListTile(
+      dense: true,
+      leading: const Icon(Icons.functions),
+      title: Text('${strings.expression}…'),
+      trailing: open ? const Icon(Icons.close) : null,
+      selected: open,
+      onTap: () => setState(() {
+        _expression = !_expression;
+        _source = '';
+        _label = '';
+        _error = const ExpressionError(
+          ExpressionErrorKind.unexpectedEnd,
+          offset: 0,
+          length: 0,
+        );
+      }),
+    );
     final list = ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
-        if (open)
-          _expressionForm(context, facts)
-        else
+        // The open form scrolls with its entry above it: pinned, the entry
+        // left a phone in landscape too little room above the keyboard.
+        if (open) ...[
+          entry,
+          _expressionForm(context, facts),
+        ] else
           for (final d in shown)
             ListTile(
               dense: true,
@@ -134,31 +155,14 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
             ),
       ],
     );
-    // Pinned under the list, where a long list cannot hide it; it swaps
-    // the list for the expression form and back.
-    final body = facts == null
+    // Pinned under the list, where a long list cannot hide it.
+    final body = facts == null || open
         ? list
         : Column(
             children: [
               Expanded(child: list),
               const Divider(height: 1),
-              ListTile(
-                dense: true,
-                leading: const Icon(Icons.functions),
-                title: Text('${strings.expression}…'),
-                trailing: open ? const Icon(Icons.close) : null,
-                selected: open,
-                onTap: () => setState(() {
-                  _expression = !_expression;
-                  _source = '';
-                  _label = '';
-                  _error = const ExpressionError(
-                    ExpressionErrorKind.unexpectedEnd,
-                    offset: 0,
-                    length: 0,
-                  );
-                }),
-              ),
+              entry,
             ],
           );
     if (short) {

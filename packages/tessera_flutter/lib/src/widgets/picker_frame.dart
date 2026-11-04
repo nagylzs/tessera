@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-/// Whether the pickers take the whole screen: shorter than Material's
-/// compact height (480 dp), a phone in landscape. A fixed-size dialog
-/// there leaves its list no room once the keyboard is up, so the
-/// pickers go full screen and do not open the keyboard by themselves.
+/// Whether the pickers and the filter editor take the whole screen:
+/// shorter than Material's compact height (480 dp), a phone in landscape.
+/// A dialog there leaves its content no room once the keyboard is up, so
+/// they go full screen and the pickers do not open the keyboard by
+/// themselves.
 bool isShortScreen(BuildContext context) =>
     MediaQuery.sizeOf(context).height < 480;
 

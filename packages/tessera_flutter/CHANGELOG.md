@@ -1,3 +1,17 @@
+## Unreleased
+
+* `ExpressionField` on desktop and the web: coming back from the
+  expression help no longer selects the whole expression. Every insert
+  and every Esc left it all selected, so the next key replaced it, and
+  two inserts in a row kept only the second.
+* The filter dialog takes the whole screen on a short screen (a phone in
+  landscape), with Clear and Apply in its top bar: with the keyboard up,
+  the dialog's title and buttons left its rows no room at all.
+* The dimension picker's expression form: while open, its "Expression…"
+  entry heads the form and scrolls with it instead of staying pinned at
+  the bottom, which on a phone in landscape left the field and its error
+  line hidden behind the keyboard.
+
 ## 0.2.5
 
 * Expression help: `ExpressionField` has a ? button that opens

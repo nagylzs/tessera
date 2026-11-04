@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tessera_flutter/tessera_flutter.dart';
 
@@ -73,6 +74,9 @@ void main() {
 
   String fieldText(WidgetTester tester) =>
       tester.widget<TextField>(find.byType(TextField)).controller!.text;
+
+  TextSelection selection(WidgetTester tester) =>
+      tester.widget<TextField>(find.byType(TextField)).controller!.selection;
 
   int cursor(WidgetTester tester) => tester
       .widget<TextField>(find.byType(TextField))
@@ -203,6 +207,43 @@ void main() {
     expect(fieldText(tester), 'qty + round()');
     expect(cursor(tester), 'qty + round('.length);
   });
+
+  // Desktop and web select a field's text when it gains focus; the
+  // field must keep the cursor the help left (Linux, 2026-11-04: the next
+  // key replaced the whole expression).
+  testWidgets('on desktop the cursor stays where the insert left it', (
+    tester,
+  ) async {
+    await pumpField(tester, scope: ExpressionScope.ofFacts(f));
+    Future<void> insert(Finder entry) async {
+      await tester.tap(find.byTooltip('Expression help'));
+      await tester.pumpAndSettle();
+      await tapInHelp(tester, entry);
+    }
+
+    await insert(find.text('region', findRichText: true));
+    await insert(find.text('[unit price]', findRichText: true));
+    expect(fieldText(tester), 'region [unit price]');
+    expect(selection(tester), const TextSelection.collapsed(offset: 19));
+    await insert(find.text('isempty(x)'));
+    expect(fieldText(tester), 'region [unit price] isempty()');
+    expect(selection(tester), const TextSelection.collapsed(offset: 28));
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('on desktop Esc leaves the text and the cursor', (tester) async {
+    await pumpField(tester, scope: ExpressionScope.ofFacts(f));
+    await tester.enterText(find.byType(TextField), 'abs(qty) > 3');
+    tester.widget<TextField>(find.byType(TextField)).controller!.selection =
+        const TextSelection.collapsed(offset: 2);
+    await tester.pump();
+    await tester.tap(find.byTooltip('Expression help'));
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byType(ExpressionHelp), findsNothing);
+    expect(fieldText(tester), 'abs(qty) > 3');
+    expect(selection(tester), const TextSelection.collapsed(offset: 2));
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('a tapped example goes in', (tester) async {
     await pumpField(

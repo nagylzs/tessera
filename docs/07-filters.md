@@ -53,7 +53,10 @@ outside the data.
 `showFilterEditor(context, facts: facts, initial: spec.filter)` opens a
 dialog and returns the applied filter (or `null` for "dismissed"; a
 result whose filter is `null` means "cleared"). `FilterEditor` is the
-same thing as an inline widget with an `onChanged` callback.
+same thing as an inline widget with an `onChanged` callback. On a screen
+shorter than 480 dp (a phone in landscape) the dialog takes the whole
+screen, with Clear and Apply in its top bar and the close button for
+Cancel, so the rows keep their room above the keyboard.
 
 ![The empty filter editor: a group with all-of / any-of, Not, and the add menu](images/filter_editor_empty.png)
 

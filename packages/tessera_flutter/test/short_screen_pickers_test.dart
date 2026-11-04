@@ -180,8 +180,115 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('2 selected'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Apply'));
+    await tester.tap(
+      find.descendant(of: find.byType(AppBar), matching: find.text('Apply')),
+    );
     await tester.pumpAndSettle();
     expect(result!.filter, ValueFilter(region, {'Asia', 'Europe'}));
+  });
+
+  /// The Android emulator's Medium Phone in landscape, where the cramped
+  /// forms were found (2026-11-04): 411 dp high under a 24 dp status bar,
+  /// and a keyboard that leaves 152 dp.
+  void landscapeAndroid(WidgetTester tester) {
+    tester.view.physicalSize = const Size(914, 411);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(top: 24);
+    addTearDown(tester.view.reset);
+  }
+
+  const keyboard = 235.0;
+
+  /// The message [ExpressionField] shows for [source].
+  String errorOf(String source, {ExprType? expected}) =>
+      const TesseraStringsEn().expressionError(
+        Expression.validate(
+          source,
+          scope: ExpressionScope.ofFacts(f),
+          expected: expected,
+        )!,
+      );
+
+  /// [finder] lies between the bar and the keyboard, not clipped away by
+  /// its scroll view.
+  void expectAboveKeyboard(WidgetTester tester, Finder finder) {
+    expect(finder.hitTestable(), findsOneWidget);
+    final rect = tester.getRect(finder);
+    expect(
+      rect.top,
+      greaterThanOrEqualTo(tester.getRect(find.byType(AppBar)).bottom),
+    );
+    expect(rect.bottom, lessThanOrEqualTo(411 - keyboard));
+  }
+
+  testWidgets('filter editor: full screen, the expression above the keyboard', (
+    tester,
+  ) async {
+    landscapeAndroid(tester);
+    FilterEditorResult? result;
+    await pumpOpener(
+      tester,
+      (context) async => result = await showFilterEditor(
+        context,
+        facts: f,
+        // two rows above it: scrolled to the caret, the field must bring
+        // its error line along
+        initial: AndFilter([
+          ValueFilter(region, {'Asia'}),
+          ValueFilter(country, {'Japan'}),
+          ExpressionFilter('qty > 1'),
+        ]),
+      ),
+    );
+    expect(find.byType(AlertDialog), findsNothing);
+    await tester.enterText(find.byType(ExpressionField), 'qty >');
+    tester.view.viewInsets = const FakeViewPadding(bottom: keyboard);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expectAboveKeyboard(tester, find.byType(EditableText));
+    expectAboveKeyboard(
+      tester,
+      find.text(errorOf('qty >', expected: ExprType.boolean)),
+    );
+    await tester.enterText(find.byType(ExpressionField), 'qty > 1');
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(of: find.byType(AppBar), matching: find.text('Apply')),
+    );
+    await tester.pumpAndSettle();
+    expect(result!.filter, isA<AndFilter>());
+  });
+
+  testWidgets('dimension picker: the expression form above the keyboard', (
+    tester,
+  ) async {
+    landscapeAndroid(tester);
+    await pumpOpener(
+      tester,
+      (context) =>
+          showDimensionPicker(context, dimensions: const [region], facts: f),
+    );
+    await tester.tap(find.text('Expression…'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(ExpressionField), 'qty >');
+    tester.view.viewInsets = const FakeViewPadding(bottom: keyboard);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expectAboveKeyboard(
+      tester,
+      find.descendant(
+        of: find.byType(ExpressionField),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expectAboveKeyboard(tester, find.text(errorOf('qty >')));
+    // the entry heads the form and still swaps it back for the list
+    await tester.drag(find.byType(ListView), const Offset(0, 300));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Expression…'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ExpressionField), findsNothing);
+    // label and id: both "region"
+    expect(find.widgetWithText(ListTile, 'region'), findsWidgets);
   });
 }

@@ -28,7 +28,8 @@ final class FilterEditorResult {
 
 /// Opens the filter editor as a dialog and returns the filter the user
 /// applied, or `null` when the dialog was dismissed. Texts default to the
-/// [TesseraStrings] of [context].
+/// [TesseraStrings] of [context]. On a short screen (a phone in landscape)
+/// the editor takes the whole screen, Clear and Apply in its bar.
 Future<FilterEditorResult?> showFilterEditor(
   BuildContext context, {
   required FactTable facts,
@@ -48,7 +49,8 @@ Future<FilterEditorResult?> showFilterEditor(
 );
 
 /// The dialog behind [showFilterEditor]: a [FilterEditor] with Clear,
-/// Cancel and Apply; pops with a [FilterEditorResult].
+/// Cancel and Apply (full screen on a short screen, where the close
+/// button cancels); pops with a [FilterEditorResult].
 class FilterEditorDialog extends StatefulWidget {
   const FilterEditorDialog({
     super.key,
@@ -86,38 +88,48 @@ class _FilterEditorDialogState extends State<FilterEditorDialog> {
   @override
   Widget build(BuildContext context) {
     final strings = TesseraLocalizations.of(context);
+    final title = widget.title ?? strings.filter;
+    final editor = FilterEditor(
+      key: ValueKey(_generation),
+      facts: widget.facts,
+      initial: _initial,
+      functions: widget.functions,
+      columns: widget.columns,
+      onChanged: (v) => setState(() => _value = v),
+    );
+    void clear() => setState(() {
+      _initial = null;
+      _generation++;
+      _value = const FilterEditorValue(null, isValid: true);
+    });
+    final apply = _value.isValid
+        ? () => Navigator.pop(context, FilterEditorResult(_value.filter))
+        : null;
+    // A dialog's title and buttons leave a phone in landscape no room for
+    // the editor once the keyboard is up: full screen, buttons in the bar.
+    if (isShortScreen(context)) {
+      return FullScreenPicker(
+        title: title,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: editor,
+        ),
+        actions: [
+          TextButton(onPressed: clear, child: Text(strings.clear)),
+          TextButton(onPressed: apply, child: Text(strings.apply)),
+        ],
+      );
+    }
     return AlertDialog(
-      title: Text(widget.title ?? strings.filter),
-      content: SizedBox(
-        width: 720,
-        child: FilterEditor(
-          key: ValueKey(_generation),
-          facts: widget.facts,
-          initial: _initial,
-          functions: widget.functions,
-          columns: widget.columns,
-          onChanged: (v) => setState(() => _value = v),
-        ),
-      ),
+      title: Text(title),
+      content: SizedBox(width: 720, child: editor),
       actions: [
-        TextButton(
-          onPressed: () => setState(() {
-            _initial = null;
-            _generation++;
-            _value = const FilterEditorValue(null, isValid: true);
-          }),
-          child: Text(strings.clear),
-        ),
+        TextButton(onPressed: clear, child: Text(strings.clear)),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
-        FilledButton(
-          onPressed: _value.isValid
-              ? () => Navigator.pop(context, FilterEditorResult(_value.filter))
-              : null,
-          child: Text(strings.apply),
-        ),
+        FilledButton(onPressed: apply, child: Text(strings.apply)),
       ],
     );
   }
@@ -329,6 +341,7 @@ class _FilterEditorState extends State<FilterEditor> {
   Widget build(BuildContext context) {
     final strings = TesseraLocalizations.of(context);
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       child: _group(context, strings, _root, parent: null),
     );
   }

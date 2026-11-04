@@ -117,6 +117,10 @@ class _ExpressionFieldState extends State<ExpressionField> {
       controller: _controller,
       focusNode: _focus,
       autofocus: widget.autofocus,
+      // Desktop and web select a field's text whenever it gains focus, so
+      // the field coming back from the help (an insert, or Esc) had all
+      // of it selected and the next key replaced the expression.
+      selectAllOnFocus: false,
       style: const TextStyle(fontFamily: 'monospace'),
       decoration: InputDecoration(
         isDense: true,

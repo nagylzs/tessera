@@ -97,7 +97,8 @@ with the dimensions already in use disabled:
 Given `facts` (which `AxisEditor` passes), the picker pins an
 "Expression…" entry under the list for a computed dimension: it swaps
 the list for an expression field checked as the user types, a label
-field and an add button, and returns an `ExpressionDimension`
+field and an add button (the entry, with a close icon, then heads the
+form and scrolls with it), and returns an `ExpressionDimension`
 (`floor(year / 10) * 10` for decades, `if(total > 500, "big", "small")`;
 see the [expression chapter](08-expressions.md)). `AxisEditor(functions:
 …)` adds functions the expressions may call.
@@ -107,7 +108,8 @@ aggregate picker and the filter editor's value list open full screen
 instead: the title and the search field (or the function dropdown) share
 the top bar with a close button, the list fills the rest, and the
 keyboard stays closed until the search field is tapped — a fixed-size
-dialog there would leave the list no room above the keyboard.
+dialog there would leave the list no room above the keyboard. The
+filter editor does the same ([filters chapter](07-filters.md)).
 
 ## AggregateEditor and the aggregate picker
 

@@ -35,6 +35,14 @@ under `## Unreleased` in the affected package's CHANGELOG.
 
 ## Widgets
 
+- [ ] Full-screen pickers and the full-screen filter editor in landscape
+      leave the navigation bar's strip uncovered, and the page behind
+      shows through there (Tessera Studio on the Android emulator,
+      2026-11-04; the expression help and the pickers alike).
+- [ ] The aggregate picker on a phone in portrait: with the keyboard up,
+      the expression form's Add button sits under it until the list is
+      dragged, which closes the keyboard (Tessera Studio on the Android
+      emulator, 2026-11-04).
 - [x] Expression help (Tessera Studio, 2026-11-04: a tester did not know
       the syntax or the functions, and an app may run offline). A help
       button in `ExpressionField` opens `showExpressionHelp`: an intro

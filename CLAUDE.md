@@ -489,7 +489,9 @@ Paths below are relative to the package (`lib/src/...` means
   with `facts` an "Expression…" tile pinned under the list swaps it for
   an `ExpressionField` in row scope, any type, + label + "Add dimension"
   → `ExpressionDimension`, refused while its id — the source — is in
-  use; `AxisEditor` passes the cube's facts and its `functions`).
+  use; while the form is open the tile heads it inside the `ListView`,
+  since pinned it left a phone in landscape about 55 px above the
+  keyboard; `AxisEditor` passes the cube's facts and its `functions`).
   Both verified on Linux desktop. The caption ("Rows"/"Columns") is a
   `MenuAnchor` setting `CubeAxis.summaryPosition` (end/start/hidden;
   strings `totalsAtEnd` …) and `subtotalPosition` (`subtotalsAbove`/`Below` on rows,
@@ -535,6 +537,12 @@ Paths below are relative to the package (`lib/src/...` means
   the `ExpressionError` range; the message comes from
   `TesseraStrings.expressionError`. Tests: `test/filter_editor_test.dart`
   (tall `physicalSize`, `showFilterEditor` through a button).
+  Short screens (`widgets/picker_frame.dart`: `isShortScreen` < 480 dp
+  high, `FullScreenPicker`): the dimension and aggregate pickers, the
+  value list and, since 0.2.6, the filter dialog itself (Clear and Apply
+  in the bar) go full screen; `test/short_screen_pickers_test.dart`
+  checks the expression forms on the Android emulator's landscape size
+  with a 235 dp keyboard (field and error hit-testable above it).
 - `ExpressionField` (`widgets/expression_field.dart`, also
   `ExpressionTextController`): validates in a given `ExpressionScope` /
   `expected` on each keystroke, reports `ExpressionFieldValue(source,
@@ -572,7 +580,12 @@ Paths below are relative to the package (`lib/src/...` means
   signature in localized type names. A tap pops with an
   `ExpressionSnippet` (text + cursor; `insertInto` replaces the
   selection, puts a space between two names); the field inserts it,
-  reports the change and takes focus. Texts: the engine's
+  reports the change and takes focus. The `TextField` has
+  `selectAllOnFocus: false`: desktop and web select all on focus by
+  default, so in 0.2.5 every return from the help (an insert, or Esc)
+  left the whole expression selected and the next key replaced it
+  (found on Linux; tests run on `TargetPlatformVariant.desktop()`).
+  Texts: the engine's
   `l10n/expression_help.dart` (abstract `ExpressionHelpStrings` + the
   enums, switched over exhaustively in `expression_help_xx.dart`), reached
   through `TesseraStrings.expressionHelp`, which is concrete (English
