@@ -613,6 +613,7 @@ class _FilterEditorState extends State<FilterEditor> {
           key: ValueKey(e),
           scope: _scope,
           expected: ExprType.boolean,
+          columnLabels: {for (final c in widget.facts.columns) c.name: c.label},
           initialValue: e.source,
           onChanged: (v) => _changed(() {
             e.source = v.source;

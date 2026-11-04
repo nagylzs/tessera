@@ -230,6 +230,11 @@ abstract class TesseraStrings {
     return argument;
   }
 
+  /// The texts of the expression help. Unlike the rest, concrete, so that
+  /// its addition did not break subclasses: English unless overridden.
+  /// Every built-in locale overrides it.
+  ExpressionHelpStrings get expressionHelp => const ExpressionHelpStringsEn();
+
   // ------------------------------------------------ derived, concrete
 
   /// Label of an aggregate: built-in ones are composed from the column

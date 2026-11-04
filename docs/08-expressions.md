@@ -158,4 +158,6 @@ compiled.evaluate(row);                                    // boxed: double?, St
 `ExpressionScope.ofSchema(schema)` validates before any data is imported
 — what a settings screen would use. `ExpressionField` in
 `tessera_flutter` is a text field that does the validation and
-underlining for you.
+underlining for you, and its ? button opens a help for your users: this
+chapter in short, with examples over their own columns, in their
+language (see the [widgets chapter](09-widgets.md#expressionfield)).

@@ -293,6 +293,10 @@ class _AggregatePickerDialogState extends State<AggregatePickerDialog> {
           ExpressionField(
             scope: scope,
             expected: ExprType.number,
+            columnLabels: {
+              for (final c in widget.facts?.columns ?? const <FactColumn>[])
+                c.name: c.label,
+            },
             initialValue: _source,
             hintText: hint,
             autofocus: true,

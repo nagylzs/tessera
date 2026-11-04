@@ -2,6 +2,8 @@ import '../cube/layout_aggregate.dart';
 import '../expr/expr_type.dart';
 import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
+import 'expression_help.dart';
+import 'expression_help_pt.dart';
 import 'tessera_strings.dart';
 
 /// pt texts. Native review welcome.
@@ -10,6 +12,9 @@ final class TesseraStringsPt extends TesseraStrings {
 
   @override
   String get languageCode => 'pt';
+
+  @override
+  ExpressionHelpStrings get expressionHelp => const ExpressionHelpStringsPt();
 
   @override
   String sumOf(String t) => 'soma de $t';

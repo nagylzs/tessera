@@ -2,6 +2,8 @@ import '../cube/layout_aggregate.dart';
 import '../expr/expr_type.dart';
 import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
+import 'expression_help.dart';
+import 'expression_help_tr.dart';
 import 'tessera_strings.dart';
 
 /// tr texts. Native review welcome.
@@ -10,6 +12,9 @@ final class TesseraStringsTr extends TesseraStrings {
 
   @override
   String get languageCode => 'tr';
+
+  @override
+  ExpressionHelpStrings get expressionHelp => const ExpressionHelpStringsTr();
 
   @override
   String sumOf(String t) => '$t toplamı';

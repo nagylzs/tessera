@@ -554,6 +554,34 @@ Paths below are relative to the package (`lib/src/...` means
   choices replace rather than nest, `of` returns null for wrappers
   outside the list. Tests: `test/aggregate_editor_test.dart` ("expressions
   and show values as" group).
+- Expression help (2026-11-04, asked for by a Tessera Studio tester):
+  `ExpressionField` has a ? suffix button (`help`, default true) that
+  opens `showExpressionHelp` (`widgets/expression_help.dart`;
+  `ExpressionHelpDialog`: a `FullScreenPicker` under 600 dp wide or on a
+  short screen, else a `Dialog` at most 640 wide) over `ExpressionHelp`,
+  the content as a `ListView`: intro by `ExpressionHelpUse.of(scope,
+  expected)` (cell scope → formula, boolean → filter, number → measure,
+  else dimension), examples from `expressionExamples` (templates over the
+  first number/text/date/boolean columns, kept only if
+  `Expression.validate` passes, at most four), column chips
+  (`Expr.quoteName`, type icon, ` · label` from `columnLabels` where it
+  differs; the three hosts pass their facts' labels) — in a cell scope
+  the `ExpressionHelpAggregate`s first, named by `aggregateKindLabel` —,
+  operators, values, rules, then the functions by `ExpressionHelpGroup`,
+  the scope's functions with an `implementation` under "other" with a
+  signature in localized type names. A tap pops with an
+  `ExpressionSnippet` (text + cursor; `insertInto` replaces the
+  selection, puts a space between two names); the field inserts it,
+  reports the change and takes focus. Texts: the engine's
+  `l10n/expression_help.dart` (abstract `ExpressionHelpStrings` + the
+  enums, switched over exhaustively in `expression_help_xx.dart`), reached
+  through `TesseraStrings.expressionHelp`, which is concrete (English
+  default) so that adding it broke no subclass; each `l10n_xx.dart`
+  overrides it. Signatures name the parameters in the language
+  (`round(x, jegyek)`), code stays English. Tests: the engine's
+  `test/expression_help_test.dart` (every locale its own, every built-in
+  function listed, arities, aggregates valid in a cell scope) and
+  `test/expression_help_test.dart` here.
 - Example app: `example/lib/main.dart` is a launcher (`LauncherPage`)
   listing the entries of `example/lib/examples.dart`; each example lives in
   its own folder under `example/lib/` (kept as one project so pub.dev's

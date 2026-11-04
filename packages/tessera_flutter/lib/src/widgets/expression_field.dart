@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tessera/tessera.dart';
 
 import '../l10n/tessera_localizations.dart';
+import 'expression_help.dart';
 
 /// What an [ExpressionField] reports: the text and its first error, if
 /// any, in [scope].
@@ -18,6 +19,11 @@ final class ExpressionFieldValue {
 /// on every keystroke in [scope] (and, with [expected], as an expression
 /// of that type), the error's source range underlined and its message
 /// shown in the current language.
+///
+/// With [help] (the default) a ? button at its end opens
+/// [showExpressionHelp]; what is tapped there goes in at the cursor.
+/// [columnLabels] (column name → label) shows there what the columns are
+/// called elsewhere in the app.
 class ExpressionField extends StatefulWidget {
   const ExpressionField({
     super.key,
@@ -28,6 +34,8 @@ class ExpressionField extends StatefulWidget {
     this.label,
     this.hintText,
     this.autofocus = false,
+    this.help = true,
+    this.columnLabels = const {},
   });
 
   final ExpressionScope scope;
@@ -39,6 +47,10 @@ class ExpressionField extends StatefulWidget {
   final String? label;
   final String? hintText;
   final bool autofocus;
+
+  /// Whether the field offers the expression help.
+  final bool help;
+  final Map<String, String> columnLabels;
 
   /// The first error of [source] in [scope], or `null` when valid.
   static ExpressionError? validate(
@@ -53,6 +65,7 @@ class ExpressionField extends StatefulWidget {
 
 class _ExpressionFieldState extends State<ExpressionField> {
   late final _controller = ExpressionTextController(text: widget.initialValue);
+  final _focus = FocusNode();
   ExpressionError? _error;
 
   @override
@@ -68,6 +81,7 @@ class _ExpressionFieldState extends State<ExpressionField> {
   @override
   void dispose() {
     _controller.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -82,12 +96,26 @@ class _ExpressionFieldState extends State<ExpressionField> {
     widget.onChanged(ExpressionFieldValue(text, _error));
   }
 
+  Future<void> _openHelp() async {
+    final snippet = await showExpressionHelp(
+      context,
+      scope: widget.scope,
+      expected: widget.expected,
+      columnLabels: widget.columnLabels,
+    );
+    if (snippet == null || !mounted) return;
+    _controller.value = snippet.insertInto(_controller.value);
+    _changed(_controller.text);
+    _focus.requestFocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = TesseraLocalizations.of(context);
     _controller.error = _error;
     return TextField(
       controller: _controller,
+      focusNode: _focus,
       autofocus: widget.autofocus,
       style: const TextStyle(fontFamily: 'monospace'),
       decoration: InputDecoration(
@@ -100,6 +128,14 @@ class _ExpressionFieldState extends State<ExpressionField> {
             ? null
             : strings.expressionError(_error!),
         errorMaxLines: 3,
+        suffixIcon: widget.help
+            ? IconButton(
+                icon: const Icon(Icons.help_outline),
+                tooltip: strings.expressionHelp.title,
+                visualDensity: VisualDensity.compact,
+                onPressed: _openHelp,
+              )
+            : null,
       ),
       onChanged: _changed,
     );

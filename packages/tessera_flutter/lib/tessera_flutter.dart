@@ -26,4 +26,5 @@ export 'src/widgets/cube_theme.dart';
 export 'src/widgets/cube_view.dart';
 export 'src/widgets/dimension_picker.dart';
 export 'src/widgets/expression_field.dart';
+export 'src/widgets/expression_help.dart';
 export 'src/widgets/filter_editor.dart';

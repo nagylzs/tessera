@@ -1,3 +1,18 @@
+## Unreleased
+
+* `ExpressionHelpStrings`: the texts of the expression help that
+  `tessera_flutter` shows (what an expression does as a filter, a
+  calculated measure, a computed dimension or a cell formula; operators,
+  values, rules for empty values; every built-in function with its
+  signature and what it gives), in all fourteen languages, reached
+  through `TesseraStrings.expressionHelp`. The enums it switches over —
+  `ExpressionHelpUse` (`of(scope, expected)`), `ExpressionHelpFunction`,
+  `ExpressionHelpAggregate`, `ExpressionHelpOperator`,
+  `ExpressionHelpLiteral`, `ExpressionHelpRule`, `ExpressionHelpGroup`
+  — list what the help covers. `expressionHelp` is concrete (English
+  unless overridden) so that a `TesseraStrings` written outside the
+  package still compiles.
+
 ## 0.2.2
 
 * `ExportTable`: a plain table — not a cube — for the new table exporters:

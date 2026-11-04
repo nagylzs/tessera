@@ -35,6 +35,21 @@ under `## Unreleased` in the affected package's CHANGELOG.
 
 ## Widgets
 
+- [ ] Expression help (Tessera Studio, 2026-11-04: a tester did not know
+      the syntax or the functions, and an app may run offline). A help
+      button in `ExpressionField` opens `showExpressionHelp`: an intro
+      for the use (filter, calculated measure, computed dimension, cell
+      formula — from the scope and the expected type), examples built
+      from the scope's own columns and kept only if they validate, the
+      columns (with their labels where they differ) or, in a cell scope,
+      the aggregates, operators, values, rules for empty values, and the
+      functions by group, application functions included; a tap inserts
+      at the cursor (`name()` with the cursor inside). `ExpressionHelp`
+      is the content alone, for an app's own page. Texts in the engine:
+      `ExpressionHelpStrings`, reached through a concrete
+      `TesseraStrings.expressionHelp` (English by default, overridden by
+      every built-in locale), so the addition is not breaking: tessera
+      0.2.3, tessera_flutter 0.2.5. Docs: chapters 8 and 9.
 - [ ] Computed dimensions, follow-ups to the picker's "Expression…"
       entry (Tessera Studio, 2026-10-22): edit the expression or label
       of a computed dimension from its chip (now: remove and add again),

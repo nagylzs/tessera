@@ -2,6 +2,8 @@ import '../cube/layout_aggregate.dart';
 import '../expr/expr_type.dart';
 import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
+import 'expression_help.dart';
+import 'expression_help_pl.dart';
 import 'tessera_strings.dart';
 
 /// pl texts. Native review welcome.
@@ -10,6 +12,9 @@ final class TesseraStringsPl extends TesseraStrings {
 
   @override
   String get languageCode => 'pl';
+
+  @override
+  ExpressionHelpStrings get expressionHelp => const ExpressionHelpStringsPl();
 
   @override
   String sumOf(String t) => 'suma: $t';

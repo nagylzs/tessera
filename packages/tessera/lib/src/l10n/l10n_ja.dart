@@ -2,6 +2,8 @@ import '../cube/layout_aggregate.dart';
 import '../expr/expr_type.dart';
 import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
+import 'expression_help.dart';
+import 'expression_help_ja.dart';
 import 'tessera_strings.dart';
 
 /// ja texts. Native review welcome.
@@ -10,6 +12,9 @@ final class TesseraStringsJa extends TesseraStrings {
 
   @override
   String get languageCode => 'ja';
+
+  @override
+  ExpressionHelpStrings get expressionHelp => const ExpressionHelpStringsJa();
 
   @override
   String sumOf(String t) => '$tの合計';

@@ -1,3 +1,19 @@
+## Unreleased
+
+* Expression help: `ExpressionField` has a ? button that opens
+  `showExpressionHelp`, a reference to the expression language for the
+  app's users, offline and in their language — what the expression does
+  in its place, up to four examples written with the scope's own
+  columns, the columns (with their labels: the new `columnLabels`) or a
+  cell formula's aggregates, operators, values, the rules for empty
+  values and every function by group, the application's own included.
+  A tap on an example, a column or a function inserts it at the cursor
+  (`round()` with the cursor inside). Full screen on a narrow or short
+  screen. `ExpressionHelp` is the content alone, for an app's own page;
+  `ExpressionSnippet` is what a tap gives. `help: false` leaves the
+  button out. The filter editor, the aggregate picker and the dimension
+  picker pass their columns' labels.
+
 ## 0.2.4
 
 * Computed dimensions in the dimension picker: with `facts` given,

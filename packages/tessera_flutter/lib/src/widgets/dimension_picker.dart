@@ -218,6 +218,7 @@ class _DimensionPickerDialogState extends State<DimensionPickerDialog> {
             scope: ExpressionScope.ofFacts(facts, functions: widget.functions),
             initialValue: _source,
             hintText: 'floor(year / 10) * 10',
+            columnLabels: {for (final c in facts.columns) c.name: c.label},
             autofocus: true,
             onChanged: (v) => setState(() {
               _source = v.source;

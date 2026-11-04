@@ -151,8 +151,34 @@ ExpressionField(
   scope: ExpressionScope.ofFacts(facts),
   expected: ExprType.boolean,
   initialValue: current,
+  columnLabels: {for (final c in facts.columns) c.name: c.label},
   onChanged: (v) => setState(() { text = v.source; valid = v.isValid; }),
 )
+```
+
+A ? button at the end of the field opens the expression help
+(`showExpressionHelp`), a reference to the language for people who have
+not read the [expression chapter](08-expressions.md): what the
+expression does in its place — a filter, a calculated measure, a
+computed dimension or a cell formula, told from the scope and `expected`
+—, up to four examples written with the scope's own columns (only those
+that validate), the columns with their labels where `columnLabels` gives
+different ones (in a cell scope, the aggregates first), the operators,
+how values are written, the rules for empty values, and every function
+by group, the application's own (`ExpressionFunction` with an
+implementation) under "Other functions". A tap on an example, a column
+or a function closes the help and inserts it at the cursor — `round()`
+with the cursor between the parentheses. On a narrow or short screen
+the help takes the whole screen. `help: false` leaves the button out.
+
+The help works offline and speaks the app's language: its texts are
+`TesseraStrings.expressionHelp` (`ExpressionHelpStrings`), in all
+fourteen languages. `ExpressionHelp` is its content alone, for an app
+that wants it on a page of its own; without `onPick`, nothing in it can
+be tapped:
+
+```dart
+ExpressionHelp(scope: ExpressionScope.ofFacts(facts))
 ```
 
 ## Putting it together

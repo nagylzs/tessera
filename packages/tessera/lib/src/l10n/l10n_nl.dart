@@ -2,6 +2,8 @@ import '../cube/layout_aggregate.dart';
 import '../expr/expr_type.dart';
 import '../expr/expression_error.dart';
 import '../facts/dimension.dart';
+import 'expression_help.dart';
+import 'expression_help_nl.dart';
 import 'tessera_strings.dart';
 
 /// nl texts. Native review welcome.
@@ -10,6 +12,9 @@ final class TesseraStringsNl extends TesseraStrings {
 
   @override
   String get languageCode => 'nl';
+
+  @override
+  ExpressionHelpStrings get expressionHelp => const ExpressionHelpStringsNl();
 
   @override
   String sumOf(String t) => 'som van $t';
