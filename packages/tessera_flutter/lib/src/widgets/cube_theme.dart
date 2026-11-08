@@ -392,6 +392,7 @@ final class CubeTheme {
       cellPadding: cellPadding,
       styleLook: lookOf,
       styleKey: (style, coloring, fontFamilies, dark),
+      styleIconColor: chrome.icon == null ? null : Color(chrome.icon!),
     );
   }
 }
@@ -418,7 +419,20 @@ final class ResolvedCubeTheme {
     required this.cellPadding,
     this.styleLook,
     this.styleKey,
+    this.styleIconColor,
   });
+
+  /// A style's one colour for every header icon, where it sets one.
+  final Color? styleIconColor;
+
+  /// The colour of the icons (expand, collapse, sort, the menu button) in a
+  /// header cell that looks [look]: from a style, its icon colour where it
+  /// sets one, else the cell's text colour, so an icon stays visible on a
+  /// dark band and a light total row alike; from plain fields,
+  /// [headerIconColor].
+  Color iconColorOf(ScreenLook look) => styleLook == null
+      ? headerIconColor
+      : styleIconColor ?? look.text.color ?? headerIconColor;
 
   /// What [styleLook] depends on, equal across resolutions of the same
   /// style in the same circumstances: for caches of what the looks decide

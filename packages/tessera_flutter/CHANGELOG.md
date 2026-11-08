@@ -8,8 +8,13 @@
   from the plain fields alike; `CubeView` draws and measures every cell
   through it, so a style may vary fonts by depth and the columns still
   fit.
+* A style's header icons take their own cell's text colour unless the style
+  sets one icon colour (`ResolvedCubeTheme.iconColorOf`), so they stay
+  visible on a dark band and a light total row alike.
 * `CubeStylePreview`: a small sample pivot drawn in a theme, light or dark,
-  in the app's language, for a gallery of styles.
+  in the app's language, for a gallery of styles; laid out at the style's
+  own sizes whatever the system's text size, its columns measured, `fit`
+  into its box.
 * A value's name under the total column is bold, like the column's label.
 
 ## 0.2.7

@@ -227,6 +227,15 @@ void main() {
       expect(styleOf(tester, total).fontWeight, FontWeight.bold);
       expect(fillOf(tester, find.text('A')), const Color(0xFFB00000));
       expect(styleOf(tester, find.text('region')).fontStyle, FontStyle.italic);
+      // a style without an icon colour: each icon in its cell's text colour
+      final minus = find.descendant(
+        of: find.ancestor(of: europe, matching: find.byType(Row)).first,
+        matching: find.byType(Icon),
+      );
+      expect(
+        IconTheme.of(tester.element(minus)).color,
+        styleOf(tester, europe).color,
+      );
       expect(tester.takeException(), isNull);
     });
 

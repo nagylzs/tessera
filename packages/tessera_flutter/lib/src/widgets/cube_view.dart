@@ -499,6 +499,7 @@ class _CubeGridState extends State<_CubeGrid> {
         child: _box(
           color: look.fill,
           alignment: isRow ? Alignment.centerLeft : Alignment.centerRight,
+          iconColor: theme.iconColorOf(look),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -620,6 +621,7 @@ class _CubeGridState extends State<_CubeGrid> {
         child: _box(
           color: look.fill,
           alignment: Alignment.centerRight,
+          iconColor: theme.iconColorOf(look),
           onTap: view.sortable && aggregate != null
               ? () => _sortRowsByColumn(entry, aggregate)
               : null,
@@ -818,30 +820,34 @@ class _CubeGridState extends State<_CubeGrid> {
   }) {
     final text = _entryText(entry, isRow: isRow);
     final icon = Icon(entry.isExpanded ? Icons.remove : Icons.add, size: 14);
-    final style = _look(_labelCell(entry, isRow: isRow)).text;
-    return SizedBox(
-      height: isRow ? theme.rowHeight : theme.headerRowHeight,
-      child: Row(
-        children: [
-          // the cue only, as the whole cell toggles (`_toggleOf`); the
-          // grand total's is still its only target
-          if (entry.isExpandable)
-            _togglesByCell(entry)
-                ? icon
-                : InkWell(
-                    onTap: () => _toggle(context, entry, isRow: isRow),
-                    child: icon,
-                  ),
-          if (entry.isExpandable) const SizedBox(width: 4),
-          Expanded(
-            child: Text(
-              text,
-              style: style,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+    final look = _look(_labelCell(entry, isRow: isRow));
+    final style = look.text;
+    return IconTheme.merge(
+      data: IconThemeData(color: theme.iconColorOf(look)),
+      child: SizedBox(
+        height: isRow ? theme.rowHeight : theme.headerRowHeight,
+        child: Row(
+          children: [
+            // the cue only, as the whole cell toggles (`_toggleOf`); the
+            // grand total's is still its only target
+            if (entry.isExpandable)
+              _togglesByCell(entry)
+                  ? icon
+                  : InkWell(
+                      onTap: () => _toggle(context, entry, isRow: isRow),
+                      child: icon,
+                    ),
+            if (entry.isExpandable) const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                text,
+                style: style,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -943,7 +949,14 @@ class _CubeGridState extends State<_CubeGrid> {
     double bottomBorderFrom = 0,
     double bottomBorderUntil = double.infinity,
     Color? outline,
+    Color? iconColor,
   }) {
+    if (iconColor != null) {
+      child = IconTheme.merge(
+        data: IconThemeData(color: iconColor),
+        child: child,
+      );
+    }
     final box = CustomPaint(
       foregroundPainter: CellBorder(
         color: theme.borderColor,
