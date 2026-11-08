@@ -1,5 +1,6 @@
 import '../color/hue_levels.dart';
 import '../l10n/tessera_strings.dart';
+import '../style/cube_style.dart';
 import 'cube_grid.dart';
 
 /// A font for one role of an exported document. Pure Dart: the colour is
@@ -298,6 +299,20 @@ final class CubeExportTheme {
     summaryFont: ExportFont(family: fontFamily, bold: true),
   );
 
+  /// A theme that draws every cell as [style] does, in its light variant
+  /// (documents go on paper): its fill and font by [CubeStyle.lookOf],
+  /// with the depths [coloring] picks and the font names of [families]
+  /// (each [StyleFamily]'s; a PDF embeds its fonts under them). The plain
+  /// fields ([levelFills], [headerFont], …) hold the style's looks at the
+  /// first levels, for those that read them; [fillOf] and [fontOf] are
+  /// exact for every cell.
+  factory CubeExportTheme.fromStyle(
+    CubeStyle style, {
+    DepthColoring coloring,
+    ExportFamilies families,
+    NumberFormat numberFormat,
+  }) = _StyledExportTheme;
+
   /// [steps] colours interpolated from [from] to [to] (both inclusive),
   /// for [levelFills].
   static List<int> gradient(int from, int to, int steps) {
@@ -317,5 +332,139 @@ final class CubeExportTheme {
         (channel(16) << 16) |
         (channel(8) << 8) |
         channel(0);
+  }
+}
+
+/// [CubeExportTheme.fromStyle]: every cell asks the style.
+final class _StyledExportTheme extends CubeExportTheme {
+  _StyledExportTheme(
+    this.style, {
+    this.coloring = DepthColoring.both,
+    this.families = const ExportFamilies(),
+    super.numberFormat,
+  }) : super(
+         headerFill: _look(
+           style,
+           coloring,
+           const StyleCell(CellRole.corner),
+         ).fill,
+         summaryFill: _look(
+           style,
+           coloring,
+           const StyleCell(CellRole.total),
+         ).fill,
+         levelFills: [
+           for (var d = 0; d < _levels; d++)
+             _look(
+               style,
+               coloring,
+               StyleCell(CellRole.value, rowLevel: d),
+             ).fill,
+         ],
+         rowHeaderFills: [
+           for (var d = 0; d < _levels; d++)
+             _look(
+               style,
+               coloring,
+               StyleCell(CellRole.rowLabel, rowLevel: d),
+             ).fill,
+         ],
+         columnHeaderFills: [
+           for (var d = 0; d < _levels; d++)
+             _look(
+               style,
+               coloring,
+               StyleCell(CellRole.columnLabel, columnLevel: d),
+             ).fill,
+         ],
+         borderColor: style.chrome().border,
+         cellFont: _look(
+           style,
+           coloring,
+           const StyleCell(CellRole.value, rowLevel: 0, columnLevel: 0),
+         ).exportFont(families),
+         headerFont: _look(
+           style,
+           coloring,
+           const StyleCell(CellRole.rowLabel, rowLevel: 0),
+         ).exportFont(families),
+         summaryFont: _look(
+           style,
+           coloring,
+           const StyleCell(CellRole.total),
+         ).exportFont(families),
+       );
+
+  /// Levels the plain fields hold.
+  static const _levels = 4;
+
+  static CellLook _look(
+    CubeStyle style,
+    DepthColoring coloring,
+    StyleCell cell,
+  ) => style.lookOf(cell, coloring: coloring);
+
+  final CubeStyle style;
+  final DepthColoring coloring;
+  final ExportFamilies families;
+
+  CellLook _of(GridCell cell) =>
+      style.lookOf(StyleCell.ofGrid(cell), coloring: coloring);
+
+  @override
+  int fillOf(GridCell cell) => _of(cell).fill;
+
+  @override
+  ExportFont fontOf(GridCell cell) => _of(cell).exportFont(families);
+
+  /// Keeps the style where only the number format changes, which is what
+  /// apps adjust on a theme; any other change gives a plain theme from
+  /// the fields.
+  @override
+  CubeExportTheme copyWith({
+    int? headerFill,
+    int? summaryFill,
+    List<int>? levelFills,
+    LevelBasis? levelBasis,
+    List<int>? rowHeaderFills,
+    List<int>? columnHeaderFills,
+    int? borderColor,
+    ExportFont? cellFont,
+    ExportFont? headerFont,
+    ExportFont? summaryFont,
+    NumberFormat? numberFormat,
+  }) {
+    final onlyNumbers =
+        headerFill == null &&
+        summaryFill == null &&
+        levelFills == null &&
+        levelBasis == null &&
+        rowHeaderFills == null &&
+        columnHeaderFills == null &&
+        borderColor == null &&
+        cellFont == null &&
+        headerFont == null &&
+        summaryFont == null;
+    if (!onlyNumbers) {
+      return super.copyWith(
+        headerFill: headerFill,
+        summaryFill: summaryFill,
+        levelFills: levelFills,
+        levelBasis: levelBasis,
+        rowHeaderFills: rowHeaderFills,
+        columnHeaderFills: columnHeaderFills,
+        borderColor: borderColor,
+        cellFont: cellFont,
+        headerFont: headerFont,
+        summaryFont: summaryFont,
+        numberFormat: numberFormat,
+      );
+    }
+    return _StyledExportTheme(
+      style,
+      coloring: coloring,
+      families: families,
+      numberFormat: numberFormat ?? this.numberFormat,
+    );
   }
 }

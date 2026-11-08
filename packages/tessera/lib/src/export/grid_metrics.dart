@@ -80,15 +80,11 @@ final class GridMetrics {
         widths[c + k] += short / span;
       }
     }
+    // each row as high as the largest font among its cells: a style may
+    // set one level's labels larger than the others
     final heights = [
       for (var r = 0; r < rows; r++)
-        (_fontPx(
-                  r < grid.headerRows
-                      ? math.max(theme.headerFont.size, theme.summaryFont.size)
-                      : math.max(theme.cellFont.size, theme.summaryFont.size),
-                ) *
-                lineHeight)
-            .ceilToDouble(),
+        (_fontPx(_largestFont(grid, theme, r)) * lineHeight).ceilToDouble(),
     ];
     return GridMetrics._(
       List.unmodifiable([for (final w in widths) w.ceilToDouble()]),
@@ -158,4 +154,13 @@ final class GridMetrics {
     }
     return out;
   }
+}
+
+/// The largest font size, in points, among the cells of [grid]'s row [r].
+double _largestFont(CubeGrid grid, CubeExportTheme theme, int r) {
+  var size = 0.0;
+  for (var c = 0; c < grid.columnCount; c++) {
+    size = math.max(size, theme.fontOf(grid.cellAt(r, c)).size);
+  }
+  return size;
 }

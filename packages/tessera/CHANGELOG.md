@@ -1,3 +1,23 @@
+## Unreleased
+
+* `CubeStyle`: how every cell of a pivot table looks — fill, text colour,
+  font family (`StyleFamily`: sans, serif, mono), size, bold, italic —
+  by its role (`CellRole`: value, total, row or column label, total
+  label, title, value name, corner) and its depth on each axis
+  (`StyleCell`), with the grid's colours (`StyleChrome`) and sizes
+  (`StyleMetrics`), in a light and optionally a dark variant.
+  `DepthColoring` (off, rows, columns, both) is the user's choice of which
+  depths pick the colours; fonts keep the cell's own depth.
+* `JsonCubeStyle` reads a style from JSON, the format of `docs/style.md`:
+  looks by role, each taking what it does not set from a parent, values by
+  depth as lists, a dark variant over the light one; strict, with errors
+  that name the place.
+* `CubeExportTheme.fromStyle`: exports in a style, every cell's fill and
+  font from it (`fillOf`, `fontOf`), the family names from
+  `ExportFamilies`; `copyWith(numberFormat:)` keeps the style.
+* `GridMetrics` sizes each row by the largest font among its own cells,
+  so a style may set one level's labels larger than the others.
+
 ## 0.2.3
 
 * `ExpressionHelpStrings`: the texts of the expression help that

@@ -120,6 +120,8 @@ export 'src/schema/column_type.dart';
 export 'src/schema/schema.dart';
 export 'src/schema/value_parsing.dart';
 export 'src/snapshot/tessera_snapshot.dart';
+export 'src/style/cube_style.dart';
+export 'src/style/json_cube_style.dart';
 export 'src/source/csv_data_source.dart';
 export 'src/source/data_source.dart';
 export 'src/source/json_data_source.dart';
