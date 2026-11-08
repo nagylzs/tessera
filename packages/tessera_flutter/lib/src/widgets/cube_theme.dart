@@ -144,9 +144,9 @@ final class CubeTheme {
        headerIconColor = null,
        rowHeight = style.metrics.rowHeight,
        headerRowHeight = style.metrics.headerRowHeight,
-       minColumnWidth = 72,
+       minColumnWidth = style.metrics.minColumnWidth,
        maxColumnWidth = 320,
-       minRowHeaderWidth = 100,
+       minRowHeaderWidth = style.metrics.minRowHeaderWidth,
        maxRowHeaderWidth = 400,
        cellPadding = EdgeInsets.symmetric(horizontal: style.metrics.padding);
 

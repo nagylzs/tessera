@@ -51,7 +51,7 @@ default.
 | `version` | required | `1`; a reader rejects versions it does not know |
 | `id` | required | unique among the styles an app offers; what it stores as the user's choice |
 | `name` | required | the name by language code (`en`, `hu`, `ja`, …); `en` is required and stands in for a missing language |
-| `metrics` | optional | `rowHeight` (a row of values and row labels), `headerRowHeight` (a row of the column header band), `padding` (at each side of a cell's text), in logical pixels; 28, 28 and 6 by default |
+| `metrics` | optional | `rowHeight` (a row of values and row labels), `headerRowHeight` (a row of the column header band), `padding` (at each side of a cell's text), `minColumnWidth` and `minRowHeaderWidth` (the narrowest a column of values or of row labels gets), in logical pixels; 28, 28, 6, 72 and 100 by default |
 | `light` | required | the light variant: what documents use, and the screen in light mode |
 | `dark` | optional | the dark variant for the screen in dark mode; without it the style looks the same in dark mode, like paper |
 
@@ -93,7 +93,7 @@ practice it sets colours only and leaves the fonts to `light`.
 | `fill` | colour, or a list by depth | the background |
 | `text` | colour, or a list by depth | the text's colour |
 | `family` | `"sans"`, `"serif"` or `"mono"` | the font; absent = what the surroundings use (the app's font on a screen, sans in a document) |
-| `size` | number, or a list by depth | in logical pixels as on a screen; documents use five sixths of it in points, so 12 is 10 pt |
+| `size` | number, or a list by depth | in logical pixels as on a screen; documents use five sixths of it in points, to the nearest half point, so 12 is 10 pt and 14 is 11.5 |
 | `bold` | `true`/`false`, or a list by depth | |
 | `italic` | `true`/`false`, or a list by depth | |
 

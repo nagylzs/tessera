@@ -161,8 +161,8 @@ final class CellLook {
   final StyleFamily? family;
 
   /// In logical pixels, as on a screen. Documents take five sixths of it
-  /// in points ([exportFont]): 12 on the screen is 10 in a spreadsheet,
-  /// as their defaults go.
+  /// in points, to the nearest half point ([exportFont]): 12 on the screen
+  /// is 10 in a spreadsheet, as their defaults go, 11 is 9, 14 is 11.5.
   final double size;
 
   final bool bold;
@@ -172,7 +172,7 @@ final class CellLook {
   ExportFont exportFont([ExportFamilies families = const ExportFamilies()]) =>
       ExportFont(
         family: families.of(family),
-        size: size * 5 / 6,
+        size: (size * 5 / 6 * 2).roundToDouble() / 2,
         bold: bold,
         italic: italic,
         color: text,
@@ -248,6 +248,8 @@ final class StyleMetrics {
     this.rowHeight = 28,
     this.headerRowHeight = 28,
     this.padding = 6,
+    this.minColumnWidth = 72,
+    this.minRowHeaderWidth = 100,
   });
 
   /// A row of values or row labels.
@@ -258,6 +260,12 @@ final class StyleMetrics {
 
   /// Space at each side of a cell's text.
   final double padding;
+
+  /// The narrowest a column of values gets, however short its texts.
+  final double minColumnWidth;
+
+  /// The narrowest a column of row labels gets.
+  final double minRowHeaderWidth;
 }
 
 /// How a pivot table looks, cell by cell: on a screen (`tessera_flutter`'s

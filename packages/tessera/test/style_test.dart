@@ -326,7 +326,7 @@ void main() {
           expect(theme.fillOf(cell), want.fill, reason: '$cell');
           final font = theme.fontOf(cell);
           expect(font.color, want.text);
-          expect(font.size, closeTo(want.size * 5 / 6, 1e-9));
+          expect(font.size, (want.size * 5 / 6 * 2).round() / 2);
           expect(font.bold, want.bold);
           expect(
             font.family,

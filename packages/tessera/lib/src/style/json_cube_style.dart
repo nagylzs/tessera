@@ -86,11 +86,19 @@ final class JsonCubeStyle implements CubeStyle {
       throw const FormatException(r'$.name: no English ("en") name');
     }
     final m = r.child('metrics');
-    m?.only(const {'rowHeight', 'headerRowHeight', 'padding'});
+    m?.only(const {
+      'rowHeight',
+      'headerRowHeight',
+      'padding',
+      'minColumnWidth',
+      'minRowHeaderWidth',
+    });
     final metrics = StyleMetrics(
       rowHeight: m?.number('rowHeight') ?? 28,
       headerRowHeight: m?.number('headerRowHeight') ?? 28,
       padding: m?.number('padding') ?? 6,
+      minColumnWidth: m?.number('minColumnWidth') ?? 72,
+      minRowHeaderWidth: m?.number('minRowHeaderWidth') ?? 100,
     );
     final light = _Variant.read(r.child('light', required: true)!);
     if (light.chrome.border == null) {
