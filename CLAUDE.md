@@ -28,7 +28,30 @@ the root, ignored; members carry `resolution: workspace`):
   fills, border, fonts per role, decimals/grouping; `brand(primary:)`,
   `gradient`, `mix`; `rowHeaderFills`/`columnHeaderFills` per level,
   `levelBasis` (`combined` = row + column depth, `row`), `fillOf(cell)` /
-  `fontOf(cell)` are what exporters call; `hueLevels(levels:)`).
+  `fontOf(cell)` are what exporters call; `hueLevels(levels:)`;
+  `fromStyle(style, coloring:, families:)`, a private subclass whose
+  `fillOf`/`fontOf` ask the style per cell, `style` non-null on it).
+  `style/` (2026-11-08, for Tessera Studio's gallery): `CubeStyle`, the
+  interface of a look for every cell by `CellRole` and depth
+  (`StyleCell.ofGrid` maps a `GridCell`), light and optional dark variant,
+  `StyleChrome`, `StyleMetrics`; `DepthColoring` (off, rows, columns, both)
+  picks which depth indexes the colours, fonts always the cell's own
+  `depth`; `StyleFamily` sans/serif/mono, `ExportFamilies` names them in
+  documents; `CellLook.exportFont` sizes at 5/6 px → pt, rounded to the
+  half point. `JsonCubeStyle` reads `docs/style.md`'s format strictly
+  (errors name the JSON path, `_` keys are comments): roles take from a
+  parent chain (`valueName` → `columnLabel` → `header` → `cell`,
+  `totalLabel` → `total` → `cell`), lists by depth, the dark variant
+  looks along its own chain first and takes only what it sets nowhere
+  from light. `GridMetrics` sizes each row by the largest font among its
+  cells. `tessera_pdf`'s `PdfFonts.families` embeds a family per name,
+  only if a cell uses it; `tessera_html` adds `tessera-look-N` classes
+  for a styled theme. In `tessera_flutter`: `CubeTheme.fromStyle(style,
+  coloring:, fontFamilies:)`, `ResolvedCubeTheme.lookOf(cell, rowLevels:,
+  columnLevels:)` (styles and plain fields alike; `CubeView` draws and
+  measures every cell through it), `iconColorOf(look)` (a style's icons
+  take their cell's text colour unless it sets one), `CubeStylePreview`
+  (a fixed localized sample, measured, no text scaling, `fit`).
   `color/`: `Oklch` (perceptual colour, ARGB both ways, gamut clipping
   by chroma) and `HueLevels` (levels differ in hue only, golden-angle
   step from a start hue, rows first then columns, header = same hue
