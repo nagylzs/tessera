@@ -50,7 +50,9 @@ the root, ignored; members carry `resolution: workspace`):
   format = one package): `XlsxDataSource` (streams one worksheet's rows,
   typed cells, `fromData`/`fromBytes`, `XlsxOptions`) and
   `XlsxCubeExporter` (renders a `CubeLayout` from `CubeGrid`,
-  the engine's `CubeExportTheme`; `numberFormatCode`, `freezeHeaders`
+  the engine's `CubeExportTheme`, whose `NumberFormat` becomes two codes:
+  `#,##0.00` and, for whole numbers as the grid shows them, `#,##0`;
+  `numberFormatCode` (one code for every number), `freezeHeaders`
   and the width bounds are exporter options — `TesseraStrings` labels)
   and `XlsxTableExporter` (an engine `ExportTable` as a filterable data
   table — autofilter + `_xlnm._FilterDatabase`, frozen header, number
@@ -117,7 +119,8 @@ the root, ignored; members carry `resolution: workspace`):
   `OdsCubeExporter` (renders `CubeGrid`: `mimetype` stored first through
   the shared `ZipWriter`, manifest,
   `content.xml` with automatic styles per (fill, font, align) →
-  `ce<n>`, `number:number-style` N1 from `NumberFormat`, column styles
+  `ce<n>`, `number:number-style` N1 from `NumberFormat` and N0, the same
+  without decimals, for whole numbers as the grid shows them, column styles
   in cm from the longest text, merges via
   `number-columns/rows-spanned` + `covered-table-cell`, `settings.xml`
   view settings for frozen panes — LibreOffice's documented

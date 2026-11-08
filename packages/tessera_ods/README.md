@@ -10,8 +10,9 @@ support for the [tessera](../tessera) pivot-table engine:
 * `OdsCubeExporter` — writes a `CubeLayout` (the expanded rows and columns
   exactly as shown) as a formatted sheet: merged group headers in the
   "rotated L" shape, level shading, bold summaries, frozen headers,
-  localized labels through `TesseraStrings`, looks from the engine's
-  `CubeExportTheme` (shared with `tessera_xlsx`).
+  localized labels through `TesseraStrings`, looks and the number format
+  from the engine's `CubeExportTheme` (shared with `tessera_xlsx`; whole
+  numbers without decimals, as the grid shows them).
 * `OdsTableExporter` — writes an `ExportTable` (plain rows, or a whole
   `FactTable` through `ExportTable.ofFacts`) as a filterable data table
   rather than a pivot: filter buttons on the header row, the header frozen

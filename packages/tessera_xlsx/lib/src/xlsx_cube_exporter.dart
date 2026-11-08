@@ -32,8 +32,10 @@ final class XlsxCubeExporter {
   /// Colours, fonts and number format; shared with the other exporters.
   final CubeExportTheme theme;
 
-  /// An Excel format code (`0.0%`, `#,##0`) applied to numeric cells
-  /// instead of the one derived from [CubeExportTheme.numberFormat].
+  /// An Excel format code (`0.0%`, `#,##0`) applied to every numeric cell
+  /// instead of the ones derived from [CubeExportTheme.numberFormat]: its
+  /// decimals, and none for a whole number, as the grid and the text
+  /// formats show them ([NumberFormat.format]).
   final String? numberFormatCode;
 
   /// Freeze panes at the corner, so headers stay visible while scrolling.
@@ -148,5 +150,24 @@ final class _Export {
     theme.fillOf(cell),
     font: theme.fontOf(cell),
     right: cell.alignRight,
+    format: _isWhole(cell.value) ? _wholeCode : null,
   );
+
+  /// The theme's format without decimals, for whole numbers; `null` when
+  /// [XlsxCubeExporter.numberFormatCode] decides, or the theme's format
+  /// has no decimals anyway.
+  late final String? _wholeCode =
+      exporter.numberFormatCode == null && theme.numberFormat.decimals > 0
+      ? XlsxCubeExporter.formatCode(
+          NumberFormat(decimals: 0, grouping: theme.numberFormat.grouping),
+        )
+      : null;
 }
+
+/// Whether [value] is a number that [NumberFormat.format] writes without
+/// decimals: an `int`, or a `double` with nothing after the point.
+bool _isWhole(Object? value) => switch (value) {
+  int() => true,
+  double v => v == v.truncateToDouble() && v.abs() < 1e15,
+  _ => false,
+};

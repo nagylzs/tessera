@@ -148,6 +148,101 @@ void main() {
     expect(ZipDecoder().decodeBytes(ods).find('settings.xml'), isNull);
   });
 
+  test('whole numbers without decimals, as the grid shows them', () {
+    // counts are ints; the averages 7.0 and 4.0 are whole doubles, while
+    // 5.5 and 2.5 are not
+    final cube = Cube(
+      facts: f,
+      spec: CubeSpec(
+        rows: CubeAxis.of([region]),
+        aggregates: [Aggregate.count, Aggregate.average(qty)],
+      ),
+    );
+    final xml = part(
+      const OdsCubeExporter().export(cube.layout),
+      'content.xml',
+    );
+    final decimalsOf = {
+      for (final m in RegExp(
+        r'<number:number-style style:name="(N\d)"><number:number '
+        r'number:decimal-places="(\d+)"',
+      ).allMatches(xml))
+        m[1]!: int.parse(m[2]!),
+    };
+    expect(decimalsOf, {'N1': 2, 'N0': 0});
+    final numberStyleOf = {
+      for (final m in RegExp(
+        r'style:name="(ce\d+)" style:family="table-cell" '
+        r'style:data-style-name="(N\d)"',
+      ).allMatches(xml))
+        m[1]!: m[2]!,
+    };
+    final cells = RegExp(
+      r'table:style-name="(ce\d+)" office:value-type="float" '
+      r'office:value="([^"]+)"><text:p>([^<]*)</text:p>',
+    ).allMatches(xml).toList();
+    expect(cells, hasLength(8));
+    for (final m in cells) {
+      final value = num.parse(m[2]!);
+      final whole = value == value.truncate();
+      expect(decimalsOf[numberStyleOf[m[1]!]], whole ? 0 : 2, reason: m[2]);
+      expect(m[3], whole ? '${value.toInt()}' : value.toStringAsFixed(2));
+    }
+
+    // a theme without decimals needs no second number style
+    final plain = part(
+      const OdsCubeExporter(
+        theme: CubeExportTheme(numberFormat: NumberFormat(decimals: 0)),
+      ).export(cube.layout),
+      'content.xml',
+    );
+    expect(plain, isNot(contains('style:name="N0"')));
+  });
+
+  test('LibreOffice shows the numbers as the grid does', () async {
+    if (Process.runSync('which', ['soffice']).exitCode != 0) {
+      markTestSkipped('soffice not installed');
+      return;
+    }
+    final cube = Cube(
+      facts: f,
+      spec: CubeSpec(
+        rows: CubeAxis.of([region]),
+        aggregates: [Aggregate.count, Aggregate.average(qty)],
+      ),
+    );
+    final dir = Directory.systemTemp.createTempSync('tessera_ods');
+    try {
+      final file = File('${dir.path}/pivot.ods')
+        ..writeAsBytesSync(const OdsCubeExporter().export(cube.layout));
+      // tab-separated, UTF-8, cells "as shown" (the 9th token)
+      final result = Process.runSync('soffice', [
+        '--headless',
+        '--convert-to',
+        'csv:Text - txt - csv (StarCalc):9,34,76,1,,1033,false,true,true',
+        '--outdir',
+        dir.path,
+        file.path,
+      ]);
+      expect(result.exitCode, 0, reason: '${result.stdout}${result.stderr}');
+      final lines = const LineSplitter().convert(
+        File('${dir.path}/pivot.csv').readAsStringSync(),
+      );
+      // the decimal mark is LibreOffice's locale's
+      expect(
+        lines.skip(2).join('\n'),
+        matches(
+          RegExp(
+            '^\\(empty\\)\t2\t7\nAsia\t2\t5[.,]50\n'
+            'Europe\t4\t2[.,]50\nTotal\t8\t4\$',
+          ),
+        ),
+      );
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
+  });
+
   test('LibreOffice opens the export: values and merges', () async {
     if (Process.runSync('which', ['soffice']).exitCode != 0) {
       markTestSkipped('soffice not installed');

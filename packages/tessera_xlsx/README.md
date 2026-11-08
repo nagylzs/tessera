@@ -11,7 +11,8 @@ Excel (`.xlsx`) support for the [tessera](../tessera) pivot-table engine:
   in the "rotated L" shape, level shading, bold summaries, frozen headers,
   localized labels through `TesseraStrings`. The engine's
   `CubeExportTheme` (shared with the other exporters) sets fills, borders,
-  fonts and the number format with plain ARGB ints — no Flutter types;
+  fonts and the number format (whole numbers without decimals, as the
+  grid shows them) with plain ARGB ints — no Flutter types;
   `CubeExportTheme.brand(primary: 0xFF00695C)` derives a whole theme from
   one company colour, `gradient` builds level fills. Excel-only choices
   (`numberFormatCode`, `freezeHeaders`, column-width bounds) are on the

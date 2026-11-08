@@ -1,3 +1,11 @@
+## Unreleased
+
+* Fix: a whole number (a count, a sum of whole numbers) read "1,014.00"
+  in LibreOffice and Excel, as every numeric cell had the theme's
+  `NumberFormat` with its decimals, while the grid and the PDF, HTML and
+  SVG exports write "1,014". Whole numbers now get a number style without
+  decimals (`N0`), the others keep the theme's (`N1`).
+
 ## 0.2.3
 
 * `OdsDataSource.sheets()` lists the sheets in order as `OdsSheetInfo`

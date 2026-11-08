@@ -9,7 +9,8 @@ import 'zip_writer.dart';
 /// formatted OpenDocument sheet, rendered from [CubeGrid] like the other
 /// exporters: merged "rotated L" group headers, one column per exported
 /// aggregate, subtotals on the group's own row, fills, fonts and the
-/// number format from [theme], labels from [strings].
+/// number format from [theme] (without decimals for a whole number, as
+/// the grid and the text formats show it), labels from [strings].
 final class OdsCubeExporter {
   const OdsCubeExporter({
     this.strings = const TesseraStringsEn(),
@@ -101,7 +102,12 @@ final class _Writer {
     final font = theme.fontOf(cell);
     final fill = theme.fillOf(cell);
     _fonts.add(font.family);
-    final style = _CellStyle(fill, font, cell.alignRight);
+    final style = _CellStyle(
+      fill,
+      font,
+      cell.alignRight,
+      whole: theme.numberFormat.decimals > 0 && _isWhole(cell.value),
+    );
     return _styleIndex.putIfAbsent(style, () {
       _styles.add(style);
       return _styles.length - 1;
@@ -135,7 +141,9 @@ final class _Writer {
         final String text;
         switch (value) {
           case num v when v.isFinite:
-            text = v is int ? v.toString() : v.toStringAsFixed(decimals);
+            text = _isWhole(v)
+                ? v.toInt().toString()
+                : v.toStringAsFixed(decimals);
             b.write(
               '<table:table-cell table:style-name="$s"$span '
               'office:value-type="float" office:value="$v">',
@@ -178,12 +186,16 @@ final class _Writer {
     b.write('</office:font-face-decls>');
     b.write('<office:automatic-styles>');
     final nf = theme.numberFormat;
-    b.write(
-      '<number:number-style style:name="N1"><number:number '
-      'number:decimal-places="${nf.decimals}" number:min-decimal-places="${nf.decimals}" '
-      'number:min-integer-digits="1"${nf.grouping ? ' number:grouping="true"' : ''}/>'
-      '</number:number-style>',
-    );
+    // N1 the theme's format, N0 the same without decimals (whole numbers)
+    for (final (name, decimals) in [('N1', nf.decimals), ('N0', 0)]) {
+      if (name == 'N0' && !_styles.any((s) => s.whole)) continue;
+      b.write(
+        '<number:number-style style:name="$name"><number:number '
+        'number:decimal-places="$decimals" number:min-decimal-places="$decimals" '
+        'number:min-integer-digits="1"${nf.grouping ? ' number:grouping="true"' : ''}/>'
+        '</number:number-style>',
+      );
+    }
     for (var c = 0; c < grid.columnCount; c++) {
       final chars = (_longest[c] * 1.1 + 2).clamp(
         exporter.minColumnWidth,
@@ -200,7 +212,7 @@ final class _Writer {
       final s = _styles[i];
       b.write(
         '<style:style style:name="ce$i" style:family="table-cell" '
-        'style:data-style-name="N1">'
+        'style:data-style-name="${s.whole ? 'N0' : 'N1'}">'
         '<style:table-cell-properties fo:background-color="${odsRgb(s.fill)}" '
         'fo:border="$border" style:vertical-align="middle"/>'
         '<style:paragraph-properties fo:text-align="${s.right ? 'end' : 'start'}"/>'
@@ -225,19 +237,31 @@ final class _Writer {
 }
 
 final class _CellStyle {
-  const _CellStyle(this.fill, this.font, this.right);
+  const _CellStyle(this.fill, this.font, this.right, {required this.whole});
 
   final int fill;
   final ExportFont font;
   final bool right;
+
+  /// Shows its number without decimals ([_isWhole]).
+  final bool whole;
 
   @override
   bool operator ==(Object other) =>
       other is _CellStyle &&
       other.fill == fill &&
       other.font == font &&
-      other.right == right;
+      other.right == right &&
+      other.whole == whole;
 
   @override
-  int get hashCode => Object.hash(fill, font, right);
+  int get hashCode => Object.hash(fill, font, right, whole);
 }
+
+/// Whether [value] is a number that [NumberFormat.format] writes without
+/// decimals: an `int`, or a `double` with nothing after the point.
+bool _isWhole(Object? value) => switch (value) {
+  int() => true,
+  double v => v == v.truncateToDouble() && v.abs() < 1e15,
+  _ => false,
+};

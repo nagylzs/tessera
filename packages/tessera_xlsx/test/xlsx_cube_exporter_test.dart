@@ -54,6 +54,29 @@ List<String> merges(Uint8List xlsx) =>
         .map((m) => m[1]!)
         .toList();
 
+/// Every numeric cell's value and Excel number format code.
+List<(num, String)> numberFormats(Uint8List xlsx) {
+  final styles = utf8.decode(
+    ZipDecoder().decodeBytes(xlsx).find('xl/styles.xml')!.content,
+  );
+  final codes = {
+    for (final m in RegExp(
+      r'<numFmt numFmtId="(\d+)" formatCode="([^"]*)"/>',
+    ).allMatches(styles))
+      m[1]!: m[2]!,
+  };
+  final xfs = RegExp(r'<cellXfs[^>]*>(.*)</cellXfs>').firstMatch(styles)![1]!;
+  final ids = [
+    for (final m in RegExp(r'<xf numFmtId="(\d+)"').allMatches(xfs)) m[1]!,
+  ];
+  return [
+    for (final m in RegExp(
+      r'<c r="[A-Z]+\d+" s="(\d+)"><v>([^<]*)</v>',
+    ).allMatches(sheetXml(xlsx)))
+      (num.parse(m[2]!), codes[ids[int.parse(m[1]!)]] ?? 'General'),
+  ];
+}
+
 void main() {
   late FactTable f;
   setUpAll(() async => f = await facts());
@@ -306,6 +329,88 @@ void main() {
     expect(styles, contains('<color rgb="FFFFFFFF"/>')); // header text
     // still a valid grid
     expect((await grid(xlsx)).last.first, 'Total');
+  });
+
+  test('whole numbers without decimals, as the grid shows them', () {
+    // counts are ints; the averages 7.0 and 4.0 are whole doubles, while
+    // 5.5 and 2.5 are not
+    final cube = Cube(
+      facts: f,
+      spec: CubeSpec(
+        rows: CubeAxis.of([region]),
+        aggregates: [Aggregate.count, Aggregate.average(qty)],
+      ),
+    );
+    final cells = numberFormats(const XlsxCubeExporter().export(cube.layout));
+    expect(cells, hasLength(8));
+    for (final (value, code) in cells) {
+      final whole = value == value.truncate();
+      expect(code, whole ? '#,##0' : '#,##0.00', reason: '$value');
+    }
+    expect(cells.map((c) => c.$1), containsAll([2.5, 5.5, 7, 4, 8]));
+
+    // the theme's decimals and grouping, without decimals for whole numbers
+    final plain = numberFormats(
+      const XlsxCubeExporter(
+        theme: CubeExportTheme(
+          numberFormat: NumberFormat(decimals: 1, grouping: false),
+        ),
+      ).export(cube.layout),
+    );
+    expect(
+      {for (final (v, code) in plain) v == v.truncate(): code},
+      {true: '0', false: '0.0'},
+    );
+
+    // an explicit code is applied to every number
+    final fixed = numberFormats(
+      const XlsxCubeExporter(numberFormatCode: '0.000').export(cube.layout),
+    );
+    expect(fixed.map((c) => c.$2).toSet(), {'0.000'});
+  });
+
+  test('LibreOffice shows the numbers as the grid does', () async {
+    if (Process.runSync('which', ['soffice']).exitCode != 0) {
+      markTestSkipped('soffice not installed');
+      return;
+    }
+    final cube = Cube(
+      facts: f,
+      spec: CubeSpec(
+        rows: CubeAxis.of([region]),
+        aggregates: [Aggregate.count, Aggregate.average(qty)],
+      ),
+    );
+    final dir = Directory.systemTemp.createTempSync('tessera_xlsx');
+    try {
+      final file = File('${dir.path}/pivot.xlsx')
+        ..writeAsBytesSync(const XlsxCubeExporter().export(cube.layout));
+      // tab-separated, UTF-8, cells "as shown" (the 9th token)
+      final result = Process.runSync('soffice', [
+        '--headless',
+        '--convert-to',
+        'csv:Text - txt - csv (StarCalc):9,34,76,1,,1033,false,true,true',
+        '--outdir',
+        dir.path,
+        file.path,
+      ]);
+      expect(result.exitCode, 0, reason: '${result.stdout}${result.stderr}');
+      final lines = const LineSplitter().convert(
+        File('${dir.path}/pivot.csv').readAsStringSync(),
+      );
+      // the decimal mark is LibreOffice's locale's
+      expect(
+        lines.skip(2).join('\n'),
+        matches(
+          RegExp(
+            '^\\(empty\\)\t2\t7\nAsia\t2\t5[.,]50\n'
+            'Europe\t4\t2[.,]50\nTotal\t8\t4\$',
+          ),
+        ),
+      );
+    } finally {
+      dir.deleteSync(recursive: true);
+    }
   });
 
   test('LibreOffice opens the export and reads the same grid', () async {
