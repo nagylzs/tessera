@@ -175,6 +175,48 @@ void main() {
     }
   });
 
+  test('a style\'s families, each embedded where a cell uses it', () async {
+    final serif = File('/usr/share/fonts/noto/NotoSerif-Regular.ttf');
+    final mono = File('/usr/share/fonts/noto/NotoSansMono-Regular.ttf');
+    if (!has('pdffonts') || !noto.existsSync() || !serif.existsSync()) {
+      markTestSkipped('needs pdffonts and the Noto fonts');
+      return;
+    }
+    final style = JsonCubeStyle.fromJson({
+      'format': 'tessera-style',
+      'version': 1,
+      'id': 'serif-titles',
+      'name': {'en': 'Serif titles'},
+      'light': {
+        'border': '#CCCCCC',
+        'cell': {'fill': '#FFFFFF', 'text': '#000000'},
+        'title': {'family': 'serif'},
+      },
+    });
+    const names = ExportFamilies(
+      sans: 'Noto Sans',
+      serif: 'Noto Serif',
+      mono: 'Noto Sans Mono',
+    );
+    final fonts = PdfFonts(
+      regular: noto.readAsBytesSync(),
+      families: {
+        'Noto Serif': PdfFonts(regular: serif.readAsBytesSync()),
+        'Noto Sans Mono': PdfFonts(regular: mono.readAsBytesSync()),
+      },
+    );
+    final bytes = await PdfCubeExporter(
+      theme: CubeExportTheme.fromStyle(style, families: names),
+      fonts: fonts,
+    ).export(cube().layout, title: 'Sales');
+    final file = File('${dir.path}/families.pdf')..writeAsBytesSync(bytes);
+    final embedded = Process.runSync('pdffonts', [file.path]).stdout as String;
+    expect(embedded, contains('NotoSans-Regular'));
+    expect(embedded, contains('NotoSerif-Regular'));
+    // no cell is monospaced: not embedded
+    expect(embedded, isNot(contains('NotoSansMono')));
+  });
+
   test('page setup: sizes, orientation, margins', () {
     const setup = PageSetup();
     expect(setup.pageWidth, 297);

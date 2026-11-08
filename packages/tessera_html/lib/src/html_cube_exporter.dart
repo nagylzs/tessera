@@ -23,7 +23,10 @@ enum HtmlStyling {
 /// page can restyle it: `tessera-title`, `tessera-header`, `tessera-leg`,
 /// `tessera-aggregate`, `tessera-data`, `tessera-summary`,
 /// `tessera-level-N`, `tessera-row-level-N` / `tessera-col-level-N` (the
-/// level a header cell belongs to), `tessera-num`.
+/// level a header cell belongs to), `tessera-num`. A theme drawn from a
+/// style ([CubeExportTheme.style]) varies cells beyond those levels, so
+/// the embedded stylesheet then adds `tessera-look-N`, one class per
+/// distinct fill and font among the table's cells.
 final class HtmlCubeExporter {
   const HtmlCubeExporter({
     this.strings = const TesseraStringsEn(),
@@ -76,7 +79,23 @@ final class HtmlCubeExporter {
       columnSummaryLabel: columnSummaryLabel,
     );
     final b = StringBuffer();
-    final css = styling == HtmlStyling.stylesheet ? stylesheet() : null;
+    // a style varies cells beyond the level classes: a class per look
+    final looks = <(int, ExportFont), int>{};
+    if (theme.style != null && styling == HtmlStyling.stylesheet) {
+      for (var r = 0; r < grid.rowCount; r++) {
+        for (var c = 0; c < grid.columnCount; c++) {
+          final cell = grid.cellAt(r, c);
+          if (!cell.isOrigin) continue;
+          looks.putIfAbsent((
+            theme.fillOf(cell),
+            theme.fontOf(cell),
+          ), () => looks.length);
+        }
+      }
+    }
+    final css = styling == HtmlStyling.stylesheet
+        ? stylesheet() + _lookRules(looks)
+        : null;
     if (standalone) {
       b.write(
         '<!DOCTYPE html>\n<html lang="${escape(strings.languageCode)}">\n<head>\n'
@@ -87,14 +106,16 @@ final class HtmlCubeExporter {
     } else if (css != null) {
       b.write('<style>\n$css</style>\n');
     }
-    _table(b, grid, title);
+    _table(b, grid, title, looks);
     if (standalone) b.write('</body>\n</html>\n');
     return b.toString();
   }
 
   /// The CSS rules for the `classPrefix-…` classes derived from [theme]
   /// (what [HtmlStyling.stylesheet] embeds), for pages that want to serve
-  /// it themselves.
+  /// it themselves. Without the `look` classes of a style, which depend on
+  /// the table: serve a styled table with [export]'s own stylesheet, or
+  /// [HtmlStyling.inline].
   String stylesheet() {
     final p = classPrefix;
     final b = StringBuffer();
@@ -133,7 +154,22 @@ final class HtmlCubeExporter {
     return b.toString();
   }
 
-  void _table(StringBuffer b, CubeGrid grid, String title) {
+  /// One rule per look, after the others so that it wins over them.
+  String _lookRules(Map<(int, ExportFont), int> looks) {
+    final p = classPrefix;
+    return [
+      for (final MapEntry(key: (fill, font), value: k) in looks.entries)
+        'table.$p th.$p-look-$k, table.$p td.$p-look-$k '
+            '{ background: ${_rgb(fill)}; ${_font(font)} }\n',
+    ].join();
+  }
+
+  void _table(
+    StringBuffer b,
+    CubeGrid grid,
+    String title,
+    Map<(int, ExportFont), int> looks,
+  ) {
     final p = classPrefix;
     b.write('<table class="$p"');
     if (styling == HtmlStyling.inline) {
@@ -160,7 +196,10 @@ final class HtmlCubeExporter {
         } else if (isHeader && r < grid.headerRows) {
           b.write(' scope="col"');
         }
-        b.write(' class="${_classes(cell)}"');
+        final look = looks[(theme.fillOf(cell), theme.fontOf(cell))];
+        b.write(
+          ' class="${_classes(cell)}${look == null ? '' : ' $p-look-$look'}"',
+        );
         if (styling == HtmlStyling.inline) b.write(' style="${_inline(cell)}"');
         b.write('>${escape(_text(cell))}</$tag>');
       }

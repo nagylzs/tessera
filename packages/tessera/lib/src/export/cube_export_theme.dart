@@ -172,6 +172,12 @@ final class CubeExportTheme {
 
   final NumberFormat numberFormat;
 
+  /// The style it draws every cell from ([CubeExportTheme.fromStyle]), or
+  /// `null` for a theme of plain fields. With a style, looks vary by cell
+  /// beyond what the fields hold: exporters that write shared rules (a
+  /// stylesheet) should derive them from [fillOf] and [fontOf].
+  CubeStyle? get style => null;
+
   /// The fill of a data cell at [level] (`-1` or a summary → [summaryFill]).
   int levelFill(int level, {bool summary = false}) {
     if (summary) return summaryFill;
@@ -404,6 +410,7 @@ final class _StyledExportTheme extends CubeExportTheme {
     StyleCell cell,
   ) => style.lookOf(cell, coloring: coloring);
 
+  @override
   final CubeStyle style;
   final DepthColoring coloring;
   final ExportFamilies families;

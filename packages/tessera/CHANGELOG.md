@@ -15,6 +15,8 @@
 * `CubeExportTheme.fromStyle`: exports in a style, every cell's fill and
   font from it (`fillOf`, `fontOf`), the family names from
   `ExportFamilies`; `copyWith(numberFormat:)` keeps the style.
+  `CubeExportTheme.style` says whether a theme has one, for exporters
+  that write shared rules.
 * `GridMetrics` sizes each row by the largest font among its own cells,
   so a style may set one level's labels larger than the others.
 

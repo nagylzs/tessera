@@ -161,39 +161,20 @@ final class _Export {
   final CubeExportTheme theme;
   final PdfDocument doc;
 
-  late final PdfFont _regular = _load(
-    exporter.fonts.regular,
-    PdfFont.helvetica,
-  );
-  late final PdfFont _bold = _load(
-    exporter.fonts.bold,
-    PdfFont.helveticaBold,
-    _regular,
-  );
-  late final PdfFont _italic = _load(
-    exporter.fonts.italic,
-    PdfFont.helveticaOblique,
-    _regular,
-  );
-  late final PdfFont _boldItalic = _load(
-    exporter.fonts.boldItalic,
-    PdfFont.helveticaBoldOblique,
-    _bold,
-  );
+  late final _Faces _faces = _Faces(doc, exporter.fonts);
+  final _familyFaces = <String, _Faces>{};
 
-  PdfFont _load(
-    Uint8List? bytes,
-    PdfFont Function(PdfDocument) builtIn, [
-    PdfFont? fallback,
-  ]) {
-    if (bytes != null) return PdfTtfFont(doc, ByteData.sublistView(bytes));
-    if (exporter.fonts.isBuiltIn) return builtIn(doc);
-    return fallback ?? builtIn(doc);
+  PdfFont get _regular => _faces.regular;
+
+  /// [f]'s face: of its family where the fonts have that family, else of
+  /// the document's fonts.
+  PdfFont _fontFor(ExportFont f) {
+    final family = exporter.fonts.families[f.family];
+    final faces = family == null
+        ? _faces
+        : _familyFaces.putIfAbsent(f.family, () => _Faces(doc, family));
+    return faces.of(f);
   }
-
-  PdfFont _fontFor(ExportFont f) => f.bold
-      ? (f.italic ? _boldItalic : _bold)
-      : (f.italic ? _italic : _regular);
 
   /// Width of [text] in [font] at [size] points.
   double _width(PdfFont font, double size, String text) =>
@@ -422,5 +403,40 @@ final class _Export {
       n--;
     }
     return '';
+  }
+}
+
+/// The four faces of one [PdfFonts], each loaded (and so embedded) the
+/// first time a cell needs it.
+final class _Faces {
+  _Faces(this.doc, this.fonts);
+
+  final PdfDocument doc;
+  final PdfFonts fonts;
+
+  late final PdfFont regular = _load(fonts.regular, PdfFont.helvetica);
+  late final PdfFont bold = _load(fonts.bold, PdfFont.helveticaBold, regular);
+  late final PdfFont italic = _load(
+    fonts.italic,
+    PdfFont.helveticaOblique,
+    regular,
+  );
+  late final PdfFont boldItalic = _load(
+    fonts.boldItalic,
+    PdfFont.helveticaBoldOblique,
+    bold,
+  );
+
+  PdfFont of(ExportFont f) =>
+      f.bold ? (f.italic ? boldItalic : bold) : (f.italic ? italic : regular);
+
+  PdfFont _load(
+    Uint8List? bytes,
+    PdfFont Function(PdfDocument) builtIn, [
+    PdfFont? fallback,
+  ]) {
+    if (bytes != null) return PdfTtfFont(doc, ByteData.sublistView(bytes));
+    if (fonts.isBuiltIn) return builtIn(doc);
+    return fallback ?? builtIn(doc);
   }
 }

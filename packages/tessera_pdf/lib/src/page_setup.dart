@@ -117,26 +117,35 @@ final class PdfPageText {
 /// uses the PDF standard Helvetica faces, which need no file but cover
 /// WinAnsi characters only (no Central European accents).
 ///
-/// `ExportFont.family` from the theme is ignored: the faces here are the
-/// document's fonts. Size, bold, italic and colour are honoured.
+/// These faces are the document's fonts. A cell whose `ExportFont.family`
+/// is a key of [families] is set in that entry's faces instead — a style's
+/// serif or monospaced cells (`CubeExportTheme.fromStyle`, with the same
+/// names in its `ExportFamilies`); each family is embedded only if a cell
+/// uses it. Size, bold, italic and colour are honoured.
 final class PdfFonts {
   const PdfFonts({
     required Uint8List this.regular,
     this.bold,
     this.italic,
     this.boldItalic,
+    this.families = const {},
   });
 
   const PdfFonts.builtIn()
     : regular = null,
       bold = null,
       italic = null,
-      boldItalic = null;
+      boldItalic = null,
+      families = const {};
 
   final Uint8List? regular;
   final Uint8List? bold;
   final Uint8List? italic;
   final Uint8List? boldItalic;
+
+  /// Other families' faces, by the family name the theme's fonts give;
+  /// their own [families] are not looked at.
+  final Map<String, PdfFonts> families;
 
   bool get isBuiltIn => regular == null;
 }

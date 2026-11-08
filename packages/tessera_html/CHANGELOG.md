@@ -1,3 +1,10 @@
+## Unreleased
+
+* A theme drawn from a style (`CubeExportTheme.fromStyle`) gets exact
+  looks in the embedded stylesheet: one `tessera-look-N` class per
+  distinct fill and font among the table's cells, after the level rules.
+  Inline styles were exact already.
+
 ## 0.2.0
 
 * Requires `tessera` 0.2.0; no changes of its own. Cubes with the new

@@ -1,3 +1,10 @@
+## Unreleased
+
+* `PdfFonts.families`: faces by family name, for a theme whose cells name
+  several families (a style's serif or monospaced cells,
+  `CubeExportTheme.fromStyle`); each family is embedded only if a cell
+  uses it. The default faces serve every other name, as before.
+
 ## 0.2.1
 
 * Fix: the page header and footer were drawn in the header cells' font

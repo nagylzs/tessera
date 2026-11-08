@@ -157,6 +157,78 @@ void main() {
     );
   });
 
+  test('a style: a class per look, after the level rules', () {
+    // values by column depth only, and the first row level larger
+    final style = JsonCubeStyle.fromJson({
+      'format': 'tessera-style',
+      'version': 1,
+      'id': 'by-columns',
+      'name': {'en': 'By columns'},
+      'light': {
+        'border': '#CCCCCC',
+        'cell': {'fill': '#FFFFFF', 'text': '#000000'},
+        'value': {
+          'fill': ['#F0F0F0', '#E0E0E0'],
+        },
+        'rowLabel': {
+          'size': [18, 12],
+        },
+      },
+    });
+    final theme = CubeExportTheme.fromStyle(
+      style,
+      coloring: DepthColoring.columns,
+    );
+    final html = HtmlCubeExporter(theme: theme).export(cube().layout);
+    final grid = CubeGrid.of(cube().layout, strings: const TesseraStringsEn());
+    final doc = XmlDocument.parse(
+      html.substring(
+        html.indexOf('<table'),
+        html.indexOf('</table>') + '</table>'.length,
+      ),
+    );
+    // every cell's look class carries its own fill and font
+    final rules = {
+      for (final m in RegExp(
+        r'td\.tessera-look-(\d+) \{ background: (#[0-9a-f]{6}); '
+        r'font-family: (\w+); font-size: ([\d.]+)pt;',
+      ).allMatches(html))
+        m.group(1)!: (m.group(2)!, double.parse(m.group(4)!)),
+    };
+    final cells = doc.findAllElements('td').toList();
+    expect(cells, isNotEmpty);
+    final data = [
+      for (var r = 0; r < grid.rowCount; r++)
+        for (var c = 0; c < grid.columnCount; c++)
+          if (grid.cellAt(r, c) case final cell
+              when cell.isOrigin && cell.kind == GridCellKind.data)
+            cell,
+    ];
+    final tds = [
+      for (final td in cells)
+        if (td.getAttribute('class')!.contains('tessera-data')) td,
+    ];
+    expect(tds, hasLength(data.length));
+    for (var i = 0; i < tds.length; i++) {
+      final look = RegExp(r'tessera-look-(\d+)')
+          .firstMatch(tds[i].getAttribute('class')!)!
+          .group(1)!;
+      final want = theme.fillOf(data[i]);
+      expect(
+        rules[look]!.$1,
+        '#${(want & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}',
+      );
+    }
+    // the look rules come after the level rules, so they win
+    final css = html.substring(0, html.indexOf('</style>'));
+    expect(
+      css.indexOf('tessera-look-0'),
+      greaterThan(css.lastIndexOf('tessera-level-')),
+    );
+    // a row label of the first level in 18 px, 15 pt
+    expect(html, contains('font-size: 15pt;'));
+  });
+
   test('aggregates outside the spec are rejected', () {
     expect(
       () => const HtmlCubeExporter().export(

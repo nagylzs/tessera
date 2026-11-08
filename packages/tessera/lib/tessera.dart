@@ -68,6 +68,13 @@
 /// [GridPagination] cuts it into pages with repeated headers; [HueLevels] colours nesting
 /// levels by hue alone (computed in OKLCH, see [Oklch]).
 ///
+/// A [CubeStyle] says how every cell looks — fill, text colour, font — by
+/// its [CellRole] and depth ([StyleCell]), in a light and a dark variant,
+/// for the screen (`tessera_flutter`'s `CubeTheme.fromStyle`) and the
+/// exports ([CubeExportTheme.fromStyle]) alike; [DepthColoring] is the
+/// user's choice of which depths pick the colours. [JsonCubeStyle] reads
+/// one from the JSON format of `docs/style.md`.
+///
 /// Every user-facing text and the locale-specific label and number
 /// formatting rules live in [TesseraStrings] (fourteen languages built in),
 /// so renderers agree on how a cube is labelled.
