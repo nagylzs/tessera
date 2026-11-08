@@ -1,3 +1,17 @@
+## Unreleased
+
+* `CubeTheme.fromStyle`: the grid in a `CubeStyle` (tessera), every cell's
+  fill and text from it — its dark variant where the app is dark, the
+  depths a `DepthColoring` picks, its font kinds mapped to the app's
+  fonts (`fontFamilies`) — and its sizes and grid colours.
+  `ResolvedCubeTheme.lookOf(cell)` gives any cell's look, from a style or
+  from the plain fields alike; `CubeView` draws and measures every cell
+  through it, so a style may vary fonts by depth and the columns still
+  fit.
+* `CubeStylePreview`: a small sample pivot drawn in a theme, light or dark,
+  in the app's language, for a gallery of styles.
+* A value's name under the total column is bold, like the column's label.
+
 ## 0.2.7
 
 * A tap anywhere in a group's header cell expands or collapses it: its

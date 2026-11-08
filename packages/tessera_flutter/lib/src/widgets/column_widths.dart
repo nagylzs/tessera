@@ -18,10 +18,16 @@ final class ColumnWidthMeasurer {
     required this.horizontalPadding,
     required this.textDirection,
     required this.textScaler,
+    this.styleOf,
   });
 
   final TextStyle cellStyle;
   final TextStyle headerStyle;
+
+  /// Each text's style by the cell it is in, where the cells differ beyond
+  /// values and headers (a `CubeStyle`); without it [cellStyle] and
+  /// [headerStyle], bold for totals.
+  final TextStyle Function(StyleCell cell)? styleOf;
 
   /// Padding plus border plus slack added to every measured text.
   final double horizontalPadding;
@@ -65,10 +71,11 @@ final class ColumnWidthMeasurer {
     final spec = layout.spec;
 
     // -------------------------------------------------- row-header columns
-    final headers = List.generate(headerColumns, (_) => _Candidates());
+    final headers = List.generate(headerColumns, (_) => _Candidates(styleOf));
     for (var c = 0; c < spec.rows.depth; c++) {
       headers[c].add(
         titleLabel(spec.rows.dimensions[c].dimension),
+        cell: StyleCell(CellRole.title, rowLevel: c),
         header: true,
         bold: false,
         extra: 2 * iconWidth,
@@ -77,9 +84,10 @@ final class ColumnWidthMeasurer {
     if (headerColumns == 1) {
       // Column-dimension titles sit in the single corner column; with more
       // header columns they are merged across all of them.
-      for (final d in spec.columns.dimensions) {
+      for (var level = 0; level < spec.columns.depth; level++) {
         headers[0].add(
-          titleLabel(d.dimension),
+          titleLabel(spec.columns.dimensions[level].dimension),
+          cell: StyleCell(CellRole.title, columnLevel: level),
           header: true,
           bold: false,
           extra: 2 * iconWidth,
@@ -93,6 +101,9 @@ final class ColumnWidthMeasurer {
       // column is the conservative choice.
       headers[math.max(e.depth - 1, 0)].add(
         rowLabel(e),
+        cell: e.isSummary
+            ? const StyleCell(CellRole.totalLabel)
+            : StyleCell(CellRole.rowLabel, rowLevel: e.depth - 1),
         header: true,
         bold: e.isSummary,
         extra: e.isExpandable ? iconWidth : 0,
@@ -101,7 +112,10 @@ final class ColumnWidthMeasurer {
 
     // -------------------------------------------------------- data columns
     final perEntry = math.max(aggregates.length, 1);
-    final data = List.generate(columns.length * perEntry, (_) => _Candidates());
+    final data = List.generate(
+      columns.length * perEntry,
+      (_) => _Candidates(styleOf),
+    );
     for (var j = 0; j < columns.length; j++) {
       final e = columns[j];
       // Expanded parents span their children, and an entry with several
@@ -110,6 +124,9 @@ final class ColumnWidthMeasurer {
       if (layout.columns.descendantCount(j) == 0 && perEntry == 1) {
         data[j].add(
           columnLabel(e),
+          cell: e.isSummary
+              ? const StyleCell(CellRole.totalLabel)
+              : StyleCell(CellRole.columnLabel, columnLevel: e.depth - 1),
           header: true,
           bold: e.isSummary,
           extra: e.isExpandable ? iconWidth : 0,
@@ -121,6 +138,12 @@ final class ColumnWidthMeasurer {
       for (var j = 0; j < columns.length; j++) {
         data[j * perEntry + a].add(
           label,
+          cell: columns[j].isSummary
+              ? const StyleCell(CellRole.totalLabel)
+              : StyleCell(
+                  CellRole.valueName,
+                  columnLevel: columns[j].depth - 1,
+                ),
           header: true,
           bold: false,
           extra: iconWidth,
@@ -139,6 +162,11 @@ final class ColumnWidthMeasurer {
           for (var a = 0; a < aggregates.length; a++) {
             data[j * perEntry + a].add(
               formatCell(cell, cell.aggregate<Object?>(aggregates[a]), summary),
+              cell: StyleCell(
+                summary ? CellRole.total : CellRole.value,
+                rowLevel: rowEntry.isSummary ? -1 : rowEntry.depth - 1,
+                columnLevel: columns[j].isSummary ? -1 : columns[j].depth - 1,
+              ),
               header: false,
               bold: summary,
               extra: 0,
@@ -162,12 +190,15 @@ final class ColumnWidthMeasurer {
   double _widest(_Candidates c) {
     var width = 0.0;
     for (final t in c.longest(_measured)) {
-      final style = t.header ? headerStyle : cellStyle;
+      final TextStyle style;
+      if (styleOf case final of?) {
+        style = of(t.cell);
+      } else {
+        final plain = t.header ? headerStyle : cellStyle;
+        style = t.bold ? plain.copyWith(fontWeight: FontWeight.bold) : plain;
+      }
       final painter = TextPainter(
-        text: TextSpan(
-          text: t.text,
-          style: t.bold ? style.copyWith(fontWeight: FontWeight.bold) : style,
-        ),
+        text: TextSpan(text: t.text, style: style),
         textDirection: textDirection,
         textScaler: textScaler,
         maxLines: 1,
@@ -180,35 +211,59 @@ final class ColumnWidthMeasurer {
 }
 
 final class _Text {
-  const _Text(
+  _Text(
     this.text, {
+    required this.cell,
     required this.header,
     required this.bold,
     required this.extra,
-  });
+    required TextStyle Function(StyleCell cell)? styleOf,
+  }) : score = _score(text, extra, bold, styleOf?.call(cell).fontSize);
   final String text;
+
+  /// The cell it is in, for [ColumnWidthMeasurer.styleOf].
+  final StyleCell cell;
 
   /// Header text style rather than cell text style.
   final bool header;
   final bool bold;
   final double extra;
 
-  /// Length proxy used to rank candidates before measuring.
-  double get score => text.length + extra / 8 + (bold ? 0.5 : 0);
+  /// Length proxy used to rank candidates before measuring; with a style,
+  /// scaled by the size of its font.
+  final double score;
+
+  static double _score(String text, double extra, bool bold, double? size) {
+    final plain = text.length + extra / 8 + (bold ? 0.5 : 0);
+    return size == null ? plain : plain * size;
+  }
 }
 
 /// Keeps the few longest strings offered to it.
 final class _Candidates {
+  _Candidates(this.styleOf);
+
+  final TextStyle Function(StyleCell cell)? styleOf;
   final _texts = <_Text>[];
 
   void add(
     String text, {
+    required StyleCell cell,
     required bool header,
     required bool bold,
     required double extra,
   }) {
     if (text.isEmpty) return;
-    _texts.add(_Text(text, header: header, bold: bold, extra: extra));
+    _texts.add(
+      _Text(
+        text,
+        cell: cell,
+        header: header,
+        bold: bold,
+        extra: extra,
+        styleOf: styleOf,
+      ),
+    );
     if (_texts.length > 8 * ColumnWidthMeasurer._measured) {
       longest(ColumnWidthMeasurer._measured);
       _texts.length = ColumnWidthMeasurer._measured;

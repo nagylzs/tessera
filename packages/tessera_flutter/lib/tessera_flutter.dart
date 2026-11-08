@@ -22,6 +22,7 @@ export 'src/widgets/aggregate_editor.dart';
 export 'src/widgets/aggregate_picker.dart';
 export 'src/widgets/axis_editor.dart';
 export 'src/widgets/cube_controller.dart';
+export 'src/widgets/cube_style_preview.dart';
 export 'src/widgets/cube_theme.dart';
 export 'src/widgets/cube_view.dart';
 export 'src/widgets/dimension_picker.dart';

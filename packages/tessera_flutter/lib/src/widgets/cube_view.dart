@@ -313,6 +313,7 @@ class _CubeGridState extends State<_CubeGrid> {
       view.columnSummaryLabel,
       cellStyle,
       headerStyle,
+      theme.styleKey,
       theme.cellPadding,
       theme.minColumnWidth,
       theme.maxColumnWidth,
@@ -324,6 +325,7 @@ class _CubeGridState extends State<_CubeGrid> {
     final key = (layout, memoryKey);
     if (_widths != null && _widthsKey == key) return _widths!;
     _widthsKey = key;
+    final styles = <StyleCell, TextStyle>{};
     final widths =
         ColumnWidthMeasurer(
           cellStyle: cellStyle,
@@ -331,6 +333,11 @@ class _CubeGridState extends State<_CubeGrid> {
           horizontalPadding: theme.cellPadding.horizontal + 1 + _slack,
           textDirection: textDirection,
           textScaler: textScaler,
+          // a role at a level: few, while texts are one per row
+          styleOf: (cell) => styles.putIfAbsent(
+            cell,
+            () => defaultStyle.merge(_look(cell).text),
+          ),
         ).measure(
           layout: layout,
           headerColumns: headerColumns,
@@ -438,7 +445,10 @@ class _CubeGridState extends State<_CubeGrid> {
     if (r < levelRows) {
       if (columnDepth == 0) {
         return TableViewCell(
-          child: _box(color: theme.headerColor, child: const SizedBox()),
+          child: _box(
+            color: _look(const StyleCell(CellRole.corner)).fill,
+            child: const SizedBox(),
+          ),
         );
       }
       return TableViewCell(
@@ -449,7 +459,10 @@ class _CubeGridState extends State<_CubeGrid> {
     }
     if (rowDepth == 0) {
       return TableViewCell(
-        child: _box(color: theme.headerColor, child: const SizedBox()),
+        child: _box(
+          color: _look(const StyleCell(CellRole.corner)).fill,
+          child: const SizedBox(),
+        ),
       );
     }
     return TableViewCell(child: _titleCell(context, isRow: true, level: c));
@@ -465,6 +478,11 @@ class _CubeGridState extends State<_CubeGrid> {
     final axis = isRow ? spec.rows : spec.columns;
     final dimension = axis.dimensions[level];
     final sort = axis.sortAt(level);
+    final look = _look(
+      isRow
+          ? StyleCell(CellRole.title, rowLevel: level)
+          : StyleCell(CellRole.title, columnLevel: level),
+    );
     return BackClosingMenuAnchor(
       menuChildren: _titleMenu(context, isRow: isRow, level: level),
       builder: (context, menu, _) => InkWell(
@@ -479,7 +497,7 @@ class _CubeGridState extends State<_CubeGrid> {
         onSecondaryTapUp: (details) =>
             menu.open(position: details.localPosition),
         child: _box(
-          color: theme.headerLevelColor(_headerLevel(isRow, level)),
+          color: look.fill,
           alignment: isRow ? Alignment.centerLeft : Alignment.centerRight,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -487,7 +505,7 @@ class _CubeGridState extends State<_CubeGrid> {
               Flexible(
                 child: Text(
                   strings.dimensionLabel(dimension.dimension, layout.facts),
-                  style: theme.headerTextStyle,
+                  style: look.text,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -593,11 +611,14 @@ class _CubeGridState extends State<_CubeGrid> {
     if (r == levelRows) {
       final aggregate = a < aggregates.length ? aggregates[a] : null;
       final isKey = aggregate != null && _isSortKeyColumn(entry, aggregate);
+      final look = _look(
+        entry.isSummary
+            ? const StyleCell(CellRole.totalLabel)
+            : StyleCell(CellRole.valueName, columnLevel: entry.depth - 1),
+      );
       return TableViewCell(
         child: _box(
-          color: entry.isSummary
-              ? theme.summaryColor
-              : theme.headerLevelColor(_headerLevel(false, entry.depth - 1)),
+          color: look.fill,
           alignment: Alignment.centerRight,
           onTap: view.sortable && aggregate != null
               ? () => _sortRowsByColumn(entry, aggregate)
@@ -610,7 +631,7 @@ class _CubeGridState extends State<_CubeGrid> {
                   aggregate == null
                       ? ''
                       : strings.aggregateLabel(aggregate, layout.facts),
-                  style: theme.headerTextStyle,
+                  style: look.text,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -629,7 +650,7 @@ class _CubeGridState extends State<_CubeGrid> {
         columnMergeStart: perEntry > 1 ? mergeStart : null,
         columnMergeSpan: perEntry > 1 ? perEntry : null,
         child: _box(
-          color: theme.summaryColor,
+          color: _look(_labelCell(entry, isRow: false)).fill,
           alignment: Alignment.topLeft,
           child: _entryLabel(context, entry, isRow: false),
         ),
@@ -676,7 +697,7 @@ class _CubeGridState extends State<_CubeGrid> {
     if (rowDepth == 0) {
       return TableViewCell(
         child: _box(
-          color: theme.summaryColor,
+          color: _look(_labelCell(entry, isRow: true)).fill,
           alignment: Alignment.centerLeft,
           child: _entryLabel(context, entry, isRow: true),
         ),
@@ -755,12 +776,17 @@ class _CubeGridState extends State<_CubeGrid> {
     return w;
   }
 
-  HeaderLevel _headerLevel(bool isRow, int level) => HeaderLevel(
-    isRow: isRow,
-    level: level,
-    rowLevels: rowDepth,
-    columnLevels: columnDepth,
-  );
+  /// How [cell] looks in [theme], with this cube's level counts.
+  ScreenLook _look(StyleCell cell) =>
+      theme.lookOf(cell, rowLevels: rowDepth, columnLevels: columnDepth);
+
+  /// A header entry's cell: its group's label, or the total's.
+  StyleCell _labelCell(HeaderEntry entry, {required bool isRow}) =>
+      entry.isSummary
+      ? const StyleCell(CellRole.totalLabel)
+      : isRow
+      ? StyleCell(CellRole.rowLabel, rowLevel: entry.depth - 1)
+      : StyleCell(CellRole.columnLabel, columnLevel: entry.depth - 1);
 
   /// Header background: the summary colour or the level's header colour,
   /// tinted with the selection colour for the current cell's row/column
@@ -770,9 +796,7 @@ class _CubeGridState extends State<_CubeGrid> {
     required bool isRow,
     required bool selected,
   }) {
-    final base = entry.isSummary
-        ? theme.summaryColor
-        : theme.headerLevelColor(_headerLevel(isRow, entry.depth - 1));
+    final base = _look(_labelCell(entry, isRow: isRow)).fill;
     return selected
         ? Color.alphaBlend(theme.selectionColor.withValues(alpha: 0.15), base)
         : base;
@@ -794,9 +818,7 @@ class _CubeGridState extends State<_CubeGrid> {
   }) {
     final text = _entryText(entry, isRow: isRow);
     final icon = Icon(entry.isExpanded ? Icons.remove : Icons.add, size: 14);
-    final style = entry.isSummary
-        ? theme.headerTextStyle.copyWith(fontWeight: FontWeight.bold)
-        : theme.headerTextStyle;
+    final style = _look(_labelCell(entry, isRow: isRow)).text;
     return SizedBox(
       height: isRow ? theme.rowHeight : theme.headerRowHeight,
       child: Row(
@@ -832,17 +854,15 @@ class _CubeGridState extends State<_CubeGrid> {
     final colEntry = layout.columns.entries[j];
     final cell = layout.cellAt(i, j);
     final summary = rowEntry.isSummary || colEntry.isSummary;
-    // Non-summary cells have both depths >= 1; levels count from 0.
-    var color = summary
-        ? theme.summaryColor
-        : theme.levelColor(
-            CellLevel(
-              row: rowEntry.depth - 1,
-              column: colEntry.depth - 1,
-              rowLevels: rowDepth,
-              columnLevels: columnDepth,
-            ),
-          );
+    // depths count from 1, levels from 0; a summary has none on its axis
+    final look = _look(
+      StyleCell(
+        summary ? CellRole.total : CellRole.value,
+        rowLevel: rowEntry.isSummary ? -1 : rowEntry.depth - 1,
+        columnLevel: colEntry.isSummary ? -1 : colEntry.depth - 1,
+      ),
+    );
+    var color = look.fill;
     final aggregates = shown;
     final aggregate = a < aggregates.length ? aggregates[a] : null;
     if (aggregate != null && _isSortKeyColumn(colEntry, aggregate)) {
@@ -852,8 +872,7 @@ class _CubeGridState extends State<_CubeGrid> {
     if (!cell.isEmpty && aggregate != null) {
       final value = cell.aggregate<Object?>(aggregate);
       final text = (view.formatCell ?? _defaultFormat)(cell, value);
-      var style = theme.cellTextStyle;
-      if (summary) style = style.copyWith(fontWeight: FontWeight.bold);
+      var style = look.text;
       final custom =
           view.styleCell?.call(cell, value) ?? _defaultStyle(context, value);
       if (custom != null) style = style.merge(custom);

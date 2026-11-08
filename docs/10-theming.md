@@ -98,4 +98,45 @@ a cell and its value, and `formatCell` for the text itself.
 Screen shading is too subtle for paper, so exporters do not convert a
 `CubeTheme`; they take a `CubeExportTheme`, authored separately. The
 [export chapter](11-export.md) covers it; the Theming example pairs each
-preset with one.
+preset with one. A style (next) is the exception: it is authored once
+for both.
+
+## Styles
+
+A `CubeStyle` says how every cell looks — fill, text colour, font family,
+size, bold, italic — by its role (a value, a total, a row or column label,
+a title, a value's name, the corner) and its depth on each axis, in a
+light and optionally a dark variant. One style serves the screen and every
+export:
+
+```dart
+final style = JsonCubeStyle.parse(await rootBundle.loadString('teal.json'));
+
+CubeView(
+  controller: controller,
+  theme: CubeTheme.fromStyle(
+    style,
+    coloring: DepthColoring.rows,
+    fontFamilies: {StyleFamily.serif: 'Noto Serif'},
+  ),
+);
+
+XlsxCubeExporter(theme: CubeExportTheme.fromStyle(style))
+    .export(controller.cube.layout);
+```
+
+The JSON format is documented in [`style.md`](style.md): looks by role,
+each taking what it does not set from a parent (`valueName` from
+`columnLabel`, the headers from `header`, everything from `cell`), and any
+property as a list by depth. `DepthColoring` is the user's choice of which
+depths pick the colours — the row's, the column's, both, or none —
+whatever the style; fonts keep the cell's own depth. The dark variant is
+used where the app is dark; a style without one stays as it is, like
+paper. `fontFamilies` maps the style's three kinds of font (sans, serif,
+mono) to fonts the app bundles; on export, `ExportFamilies` names fonts
+readers have, and `PdfFonts.families` embeds the app's under those names.
+
+`CubeStylePreview` draws a small sample pivot in a theme — two levels on
+each axis, totals, an expanded and a collapsed group, the current cell —
+for a gallery of styles; give it `brightness` to show a style's dark
+variant in a light app.

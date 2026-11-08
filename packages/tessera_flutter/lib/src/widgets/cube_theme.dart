@@ -88,6 +88,9 @@ typedef LevelColor = Color Function(CellLevel level);
 /// headers use `summaryColor` instead.
 typedef HeaderColor = Color Function(HeaderLevel level);
 
+/// How one cell looks on the screen: its background and its text.
+typedef ScreenLook = ({Color fill, TextStyle text});
+
 /// Colours, text styles and dimensions of a [CubeView].
 ///
 /// Every colour/style is optional; unset values are derived from the
@@ -113,7 +116,49 @@ final class CubeTheme {
     this.minRowHeaderWidth = 100,
     this.maxRowHeaderWidth = 400,
     this.cellPadding = const EdgeInsets.symmetric(horizontal: 6),
+    this.style,
+    this.coloring = DepthColoring.both,
+    this.fontFamilies = const {},
   });
+
+  /// Every cell as [style] has it ([CubeStyle.lookOf]): its dark variant
+  /// where the app is dark, the depths [coloring] picks, each
+  /// [StyleFamily] as the font family [fontFamilies] names (a font the app
+  /// bundles; one it leaves out takes the app's font). The grid's sizes
+  /// and colours come from the style too; what it leaves unset (the
+  /// selection, the sort tint) from the app's theme as usual.
+  CubeTheme.fromStyle(
+    CubeStyle this.style, {
+    this.coloring = DepthColoring.both,
+    this.fontFamilies = const {},
+  }) : levelColor = null,
+       headerColor = null,
+       headerLevelColor = null,
+       hueLevels = null,
+       summaryColor = null,
+       sortKeyColor = null,
+       selectionColor = null,
+       borderColor = null,
+       cellTextStyle = null,
+       headerTextStyle = null,
+       headerIconColor = null,
+       rowHeight = style.metrics.rowHeight,
+       headerRowHeight = style.metrics.headerRowHeight,
+       minColumnWidth = 72,
+       maxColumnWidth = 320,
+       minRowHeaderWidth = 100,
+       maxRowHeaderWidth = 400,
+       cellPadding = EdgeInsets.symmetric(horizontal: style.metrics.padding);
+
+  /// Where set, every cell's fill and text come from it, and the colour
+  /// fields above are not used; see [CubeTheme.fromStyle].
+  final CubeStyle? style;
+
+  /// Which depths pick a [style]'s colours.
+  final DepthColoring coloring;
+
+  /// The font family for each [StyleFamily] a [style] names.
+  final Map<StyleFamily, String> fontFamilies;
 
   /// Background of data cells by nesting level. Defaults to [hueLevels]
   /// when set, else a blend from the surface colour towards the primary
@@ -205,6 +250,9 @@ final class CubeTheme {
     double? minRowHeaderWidth,
     double? maxRowHeaderWidth,
     EdgeInsets? cellPadding,
+    CubeStyle? style,
+    DepthColoring? coloring,
+    Map<StyleFamily, String>? fontFamilies,
   }) => CubeTheme(
     levelColor: levelColor ?? this.levelColor,
     headerColor: headerColor ?? this.headerColor,
@@ -224,6 +272,9 @@ final class CubeTheme {
     minRowHeaderWidth: minRowHeaderWidth ?? this.minRowHeaderWidth,
     maxRowHeaderWidth: maxRowHeaderWidth ?? this.maxRowHeaderWidth,
     cellPadding: cellPadding ?? this.cellPadding,
+    style: style ?? this.style,
+    coloring: coloring ?? this.coloring,
+    fontFamilies: fontFamilies ?? this.fontFamilies,
   );
 
   /// Fills in every unset value from [context]'s theme.
@@ -231,6 +282,9 @@ final class CubeTheme {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final base = theme.textTheme.bodySmall ?? const TextStyle(fontSize: 12);
+    if (style case final style?) {
+      return _resolveStyle(style, scheme, base);
+    }
     final headerStyle =
         headerTextStyle ?? base.copyWith(fontWeight: FontWeight.w500);
     final hues = hueLevels?.copyWith(
@@ -272,6 +326,74 @@ final class CubeTheme {
       cellPadding: cellPadding,
     );
   }
+
+  ResolvedCubeTheme _resolveStyle(
+    CubeStyle style,
+    ColorScheme scheme,
+    TextStyle base,
+  ) {
+    final dark = scheme.brightness == Brightness.dark;
+    final chrome = style.chrome(dark: dark);
+    final looks = <StyleCell, ScreenLook>{};
+    ScreenLook lookOf(StyleCell cell) => looks.putIfAbsent(cell, () {
+      final look = style.lookOf(cell, dark: dark, coloring: coloring);
+      return (
+        fill: Color(look.fill),
+        text: TextStyle(
+          color: Color(look.text),
+          fontSize: look.size,
+          fontWeight: look.bold ? FontWeight.bold : FontWeight.normal,
+          fontStyle: look.italic ? FontStyle.italic : FontStyle.normal,
+          fontFamily: look.family == null
+              ? base.fontFamily
+              : fontFamilies[look.family] ?? base.fontFamily,
+          height: base.height,
+          letterSpacing: base.letterSpacing,
+        ),
+      );
+    });
+    final value = lookOf(
+      const StyleCell(CellRole.value, rowLevel: 0, columnLevel: 0),
+    );
+    final header = lookOf(const StyleCell(CellRole.rowLabel, rowLevel: 0));
+    return ResolvedCubeTheme(
+      levelColor: (level) => lookOf(
+        StyleCell(
+          CellRole.value,
+          rowLevel: level.row,
+          columnLevel: level.column,
+        ),
+      ).fill,
+      headerColor: lookOf(const StyleCell(CellRole.corner)).fill,
+      headerLevelColor: (level) => lookOf(
+        level.isRow
+            ? StyleCell(CellRole.rowLabel, rowLevel: level.level)
+            : StyleCell(CellRole.columnLabel, columnLevel: level.level),
+      ).fill,
+      summaryColor: lookOf(const StyleCell(CellRole.total)).fill,
+      sortKeyColor: chrome.sortKey == null
+          ? scheme.secondaryContainer.withValues(alpha: 0.45)
+          : Color(chrome.sortKey!),
+      selectionColor: chrome.selection == null
+          ? scheme.primary
+          : Color(chrome.selection!),
+      borderColor: Color(chrome.border),
+      cellTextStyle: value.text,
+      headerTextStyle: header.text,
+      headerIconColor: chrome.icon == null
+          ? header.text.color!
+          : Color(chrome.icon!),
+      rowHeight: rowHeight,
+      headerRowHeight: headerRowHeight,
+      minColumnWidth: minColumnWidth,
+      maxColumnWidth: maxColumnWidth,
+      minRowHeaderWidth: minRowHeaderWidth,
+      maxRowHeaderWidth: maxRowHeaderWidth,
+      cellPadding: cellPadding,
+      styleLook: lookOf,
+      styleKey: (style, coloring, fontFamilies, dark),
+    );
+  }
 }
 
 /// A [CubeTheme] with every value set.
@@ -294,7 +416,73 @@ final class ResolvedCubeTheme {
     required this.minRowHeaderWidth,
     required this.maxRowHeaderWidth,
     required this.cellPadding,
+    this.styleLook,
+    this.styleKey,
   });
+
+  /// What [styleLook] depends on, equal across resolutions of the same
+  /// style in the same circumstances: for caches of what the looks decide
+  /// (column widths).
+  final Object? styleKey;
+
+  /// Each cell's look from a style ([CubeTheme.fromStyle]); `null` for a
+  /// theme of plain fields. Use [lookOf], which covers both.
+  final ScreenLook Function(StyleCell cell)? styleLook;
+
+  /// How [cell] looks: from the style where there is one, else from the
+  /// fields — values by [levelColor], headers by [headerLevelColor] (the
+  /// corner [headerColor]), totals by [summaryColor] with bold text, in
+  /// [cellTextStyle] or [headerTextStyle]. [rowLevels] and [columnLevels]
+  /// are the axes' dimension counts, which those functions are given.
+  ScreenLook lookOf(
+    StyleCell cell, {
+    required int rowLevels,
+    required int columnLevels,
+  }) {
+    if (styleLook case final look?) return look(cell);
+    HeaderLevel header(bool isRow, int level) => HeaderLevel(
+      isRow: isRow,
+      level: level,
+      rowLevels: rowLevels,
+      columnLevels: columnLevels,
+    );
+    final bold = headerTextStyle.copyWith(fontWeight: FontWeight.bold);
+    return switch (cell.role) {
+      CellRole.value => (
+        fill: levelColor(
+          CellLevel(
+            row: cell.rowLevel,
+            column: cell.columnLevel,
+            rowLevels: rowLevels,
+            columnLevels: columnLevels,
+          ),
+        ),
+        text: cellTextStyle,
+      ),
+      CellRole.total => (
+        fill: summaryColor,
+        text: cellTextStyle.copyWith(fontWeight: FontWeight.bold),
+      ),
+      CellRole.totalLabel => (fill: summaryColor, text: bold),
+      CellRole.rowLabel => (
+        fill: headerLevelColor(header(true, cell.rowLevel)),
+        text: headerTextStyle,
+      ),
+      CellRole.columnLabel || CellRole.valueName => (
+        fill: headerLevelColor(header(false, cell.columnLevel)),
+        text: headerTextStyle,
+      ),
+      CellRole.title => (
+        fill: headerLevelColor(
+          cell.onRowAxis
+              ? header(true, cell.rowLevel)
+              : header(false, cell.columnLevel),
+        ),
+        text: headerTextStyle,
+      ),
+      CellRole.corner => (fill: headerColor, text: headerTextStyle),
+    };
+  }
 
   final LevelColor levelColor;
   final Color headerColor;
