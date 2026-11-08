@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.1
 
 * A theme drawn from a style (`CubeExportTheme.fromStyle`) gets exact
   looks in the embedded stylesheet: one `tessera-look-N` class per

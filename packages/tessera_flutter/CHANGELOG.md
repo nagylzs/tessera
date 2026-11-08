@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.8
 
 * `CubeTheme.fromStyle`: the grid in a `CubeStyle` (tessera), every cell's
   fill and text from it — its dark variant where the app is dark, the

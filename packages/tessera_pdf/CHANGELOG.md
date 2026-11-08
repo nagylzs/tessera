@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.2
 
 * `PdfFonts.families`: faces by family name, for a theme whose cells name
   several families (a style's serif or monospaced cells,

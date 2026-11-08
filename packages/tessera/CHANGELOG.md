@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.4
 
 * `CubeStyle`: how every cell of a pivot table looks — fill, text colour,
   font family (`StyleFamily`: sans, serif, mono), size, bold, italic —
