@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.7
 
 * A tap anywhere in a group's header cell expands or collapses it: its
   label, its `+`/`−`, an expanded group's whole merged block. The icon
