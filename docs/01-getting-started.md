@@ -57,8 +57,8 @@ Column(children: [
 ```
 
 The grid starts with the first level of each axis visible and a total row
-and column. Tap `+` in a header to expand a group, tap a dimension title
-to sort, use the chips to add and remove dimensions and aggregates. The
+and column. Tap a group's header (its name or its `+`) to expand it and
+again to collapse it, tap a dimension title to sort, use the chips to add and remove dimensions and aggregates. The
 [widgets chapter](09-widgets.md) has the details; for the localized
 texts the app needs a `TesseraLocalizations.delegate` in its
 `MaterialApp` (see [localization](12-localization.md)).

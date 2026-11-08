@@ -1,3 +1,14 @@
+## Unreleased
+
+* A tap anywhere in a group's header cell expands or collapses it: its
+  label, its `+`/`−`, an expanded group's whole merged block. The icon
+  alone, 14 px, was the only target and was hard to hit on a phone (found
+  on an iPhone 14). The cell shows the ink and the click cursor and is
+  announced as a button with its expanded state. Cells that do not expand
+  (the deepest level) ignore taps, and the grand total still folds only by
+  its `−`: that closes every open group of the axis, which a stray tap on
+  a large cell should not do.
+
 ## 0.2.6
 
 * `ExpressionField` on desktop and the web: coming back from the

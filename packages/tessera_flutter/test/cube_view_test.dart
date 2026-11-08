@@ -53,10 +53,11 @@ Finder menuButtonOf(String label) => find.descendant(
 MenuItemButton menuItem(WidgetTester tester, String label) =>
     tester.widget(find.widgetWithText(MenuItemButton, label));
 
-/// The expand/collapse icon on the row whose label is [label].
+/// The expand/collapse icon beside [label] (a tap there toggles, as one
+/// anywhere in the cell does).
 Finder toggleIconOf(String label) => find.descendant(
   of: find.ancestor(of: find.text(label), matching: find.byType(Row)).first,
-  matching: find.byType(InkWell),
+  matching: find.byType(Icon),
 );
 
 void main() {
@@ -347,6 +348,146 @@ void main() {
       await tester.tap(toggleIconOf('Europe'));
       await tester.pumpAndSettle();
       expect(find.text('Germany'), findsNothing);
+    });
+
+    testWidgets('the whole header cell toggles its group', (tester) async {
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregates: [sumQty])),
+      );
+      bool expanded() => controller.cube.rowExpansion.isExpanded(europe);
+      // the label
+      await tester.tap(find.text('Europe'));
+      await tester.pumpAndSettle();
+      expect(expanded(), isTrue);
+      expect(find.text('Germany'), findsOneWidget);
+      // the expanded group's merged block, beside its children
+      final block = tester.getRect(
+        find.ancestor(of: find.text('Europe'), matching: find.byType(InkWell)),
+      );
+      expect(
+        block.height,
+        greaterThan(tester.getSize(find.text('Germany')).height * 3),
+      );
+      await tester.tapAt(block.bottomLeft + const Offset(4, -4));
+      await tester.pumpAndSettle();
+      expect(expanded(), isFalse);
+      // the empty end of a collapsed group's cell
+      final cell = tester.getRect(
+        find.ancestor(of: find.text('Europe'), matching: find.byType(InkWell)),
+      );
+      await tester.tapAt(cell.centerRight - const Offset(3, 0));
+      await tester.pumpAndSettle();
+      expect(expanded(), isTrue);
+    });
+
+    testWidgets('a column group cell toggles too', (tester) async {
+      final a = DimensionPath([const DimensionValue(category, 'A')]);
+      controller = CubeController(
+        Cube(
+          facts: f,
+          spec: CubeSpec(
+            rows: CubeAxis.of([region]),
+            columns: CubeAxis.of([category, country]),
+            aggregates: [sumQty],
+          ),
+        ),
+      );
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregates: [sumQty])),
+      );
+      expect(find.text('Germany'), findsNothing);
+      await tester.tap(find.text('A'));
+      await tester.pumpAndSettle();
+      expect(controller.cube.columnExpansion.isExpanded(a), isTrue);
+      expect(find.text('Germany'), findsOneWidget);
+    });
+
+    testWidgets('a drag across a group cell does not toggle it', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregates: [sumQty])),
+      );
+      await tester.drag(find.text('Europe'), const Offset(0, -40));
+      await tester.pumpAndSettle();
+      expect(controller.cube.rowExpansion.isExpanded(europe), isFalse);
+    });
+
+    testWidgets('a leaf ignores taps', (tester) async {
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregates: [sumQty])),
+      );
+      await tester.tap(find.text('Europe'));
+      await tester.pumpAndSettle();
+      final before = controller.cube;
+      await tester.tap(find.text('Germany'));
+      await tester.pumpAndSettle();
+      expect(identical(controller.cube, before), isTrue);
+    });
+
+    testWidgets('the grand total folds the axis only by its icon', (
+      tester,
+    ) async {
+      controller = CubeController(
+        Cube(
+          facts: f,
+          spec: CubeSpec(
+            rows: CubeAxis.of([region, country]),
+            aggregates: [sumQty],
+          ),
+        ).toggleRow(europe),
+      );
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregates: [sumQty])),
+      );
+      final before = controller.cube;
+      // the row total and the column header's: neither label folds
+      for (final total in find.text('Total').evaluate().toList()) {
+        await tester.tap(find.byWidget(total.widget));
+        await tester.pumpAndSettle();
+      }
+      expect(identical(controller.cube, before), isTrue);
+      expect(find.text('Germany'), findsOneWidget);
+      // the row total's `−` (the column header's total has none)
+      final icons = find.descendant(
+        of: find.ancestor(of: find.text('Total'), matching: find.byType(Row)),
+        matching: find.byIcon(Icons.remove),
+      );
+      expect(icons, findsOneWidget);
+      await tester.tap(icons);
+      await tester.pumpAndSettle();
+      expect(find.text('Europe'), findsNothing);
+    });
+
+    testWidgets('a group cell is a button with its expanded state', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        host(CubeView(controller: controller, aggregates: [sumQty])),
+      );
+      expect(
+        tester.getSemantics(find.text('Europe')),
+        isSemantics(
+          label: 'Europe',
+          isButton: true,
+          hasExpandedState: true,
+          isExpanded: false,
+          hasTapAction: true,
+        ),
+      );
+      await tester.tap(find.text('Europe'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSemantics(find.text('Europe')),
+        isSemantics(hasExpandedState: true, isExpanded: true),
+      );
+      // a leaf is no button
+      expect(
+        tester.getSemantics(find.text('Germany')),
+        isSemantics(isButton: false, hasExpandedState: false),
+      );
+      handle.dispose();
     });
 
     testWidgets('large expansions ask for confirmation', (tester) async {

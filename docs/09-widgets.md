@@ -27,8 +27,11 @@ where the paths still fit.
 ## CubeView
 
 The grid, built on `TableView` from `two_dimensional_scrollables`: lazy
-cells, pinned header band and row headers, merged group labels, expand
-and collapse icons, sort by tapping, a dimension menu on every title.
+cells, pinned header band and row headers, merged group labels, a tap
+anywhere in a group's header cell expands or collapses it (the `+`/`−` is
+the cue; screen readers hear a button with its expanded state; the grand
+total, which folds the whole axis, only by its `−`), sort by
+tapping, a dimension menu on every title.
 
 ```dart
 CubeView(

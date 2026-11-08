@@ -55,7 +55,10 @@ Column(
 )
 ```
 
-Expand and collapse groups with the `+`/`−` icons; tap a dimension name to
+Expand and collapse a group with a tap anywhere in its header cell (the
+`+`/`−` marks the groups that open; the whole cell is the touch target;
+the grand total, which folds the whole axis, only by its `−`);
+tap a dimension name to
 sort that level by value, or an aggregate name under a column to sort the
 rows by that value column. A level without a sort of its own follows the level
 above (`AxisDimension.sort == null`), so a deeper level's name cycles

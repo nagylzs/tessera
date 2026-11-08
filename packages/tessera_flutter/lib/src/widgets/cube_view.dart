@@ -50,8 +50,11 @@ typedef LevelExpansionConfirmation = Future<bool> Function(
 /// * the top-left corner names the column dimensions (right-aligned, one
 ///   per header row) and the row dimensions (one per header column).
 ///
-/// Interaction: `+`/`−` on a group toggles it via the [controller]; tapping
-/// a dimension name sorts that level by value (tap again to flip); tapping
+/// Interaction: a tap anywhere in a group's header cell — its `+`/`−`, its
+/// label, an expanded group's whole merged block — toggles it via the
+/// [controller] (a touch target as wide as the column, where the icon alone
+/// was far below the platforms' minimum); the grand total, whose collapse
+/// folds the whole axis, only by its `−`; tapping a dimension name sorts that level by value (tap again to flip); tapping
 /// an aggregate name under a column sorts the rows by that value column
 /// (tap again to flip). A level without a sort of its own follows the level
 /// above ([AxisDimension.sort]); tapping a deeper level's name cycles
@@ -655,6 +658,10 @@ class _CubeGridState extends State<_CubeGrid> {
         bottomBorderUntil: _legAt(area) == area.entrySpan - 1
             ? _spanWidth(area, area.entrySpan - 1)
             : double.infinity,
+        onTap: area.isLabel ? _toggleOf(context, owner, isRow: false) : null,
+        expanded: area.isLabel && _togglesByCell(owner)
+            ? owner.isExpanded
+            : null,
         child: area.isLabel
             ? _entryLabel(context, owner, isRow: false)
             : const SizedBox(),
@@ -694,12 +701,33 @@ class _CubeGridState extends State<_CubeGrid> {
         rightBorderUntil: _legAt(area) == area.entrySpan - 1
             ? (area.entrySpan - 1) * theme.rowHeight
             : double.infinity,
+        onTap: area.isLabel ? _toggleOf(context, owner, isRow: true) : null,
+        expanded: area.isLabel && _togglesByCell(owner)
+            ? owner.isExpanded
+            : null,
         child: area.isLabel
             ? _entryLabel(context, owner, isRow: true)
             : const SizedBox(),
       ),
     );
   }
+
+  /// What a tap on [entry]'s header cell does: toggle the group, or nothing
+  /// for an entry that cannot expand (the deepest level) and for the grand
+  /// total ([_togglesByCell]).
+  VoidCallback? _toggleOf(
+    BuildContext context,
+    HeaderEntry entry, {
+    required bool isRow,
+  }) => _togglesByCell(entry)
+      ? () => _toggle(context, entry, isRow: isRow)
+      : null;
+
+  /// Whether a tap anywhere in [entry]'s cell toggles it. Not the grand
+  /// total: collapsing it folds the whole axis and forgets every open group,
+  /// which a stray tap on a large cell should not do, so only its `−` does.
+  static bool _togglesByCell(HeaderEntry entry) =>
+      entry.isExpandable && !entry.isSummary;
 
   /// Position of the group's own row/column within a merged label area
   /// (`0` first, `entrySpan - 1` last), or `-1` when the area is not a
@@ -765,6 +793,7 @@ class _CubeGridState extends State<_CubeGrid> {
     required bool isRow,
   }) {
     final text = _entryText(entry, isRow: isRow);
+    final icon = Icon(entry.isExpanded ? Icons.remove : Icons.add, size: 14);
     final style = entry.isSummary
         ? theme.headerTextStyle.copyWith(fontWeight: FontWeight.bold)
         : theme.headerTextStyle;
@@ -772,14 +801,15 @@ class _CubeGridState extends State<_CubeGrid> {
       height: isRow ? theme.rowHeight : theme.headerRowHeight,
       child: Row(
         children: [
+          // the cue only, as the whole cell toggles (`_toggleOf`); the
+          // grand total's is still its only target
           if (entry.isExpandable)
-            InkWell(
-              onTap: () => _toggle(context, entry, isRow: isRow),
-              child: Icon(
-                entry.isExpanded ? Icons.remove : Icons.add,
-                size: 14,
-              ),
-            ),
+            _togglesByCell(entry)
+                ? icon
+                : InkWell(
+                    onTap: () => _toggle(context, entry, isRow: isRow),
+                    child: icon,
+                  ),
           if (entry.isExpandable) const SizedBox(width: 4),
           Expanded(
             child: Text(
@@ -880,12 +910,15 @@ class _CubeGridState extends State<_CubeGrid> {
   // ------------------------------------------------------------- behaviour
 
   /// A cell: background, padding and its right/bottom hairlines (see
-  /// [CellBorder] for [rightBorderFrom] / [bottomBorderFrom]).
+  /// [CellBorder] for [rightBorderFrom] / [bottomBorderFrom]). With
+  /// [expanded] set, a tappable cell is announced as a button that expands
+  /// or collapses its group.
   Widget _box({
     required Color color,
     required Widget child,
     Alignment alignment = Alignment.centerLeft,
     VoidCallback? onTap,
+    bool? expanded,
     double rightBorderFrom = 0,
     double rightBorderUntil = double.infinity,
     double bottomBorderFrom = 0,
@@ -908,7 +941,11 @@ class _CubeGridState extends State<_CubeGrid> {
         child: child,
       ),
     );
-    return onTap == null ? box : InkWell(onTap: onTap, child: box);
+    if (onTap == null) return box;
+    final ink = InkWell(onTap: onTap, child: box);
+    return expanded == null
+        ? ink
+        : Semantics(button: true, expanded: expanded, child: ink);
   }
 
   // -------------------------------------------------------------- keyboard
