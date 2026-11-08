@@ -1,4 +1,4 @@
-## Unreleased
+## 0.2.4
 
 * Fix: a whole number (a count, a sum of whole numbers) read "1,014.00"
   in LibreOffice and Excel, as every numeric cell had the theme's
