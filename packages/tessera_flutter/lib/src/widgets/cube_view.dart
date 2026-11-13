@@ -409,14 +409,40 @@ class _CubeGridState extends State<_CubeGrid> {
     );
   }
 
+  /// Whether the header columns and the header rows stay in place while
+  /// the values scroll, as of the last layout. See [_tableView].
+  bool _pinColumns = true, _pinRows = true;
+
+  /// The headers are pinned only while they leave room for a value: in a
+  /// grid narrower than its row headers plus one column of the narrowest
+  /// kind, or lower than its header rows plus one row, they would cover
+  /// everything, so there they scroll with the values. All or none on an
+  /// axis, as merged header cells may not straddle the pinned edge.
   Widget _tableView(List<double> widths) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        var headerWidth = 0.0;
+        for (var c = 0; c < headerColumns; c++) {
+          headerWidth += widths[c];
+        }
+        _pinColumns =
+            headerWidth + theme.minColumnWidth <= constraints.maxWidth;
+        _pinRows =
+            headerRows * theme.headerRowHeight + theme.rowHeight <=
+            constraints.maxHeight;
+        return _tableViewPinned(widths);
+      },
+    );
+  }
+
+  Widget _tableViewPinned(List<double> widths) {
     return TableView.builder(
       verticalDetails: ScrollableDetails.vertical(controller: _vertical),
       horizontalDetails: ScrollableDetails.horizontal(controller: _horizontal),
       rowCount: headerRows + layout.rows.length,
       columnCount: headerColumns + layout.columns.length * perEntry,
-      pinnedRowCount: headerRows,
-      pinnedColumnCount: headerColumns,
+      pinnedRowCount: _pinRows ? headerRows : 0,
+      pinnedColumnCount: _pinColumns ? headerColumns : 0,
       columnBuilder: (index) =>
           TableSpan(extent: FixedTableSpanExtent(widths[index])),
       rowBuilder: (index) => TableSpan(
@@ -1075,11 +1101,11 @@ class _CubeGridState extends State<_CubeGrid> {
     final widths = _widths;
     if (widths == null) return;
     if (_vertical.hasClients) {
-      final pinned = headerRows * theme.headerRowHeight;
+      final header = headerRows * theme.headerRowHeight;
       _reveal(
         _vertical,
-        pinned: pinned,
-        start: pinned + i * theme.rowHeight,
+        pinned: _pinRows ? header : 0,
+        start: header + i * theme.rowHeight,
         extent: theme.rowHeight,
       );
     }
@@ -1094,7 +1120,7 @@ class _CubeGridState extends State<_CubeGrid> {
       }
       _reveal(
         _horizontal,
-        pinned: pinned,
+        pinned: _pinColumns ? pinned : 0,
         start: start,
         extent: widths[headerColumns + d],
       );

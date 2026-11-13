@@ -1327,6 +1327,68 @@ void main() {
       expect(columnCount(), 1 + 4);
     });
 
+    testWidgets('headers are pinned only where they leave room for a value', (
+      tester,
+    ) async {
+      final controller = CubeController(
+        Cube(
+          facts: f,
+          spec: CubeSpec(
+            rows: CubeAxis.of([region, country]),
+            columns: CubeAxis.of([category]),
+            aggregates: [sumQty],
+          ),
+        ),
+      );
+      addTearDown(controller.dispose);
+      Future<TableCellBuilderDelegate> at(double width, double height) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: width,
+                  height: height,
+                  child: CubeView(controller: controller),
+                ),
+              ),
+            ),
+          ),
+        );
+        final table = tester.widget<TableView>(find.byType(TableView));
+        return table.delegate as TableCellBuilderDelegate;
+      }
+
+      // TableView reports pinned spans that fill the viewport.
+      final printed = <String>[];
+      final print = debugPrint;
+      debugPrint = (message, {wrapWidth}) => printed.add(message ?? '');
+      addTearDown(() => debugPrint = print);
+
+      var table = await at(1000, 700);
+      expect(table.pinnedColumnCount, 2);
+      expect(table.pinnedRowCount, 2);
+
+      // Narrower than the two row headers: they scroll with the values,
+      // which a drag then brings in.
+      table = await at(100, 700);
+      expect(table.pinnedColumnCount, 0);
+      expect(table.pinnedRowCount, 2);
+      expect(find.text('28'), findsNothing);
+      await tester.drag(find.byType(TableView), const Offset(-2000, 0));
+      await tester.pump();
+      expect(find.text('28'), findsWidgets);
+
+      // Lower than the two header rows.
+      table = await at(1000, 40);
+      expect(table.pinnedColumnCount, 2);
+      expect(table.pinnedRowCount, 0);
+
+      debugPrint = print;
+      expect(printed.where((line) => line.contains('pinned')), isEmpty);
+    });
+
     testWidgets('empty axes render a single summary cell', (tester) async {
       controller = CubeController(
         Cube(

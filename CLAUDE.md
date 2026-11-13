@@ -742,7 +742,12 @@ Paths below are relative to the package (`lib/src/...` means
   All three exist; the example app composes them.
 - `CubeView` is built on `TableView` from `two_dimensional_scrollables`
   (lazy cells, pinned headers, merged cells for the L-shaped group
-  headers). Expanded parent = first entry of its span (its own subtotal),
+  headers). The headers are pinned only while a value fits beside them
+  (`_pinColumns`, `_pinRows`, decided in a `LayoutBuilder`): narrower than
+  the row headers plus `minColumnWidth`, or lower than the header rows plus
+  a row, they scroll with the values, all or none on an axis, as merged
+  cells may not straddle the pinned edge (0.2.9; before, such a grid showed
+  no values). Expanded parent = first entry of its span (its own subtotal),
   children follow; header band = one row per column dimension + aggregate
   label row; row header = one column per row dimension; top-left corner
   shows column-dimension names.
