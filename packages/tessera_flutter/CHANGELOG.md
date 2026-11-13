@@ -1,3 +1,11 @@
+## 0.2.9
+
+* `CubeView` in a space narrower than its row headers, or lower than its
+  header rows, showed no values: the pinned headers filled it. There the
+  headers now scroll with the values (a narrow pane beside a chart, a phone
+  with several row dimensions), and are pinned again once a value fits
+  beside them.
+
 ## 0.2.8
 
 * `CubeTheme.fromStyle`: the grid in a `CubeStyle` (tessera), every cell's
